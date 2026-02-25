@@ -76,10 +76,6 @@ const LoginForm = ({ onToggle }) => {
             <button type="button" className="secondary-btn" onClick={onToggle}>
                 New to Kuizu? Create an account
             </button>
-
-            <button type="button" className="text-btn">
-                Log in with a quick link
-            </button>
         </form>
     );
 };

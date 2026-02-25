@@ -54,6 +54,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .displayName(request.getDisplayName())
+                .bio(request.getBio())
                 .role(User.UserRole.ROLE_USER)
                 .status(User.UserStatus.ACTIVE)
                 .build();

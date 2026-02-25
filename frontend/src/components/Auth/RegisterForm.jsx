@@ -7,13 +7,22 @@ const RegisterForm = ({ onToggle }) => {
         username: '',
         email: '',
         password: '',
-        displayName: ''
+        displayName: '',
+        bio: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Basic frontend validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+            setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.');
+            return;
+        }
+
         setLoading(true);
         setError('');
         try {
@@ -37,7 +46,7 @@ const RegisterForm = ({ onToggle }) => {
                 <div className="input-wrapper">
                     <input
                         type="text"
-                        placeholder="Choose a username"
+                        placeholder="Choose a username (3-50 chars)"
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         required
@@ -63,9 +72,20 @@ const RegisterForm = ({ onToggle }) => {
                 <div className="input-wrapper">
                     <input
                         type="text"
-                        placeholder="Your name"
+                        placeholder="Your public name (max 150 chars)"
                         value={formData.displayName}
                         onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                    />
+                </div>
+            </div>
+
+            <div className="form-group">
+                <label>Bio (Optional)</label>
+                <div className="input-wrapper">
+                    <textarea
+                        placeholder="Tell others about yourself (max 500 chars)"
+                        value={formData.bio}
+                        onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     />
                 </div>
             </div>
@@ -75,7 +95,7 @@ const RegisterForm = ({ onToggle }) => {
                 <div className="input-wrapper">
                     <input
                         type="password"
-                        placeholder="Create a password"
+                        placeholder="Min 8 chars, 1 upper, 1 lower, 1 special"
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         required
