@@ -60,6 +60,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .displayName(request.getDisplayName())
+                .bio(request.getBio())
                 .role(role)
                 .status(User.UserStatus.ACTIVE)
                 .build();
