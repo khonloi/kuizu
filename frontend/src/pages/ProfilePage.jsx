@@ -191,8 +191,7 @@ const ProfilePage = () => {
                                 <h4>Account Type</h4>
                             </div>
                             <div className="account-type-badge">
-                                {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_MODERATOR' ? 'Teacher' : 'Student'}
-                                <ChevronDown size={14} />
+                                {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_TEACHER' ? 'Teacher' : 'Student'}
                             </div>
                         </div>
                     </div>

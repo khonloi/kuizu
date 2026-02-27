@@ -8,7 +8,8 @@ const RegisterForm = ({ onToggle }) => {
         email: '',
         password: '',
         displayName: '',
-        bio: ''
+        bio: '',
+        role: 'ROLE_STUDENT'
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -64,6 +65,26 @@ const RegisterForm = ({ onToggle }) => {
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
                     />
+                </div>
+            </div>
+
+            <div className="form-group">
+                <label>I am a...</label>
+                <div className="role-selection">
+                    <button
+                        type="button"
+                        className={`role-btn ${formData.role === 'ROLE_STUDENT' ? 'active' : ''}`}
+                        onClick={() => setFormData({ ...formData, role: 'ROLE_STUDENT' })}
+                    >
+                        Student
+                    </button>
+                    <button
+                        type="button"
+                        className={`role-btn ${formData.role === 'ROLE_TEACHER' ? 'active' : ''}`}
+                        onClick={() => setFormData({ ...formData, role: 'ROLE_TEACHER' })}
+                    >
+                        Teacher
+                    </button>
                 </div>
             </div>
 

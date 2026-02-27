@@ -49,13 +49,25 @@ public class AuthService {
             throw new ApiException("Email already exists");
         }
 
+        User.UserRole userRole = User.UserRole.ROLE_STUDENT;
+        if (request.getRole() != null) {
+            try {
+                userRole = User.UserRole.valueOf(request.getRole());
+                if (userRole == User.UserRole.ROLE_ADMIN) {
+                    throw new ApiException("Cannot register as Admin");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new ApiException("Invalid role selected");
+            }
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .displayName(request.getDisplayName())
                 .bio(request.getBio())
-                .role(User.UserRole.ROLE_USER)
+                .role(userRole)
                 .status(User.UserStatus.ACTIVE)
                 .build();
 
@@ -68,6 +80,7 @@ public class AuthService {
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .role(user.getRole().name())
                 .build();
     }
 
@@ -94,6 +107,7 @@ public class AuthService {
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .role(user.getRole().name())
                 .build();
     }
 

@@ -48,11 +48,11 @@ public class User {
     private UserStatus status;
 
     public enum UserRole {
-        ROLE_USER, ROLE_ADMIN, ROLE_MODERATOR
+        ROLE_STUDENT, ROLE_TEACHER, ROLE_ADMIN
     }
 
     public enum UserStatus {
-        ACTIVE, INACTIVE, SUSPENDED, BANNED
+        ACTIVE, INACTIVE, SUSPENDED
     }
 
     @Column(name = "last_login_at")
