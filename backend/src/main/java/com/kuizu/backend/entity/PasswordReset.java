@@ -24,7 +24,7 @@ public class PasswordReset {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "reset_token", length = 255)
+    @Column(name = "reset_token", length = 255, unique = true)
     private String resetToken;
 
     @Column(name = "expires_at")
