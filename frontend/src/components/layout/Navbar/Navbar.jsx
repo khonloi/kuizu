@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, ChevronDown } from 'lucide-react';
+import { Search, Plus, ChevronDown, Menu } from 'lucide-react';
 import { Button } from '../../ui';
 import './Navbar.css';
 
-const Navbar = () => {
+const Navbar = ({ isSidebarCollapsed, onToggleSidebar }) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -28,10 +28,15 @@ const Navbar = () => {
         <nav className="navbar">
             <div className="navbar-content">
                 <div className="navbar-left">
+                    {onToggleSidebar && (
+                        <button className="sidebar-toggle-nav" onClick={onToggleSidebar}>
+                            <Menu size={24} />
+                        </button>
+                    )}
                     <div className="navbar-logo" onClick={() => window.location.href = '/dashboard'}>Kuizu</div>
                     <div className="navbar-links">
                         <div className="nav-dropdown">
-                            <span>Study tools</span>
+                            <span>Study Tools</span>
                             <ChevronDown size={14} strokeWidth={3} />
                         </div>
                         <div className="nav-dropdown">

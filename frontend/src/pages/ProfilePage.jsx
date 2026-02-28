@@ -198,21 +198,6 @@ const ProfilePage = () => {
                     </div>
                 </Card>
             </div>
-
-            <div className="profile-section">
-                <span className="section-label">Appearance</span>
-                <Card className="profile-card">
-                    <div className="settings-group theme-selector">
-                        <div className="field-info">
-                            <h4>Theme</h4>
-                        </div>
-                        <div className="dropdown-container" onClick={handleThemeChange}>
-                            {theme}
-                            <ChevronDown size={14} />
-                        </div>
-                    </div>
-                </Card>
-            </div>
         </div>
     );
 };

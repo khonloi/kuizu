@@ -22,7 +22,25 @@
 .navbar-left {
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 24px;
+}
+
+.sidebar-toggle-nav {
+    background: transparent;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    margin-right: -8px;
+}
+
+.sidebar-toggle-nav:hover {
+    background-color: var(--input-bg);
 }
 
 .navbar-logo {
