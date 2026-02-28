@@ -2,24 +2,31 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 
+import MainLayout from './components/layout';
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/" element={<Navigate to="/auth" replace />} />
-        {/* Placeholder for dashboard */}
-        <Route path="/dashboard" element={
-          <div style={{ padding: '20px' }}>
-            <h1>Welcome to Kuizu Dashboard!</h1>
-            <button onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.href = '/auth';
-            }}>Logout</button>
-          </div>
+
+        {/* Standard layout pages */}
+        <Route path="/profile" element={
+          <MainLayout>
+            <ProfilePage />
+          </MainLayout>
         } />
+
+        <Route path="/dashboard" element={
+          <MainLayout>
+            <div style={{ padding: '40px', maxWidth: '1440px', margin: '0 auto' }}>
+              <h1 style={{ fontSize: '32px', marginBottom: '24px' }}>Welcome back to Kuizu!</h1>
+              {/* Other dashboard components would go here */}
+            </div>
+          </MainLayout>
+        } />
+
+        <Route path="/" element={<Navigate to="/auth" replace />} />
       </Routes>
     </Router>
   );

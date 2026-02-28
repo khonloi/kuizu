@@ -57,3 +57,12 @@ input {
 .mt-4 {
   margin-top: 1rem !important;
 }
+
+.layout-container {
+  min-height: 100vh;
+  background-color: var(--white);
+}
+
+.main-content {
+  min-height: calc(100vh - 72px);
+}
