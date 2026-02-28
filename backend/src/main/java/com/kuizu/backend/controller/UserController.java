@@ -5,13 +5,15 @@ import com.kuizu.backend.dto.request.UpdateProfileRequest;
 import com.kuizu.backend.dto.response.UserResponse;
 import com.kuizu.backend.service.UserService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,8 +28,9 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserResponse>> getAllUsers(Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 
     @GetMapping("/{userId}")
@@ -36,22 +39,22 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser(@RequestParam String username) {
-        return ResponseEntity.ok(userService.getUserByUsername(username));
+    public ResponseEntity<UserResponse> getCurrentUser(Principal principal) {
+        return ResponseEntity.ok(userService.getUserByUsername(principal.getName()));
     }
 
     @PutMapping("/profile")
     public ResponseEntity<UserResponse> updateProfile(
-            @RequestParam String username,
+            Principal principal,
             @Valid @RequestBody UpdateProfileRequest request) {
-        return ResponseEntity.ok(userService.updateProfile(username, request));
+        return ResponseEntity.ok(userService.updateProfile(principal.getName(), request));
     }
 
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(
-            @RequestParam String username,
+            Principal principal,
             @Valid @RequestBody ChangePasswordRequest request) {
-        userService.changePassword(username, request);
+        userService.changePassword(principal.getName(), request);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Password changed successfully");
         return ResponseEntity.ok(response);
