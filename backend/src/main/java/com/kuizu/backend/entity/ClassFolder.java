@@ -20,9 +20,8 @@ public class ClassFolder {
     private ClassFolderId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("classId")
-    @JoinColumn(name = "class_id")
-    private StudyClass studyClass;
+    @JoinColumn(name = "class_id", nullable = false)
+    private Class clazz;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("folderId")

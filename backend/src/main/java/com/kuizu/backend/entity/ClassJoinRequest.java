@@ -22,7 +22,7 @@ public class ClassJoinRequest {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id", nullable = false)
-    private StudyClass studyClass;
+    private Class clazz;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

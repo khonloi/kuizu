@@ -22,7 +22,7 @@ public class ClassMember {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("classId")
     @JoinColumn(name = "class_id")
-    private StudyClass studyClass;
+    private Class clazz;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")

@@ -22,7 +22,7 @@ public class ClassMaterial {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id", nullable = false)
-    private StudyClass studyClass;
+    private Class clazz;
 
     @Column(name = "material_type", length = 20)
     private String materialType;

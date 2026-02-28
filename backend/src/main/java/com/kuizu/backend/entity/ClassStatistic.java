@@ -19,10 +19,9 @@ public class ClassStatistic {
     @Column(name = "class_id")
     private Long classId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "class_id")
-    private StudyClass studyClass;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_id", nullable = false)
+    private Class clazz;
 
     @Column(name = "member_count")
     private Long memberCount;
