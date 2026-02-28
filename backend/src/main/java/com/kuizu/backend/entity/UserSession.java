@@ -24,7 +24,7 @@ public class UserSession {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "session_token", length = 255)
+    @Column(name = "session_token", length = 255, unique = true)
     private String sessionToken;
 
     @Column(name = "refresh_token", length = 255)
