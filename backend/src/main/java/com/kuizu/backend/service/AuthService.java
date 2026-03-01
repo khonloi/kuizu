@@ -31,8 +31,6 @@ public class AuthService {
     @Autowired
     private SessionService sessionService;
 
-
-
     @Autowired
     private PasswordResetRepository passwordResetRepository;
 
@@ -47,12 +45,22 @@ public class AuthService {
             throw new ApiException("Email already exists");
         }
 
+        User.UserRole role;
+        try {
+            role = User.UserRole.valueOf(request.getRole().toUpperCase());
+            if (role == User.UserRole.ROLE_ADMIN) {
+                throw new ApiException("Cannot register as Admin");
+            }
+        } catch (IllegalArgumentException e) {
+            throw new ApiException("Invalid role");
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .displayName(request.getDisplayName())
-                .role(User.UserRole.ROLE_USER)
+                .role(role)
                 .status(User.UserStatus.ACTIVE)
                 .build();
 

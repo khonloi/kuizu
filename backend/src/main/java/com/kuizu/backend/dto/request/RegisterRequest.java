@@ -26,4 +26,7 @@ public class RegisterRequest {
     private String password;
 
     private String displayName;
+
+    @NotBlank(message = "Role is required")
+    private String role;
 }
