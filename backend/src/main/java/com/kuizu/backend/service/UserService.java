@@ -9,24 +9,27 @@ import com.kuizu.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::mapToUserResponse)
-                .collect(Collectors.toList());
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(this::mapToUserResponse);
     }
 
     public UserResponse getUserById(String userId) {
@@ -60,6 +63,7 @@ public class UserService {
         return mapToUserResponse(user);
     }
 
+    @Transactional
     public void changePassword(String username, ChangePasswordRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApiException("User not found"));
@@ -83,9 +87,6 @@ public class UserService {
                 .profilePictureUrl(user.getProfilePictureUrl())
                 .role(user.getRole() != null ? user.getRole().name() : null)
                 .status(user.getStatus() != null ? user.getStatus().name() : null)
-                .locale(user.getLocale())
-                .timezone(user.getTimezone())
-                .preferences(user.getPreferences())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

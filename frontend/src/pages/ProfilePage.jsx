@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck, Palette } from 'lucide-react';
 import './ProfilePage.css';
 import { getCurrentUser, updateProfile } from '../api/user';
+import { Button, Card, Input } from '../components/ui';
+import MainLayout from '../components/layout';
 
 const ProfilePage = () => {
     const [user, setUser] = useState(null);
@@ -95,124 +97,115 @@ const ProfilePage = () => {
         performUpdate({ preferences: JSON.stringify({ theme: newTheme }) });
     };
 
-    if (loading && !user) return <div className="profile-container">Loading...</div>;
-    if (error) return <div className="profile-container">{error}</div>;
-
     return (
-        <div className="profile-container">
-            <h1 className="profile-title">Settings</h1>
+        <MainLayout isLoading={loading}>
+            {error ? (
+                <div className="profile-container" style={{ textAlign: 'center', padding: '100px 0' }}>
+                    <p style={{ color: 'var(--error)', fontSize: '1.2rem', fontWeight: '600' }}>{error}</p>
+                    <Button variant="outline" onClick={fetchUserData} style={{ marginTop: '20px' }}>Try Again</Button>
+                </div>
+            ) : (
+                <div className="profile-container">
+                    <h1 className="profile-title">Settings</h1>
 
-            <div className="profile-section">
-                <span className="section-label">Personal Information</span>
-                <div className="settings-card">
-                    {/* Profile Picture */}
-                    <div className="settings-group">
-                        <h3 className="group-title">Profile Picture</h3>
-                        <div className="avatar-selection">
-                            <img
-                                src={user?.profilePictureUrl || avatars[0]}
-                                alt="Profile"
-                                className="avatar-main"
-                            />
-                            {avatars.map((url, index) => (
-                                <img
-                                    key={index}
-                                    src={url}
-                                    alt={`Option ${index}`}
-                                    className={`avatar-option ${user?.profilePictureUrl === url ? 'selected' : ''}`}
-                                    onClick={() => handleUpdateAvatar(url)}
-                                />
-                            ))}
-                            <div className="avatar-add">
-                                <Plus size={20} />
+                    <div className="profile-section">
+                        <span className="section-label">Personal Information</span>
+                        <Card className="profile-card">
+                            {/* Profile Picture */}
+                            <div className="settings-group">
+                                <h3 className="group-title">Profile Picture</h3>
+                                <div className="avatar-selection">
+                                    <img
+                                        src={user?.profilePictureUrl || avatars[0]}
+                                        alt="Profile"
+                                        className="avatar-main"
+                                    />
+                                    {avatars.map((url, index) => (
+                                        <img
+                                            key={index}
+                                            src={url}
+                                            alt={`Option ${index}`}
+                                            className={`avatar-option ${user?.profilePictureUrl === url ? 'selected' : ''}`}
+                                            onClick={() => handleUpdateAvatar(url)}
+                                        />
+                                    ))}
+                                    <div className="avatar-add">
+                                        <Plus size={20} />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Display Name */}
-                    <div className="settings-group">
-                        <div className="field-row">
-                            <div className="field-info">
-                                <h4>Display Name</h4>
-                                <p>{user?.displayName || 'Set your display name'}</p>
+                            {/* Display Name */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Display Name</h4>
+                                        <p>{user?.displayName || 'Set your display name'}</p>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('displayName')}>Edit</Button>
+                                </div>
                             </div>
-                            <button className="edit-btn" onClick={() => handleEditField('displayName')}>Edit</button>
-                        </div>
-                    </div>
 
-                    {/* Bio */}
-                    <div className="settings-group">
-                        <div className="field-row">
-                            <div className="field-info">
-                                <h4>Bio</h4>
-                                <p className="bio-text">{user?.bio || 'Add a bio to your profile'}</p>
+                            {/* Bio */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Bio</h4>
+                                        <p className="bio-text">{user?.bio || 'Add a bio to your profile'}</p>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('bio')}>Edit</Button>
+                                </div>
                             </div>
-                            <button className="edit-btn" onClick={() => handleEditField('bio')}>Edit</button>
-                        </div>
-                    </div>
 
-                    {/* Email */}
-                    <div className="settings-group">
-                        <div className="field-row">
-                            <div className="field-info">
-                                <h4>Email</h4>
-                                <p>{user?.email}</p>
+                            {/* Email */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Email</h4>
+                                        <p>{user?.email}</p>
+                                    </div>
+                                    {/* Read-only */}
+                                </div>
                             </div>
-                            {/* Read-only */}
-                        </div>
-                    </div>
 
-                    {/* Locale */}
-                    <div className="settings-group">
-                        <div className="field-row">
-                            <div className="field-info">
-                                <h4>Language</h4>
-                                <p>{user?.locale || 'English'}</p>
+                            {/* Locale */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Language</h4>
+                                        <p>{user?.locale || 'English'}</p>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('locale')}>Edit</Button>
+                                </div>
                             </div>
-                            <button className="edit-btn" onClick={() => handleEditField('locale')}>Edit</button>
-                        </div>
-                    </div>
 
-                    {/* Timezone */}
-                    <div className="settings-group">
-                        <div className="field-row">
-                            <div className="field-info">
-                                <h4>Timezone</h4>
-                                <p>{user?.timezone || 'UTC'}</p>
+                            {/* Timezone */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Timezone</h4>
+                                        <p>{user?.timezone || 'UTC'}</p>
+                                    </div>
+                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('timezone')}>Edit</Button>
+                                </div>
                             </div>
-                            <button className="edit-btn" onClick={() => handleEditField('timezone')}>Edit</button>
-                        </div>
-                    </div>
 
-                    {/* Account Type */}
-                    <div className="settings-group">
-                        <div className="field-row">
-                            <div className="field-info">
-                                <h4>Account Type</h4>
+                            {/* Account Type */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Account Type</h4>
+                                    </div>
+                                    <div className="account-type-badge">
+                                        {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_TEACHER' ? 'Teacher' : 'Student'}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="account-type-badge">
-                                {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_TEACHER' ? 'Teacher' : 'Student'}
-                            </div>
-                        </div>
+                        </Card>
                     </div>
                 </div>
-            </div>
-
-            <div className="profile-section">
-                <span className="section-label">Appearance</span>
-                <div className="settings-card">
-                    <div className="settings-group theme-selector">
-                        <div className="field-info">
-                            <h4>Theme</h4>
-                        </div>
-                        <div className="dropdown-container" onClick={handleThemeChange}>
-                            {theme}
-                            <ChevronDown size={14} />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            )}
+        </MainLayout>
     );
 };
 

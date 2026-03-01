@@ -19,9 +19,6 @@ public class UserResponse {
     private String bio;
     private String profilePictureUrl;
     private String role;
-    private String locale;
-    private String timezone;
-    private String preferences;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
