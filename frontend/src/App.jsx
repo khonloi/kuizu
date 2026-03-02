@@ -1,4 +1,8 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+
 import MainLayout from './components/layout';
 import { ToastProvider } from './context/ToastContext';
 import { HomePage } from './pages';
@@ -15,17 +19,25 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
 
-          {/* Standard layout pages */}
-          <Route path="/profile" element={<ProfilePage />} />
+          {/* Protected layout pages */}
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
 
           <Route path="/dashboard" element={
-            <MainLayout>
-              <div style={{ padding: '40px', maxWidth: '1440px', margin: '0 auto' }}>
-                <h1 style={{ fontSize: '32px', marginBottom: '24px' }}>Welcome back to Kuizu!</h1>
-                {/* Other dashboard components would go here */}
-              </div>
-            </MainLayout>
+            <ProtectedRoute>
+              <MainLayout>
+                <div style={{ padding: '40px', maxWidth: '1440px', margin: '0 auto' }}>
+                  <h1 style={{ fontSize: '32px', marginBottom: '24px' }}>Welcome back to Kuizu!</h1>
+                  {/* Other dashboard components would go here */}
+                </div>
+              </MainLayout>
+            </ProtectedRoute>
           } />
+
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Router>
     </ToastProvider>
