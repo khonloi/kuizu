@@ -39,6 +39,19 @@ const ProfilePage = () => {
             const userData = await getCurrentUser();
             setUser(userData);
 
+            // Sync theme from backend if possible
+            if (userData.preferences) {
+                try {
+                    const prefs = JSON.parse(userData.preferences);
+                    if (prefs.theme && prefs.theme !== theme) {
+                        setTheme(prefs.theme);
+                        localStorage.setItem('theme', prefs.theme);
+                    }
+                } catch (e) {
+                    console.error('Failed to parse preferences:', e);
+                }
+            }
+
             // Sync with local storage if needed
             localStorage.setItem('user', JSON.stringify(userData));
         } catch (err) {
@@ -168,6 +181,17 @@ const ProfilePage = () => {
                                 </div>
                             </div>
 
+                            {/* Username */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Username</h4>
+                                        <p>{user?.username}</p>
+                                    </div>
+                                    {/* Read-only */}
+                                </div>
+                            </div>
+
                             {/* Locale */}
                             <div className="settings-group">
                                 <div className="field-row">
@@ -198,6 +222,48 @@ const ProfilePage = () => {
                                     </div>
                                     <div className="account-type-badge">
                                         {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_TEACHER' ? 'Teacher' : 'Student'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Account Status */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Account Status</h4>
+                                        <p style={{ color: user?.status === 'ACTIVE' ? 'var(--primary)' : 'var(--error)' }}>
+                                            {user?.status || 'Unknown'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Last Login */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Last Login</h4>
+                                        <p>{user?.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString(undefined, {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) : 'Never'}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Joined Date */}
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Joined On</h4>
+                                        <p>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        }) : 'N/A'}</p>
                                     </div>
                                 </div>
                             </div>

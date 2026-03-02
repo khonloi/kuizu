@@ -20,6 +20,10 @@ public class UserResponse {
     private String profilePictureUrl;
     private String role;
     private String status;
+    private String locale;
+    private String timezone;
+    private String preferences;
+    private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
