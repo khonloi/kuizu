@@ -58,6 +58,8 @@ public class UserService {
             user.setLocale(request.getLocale());
         if (request.getTimezone() != null)
             user.setTimezone(request.getTimezone());
+        if (request.getPreferences() != null)
+            user.setPreferences(request.getPreferences());
 
         userRepository.save(user);
         return mapToUserResponse(user);
@@ -90,6 +92,7 @@ public class UserService {
                 .locale(user.getLocale())
                 .timezone(user.getTimezone())
                 .preferences(user.getPreferences())
+                .lastLoginAt(user.getLastLoginAt())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

@@ -37,6 +37,19 @@ const ProfilePage = () => {
             const userData = await getCurrentUser();
             setUser(userData);
 
+            // Sync theme from backend if possible
+            if (userData.preferences) {
+                try {
+                    const prefs = JSON.parse(userData.preferences);
+                    if (prefs.theme && prefs.theme !== theme) {
+                        setTheme(prefs.theme);
+                        localStorage.setItem('theme', prefs.theme);
+                    }
+                } catch (e) {
+                    console.error('Failed to parse preferences:', e);
+                }
+            }
+
             // Sync with local storage if needed
             localStorage.setItem('user', JSON.stringify(userData));
         } catch (err) {
@@ -193,21 +206,6 @@ const ProfilePage = () => {
                             <div className="account-type-badge">
                                 {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_TEACHER' ? 'Teacher' : 'Student'}
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="profile-section">
-                <span className="section-label">Appearance</span>
-                <div className="settings-card">
-                    <div className="settings-group theme-selector">
-                        <div className="field-info">
-                            <h4>Theme</h4>
-                        </div>
-                        <div className="dropdown-container" onClick={handleThemeChange}>
-                            {theme}
-                            <ChevronDown size={14} />
                         </div>
                     </div>
                 </div>

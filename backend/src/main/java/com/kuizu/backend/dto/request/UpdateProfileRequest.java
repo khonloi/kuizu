@@ -23,4 +23,6 @@ public class UpdateProfileRequest {
 
     @Pattern(regexp = "^[A-Za-z_]+(/[A-Za-z_\\-]+)*$", message = "Invalid timezone format (e.g., 'UTC' or 'Asia/Ho_Chi_Minh')")
     private String timezone;
+
+    private String preferences;
 }
