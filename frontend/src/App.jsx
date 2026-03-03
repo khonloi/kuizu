@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
+import HomePage from './pages/HomePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 import MainLayout from './components/layout';
