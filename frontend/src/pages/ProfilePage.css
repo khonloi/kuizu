@@ -247,3 +247,16 @@
     background: var(--white);
     box-shadow: 0 0 0 4px rgba(66, 85, 255, 0.1);
 }
+
+.password-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    display: block;
+}

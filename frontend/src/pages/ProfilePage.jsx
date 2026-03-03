@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck, Palette } from 'lucide-react';
+import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck, Palette, Lock } from 'lucide-react';
 import './ProfilePage.css';
-import { updateProfile } from '../api/user';
+import { updateProfile, changePassword } from '../api/user';
 import { Button, Card, Input, Modal } from '../components/ui';
 import MainLayout from '../components/layout';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +18,13 @@ const ProfilePage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingField, setEditingField] = useState('');
     const [editValue, setEditValue] = useState('');
+
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
 
     const fieldLabels = {
         displayName: 'Display Name',
@@ -63,6 +70,38 @@ const ProfilePage = () => {
             toast.error('Update failed');
         } finally {
 
+            setLoading(false);
+        }
+    };
+
+    const handlePasswordSubmit = async () => {
+        if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            toast.error('Please fill in all password fields');
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error('New passwords do not match');
+            return;
+        }
+
+        if (passwordData.newPassword.length < 6) {
+            toast.error('Password must be at least 6 characters');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await changePassword({
+                oldPassword: passwordData.oldPassword,
+                newPassword: passwordData.newPassword
+            });
+            toast.success('Password changed successfully');
+            setIsPasswordModalOpen(false);
+            setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to change password');
+        } finally {
             setLoading(false);
         }
     };
@@ -265,6 +304,27 @@ const ProfilePage = () => {
                         </Card>
                     </div>
 
+                    <div className="profile-section">
+                        <span className="section-label">Security</span>
+                        <Card className="profile-card">
+                            <div className="settings-group">
+                                <div className="field-row">
+                                    <div className="field-info">
+                                        <h4>Password</h4>
+                                        <p>Change your account password to keep it secure</p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsPasswordModalOpen(true)}
+                                        style={{ color: 'var(--primary)', borderColor: 'var(--primary)' }}
+                                    >
+                                        Change Password
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+
                     {/* Edit Modal */}
                     <Modal
                         isOpen={isEditModalOpen}
@@ -294,6 +354,49 @@ const ProfilePage = () => {
                                     autoFocus
                                 />
                             )}
+                        </div>
+                    </Modal>
+
+                    {/* Change Password Modal */}
+                    <Modal
+                        isOpen={isPasswordModalOpen}
+                        onClose={() => setIsPasswordModalOpen(false)}
+                        title="Change Password"
+                        footer={
+                            <>
+                                <Button variant="ghost" onClick={() => setIsPasswordModalOpen(false)}>Cancel</Button>
+                                <Button variant="primary" onClick={handlePasswordSubmit}>Update Password</Button>
+                            </>
+                        }
+                    >
+                        <div className="edit-modal-content">
+                            <div className="password-input-group">
+                                <label className="input-label">Current Password</label>
+                                <Input
+                                    type="password"
+                                    value={passwordData.oldPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                                    placeholder="Enter current password"
+                                />
+                            </div>
+                            <div className="password-input-group" style={{ marginTop: '16px' }}>
+                                <label className="input-label">New Password</label>
+                                <Input
+                                    type="password"
+                                    value={passwordData.newPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                    placeholder="Enter new password (min 6 chars)"
+                                />
+                            </div>
+                            <div className="password-input-group" style={{ marginTop: '16px' }}>
+                                <label className="input-label">Confirm New Password</label>
+                                <Input
+                                    type="password"
+                                    value={passwordData.confirmPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                    placeholder="Confirm new password"
+                                />
+                            </div>
                         </div>
                     </Modal>
                 </div>
