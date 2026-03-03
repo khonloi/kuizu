@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import FoldersPage from './pages/FoldersPage';
+import FolderDetailPage from './pages/FolderDetailPage';
 
 import MainLayout from './components/layout';
 
@@ -28,6 +30,10 @@ function App() {
             </MainLayout>
           </ProtectedRoute>
         } />
+
+        {/* Folder pages */}
+        <Route path="/folders" element={<FoldersPage />} />
+        <Route path="/folders/:folderId" element={<FolderDetailPage />} />
 
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
