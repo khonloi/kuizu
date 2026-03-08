@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, FileText, Info } from 'lucide-react';
-import { register } from '../../api/auth';
+import { useNavigate } from 'react-router-dom';
+import { register as registerApi } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Input, Button } from '../ui';
+
 import './AuthForm.css';
 
 const RegisterForm = ({ onToggle }) => {
@@ -15,6 +19,10 @@ const RegisterForm = ({ onToggle }) => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const { login } = useAuth();
+    const toast = useToast();
+    const navigate = useNavigate();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,28 +30,32 @@ const RegisterForm = ({ onToggle }) => {
         // Basic frontend validation
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$/;
         if (!passwordRegex.test(formData.password)) {
-            setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.');
+            const msg = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one special character.';
+            setError(msg);
+            toast.error(msg);
             return;
         }
+
 
         setLoading(true);
         setError('');
         try {
-            const data = await register(formData);
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data));
-            window.location.href = '/dashboard';
+            const data = await registerApi(formData);
+            await login(data, data.token);
+            toast.success('Account created successfully!');
+            navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+            const msg = err.response?.data?.message || 'Something went wrong. Please try again.';
+            setError(msg);
+            toast.error(msg);
         } finally {
+
             setLoading(false);
         }
     };
 
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
-            {error && <div className="error-msg">{error}</div>}
-
             <Input
                 label="Username"
                 placeholder="Choose a username (3-50 chars)"

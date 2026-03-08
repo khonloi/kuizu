@@ -2,27 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, ChevronDown, Menu } from 'lucide-react';
 import { Button } from '../../ui';
 import './Navbar.css';
+import { useAuth } from '../../../context/AuthContext';
+import { useToast } from '../../../context/ToastContext';
+import { useNavigate } from 'react-router-dom';
+
 
 const Navbar = ({ isSidebarCollapsed, onToggleSidebar }) => {
-    const [user, setUser] = useState(null);
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const toast = useToast();
 
-    useEffect(() => {
-        // Initial check
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (e) {
-                console.error('Failed to parse user from localStorage');
-            }
-        }
-    }, []);
-
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/auth';
+    const handleLogout = () => {
+        logout();
+        toast.info('Logged out successfully');
+        navigate('/auth');
     };
+
 
     return (
         <nav className="navbar">
@@ -33,7 +28,7 @@ const Navbar = ({ isSidebarCollapsed, onToggleSidebar }) => {
                             <Menu size={24} />
                         </button>
                     )}
-                    <div className="navbar-logo" onClick={() => window.location.href = '/dashboard'}>Kuizu</div>
+                    <div className="navbar-logo" onClick={() => navigate('/dashboard')}>Kuizu</div>
                     <div className="navbar-links">
                         <div className="nav-dropdown">
                             <span>Study Tools</span>
@@ -58,7 +53,7 @@ const Navbar = ({ isSidebarCollapsed, onToggleSidebar }) => {
                 </div>
 
                 <div className="navbar-right">
-                    <button className="create-btn" onClick={() => window.location.href = '/create'}>
+                    <button className="create-btn" onClick={() => navigate('/create')}>
                         <Plus size={20} strokeWidth={3} />
                         <span>Create</span>
                     </button>
@@ -68,18 +63,19 @@ const Navbar = ({ isSidebarCollapsed, onToggleSidebar }) => {
                                 src={user.profilePictureUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'}
                                 alt="Profile"
                                 className="nav-avatar"
-                                onClick={() => window.location.href = '/profile'}
+                                onClick={() => navigate('/profile')}
                             />
-                            <Button variant="ghost" size="sm" onClick={logout} className="logout-compact-btn">
+                            <Button variant="ghost" size="sm" onClick={handleLogout} className="logout-compact-btn">
                                 Log Out
                             </Button>
                         </div>
+
                     ) : (
                         <Button
                             variant="primary"
                             size="sm"
                             className="login-btn"
-                            onClick={() => window.location.href = '/auth'}
+                            onClick={() => navigate('/auth')}
                         >
                             Log in
                         </Button>
