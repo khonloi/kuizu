@@ -97,4 +97,16 @@ class ClassController {
         response.put("joinCode", joinCode);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{classId}")
+    public ResponseEntity<?> deleteClass(@PathVariable Long classId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        classService.deleteClass(classId, principal.getName());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Class deleted successfully");
+        return ResponseEntity.ok(response);
+    }
 }

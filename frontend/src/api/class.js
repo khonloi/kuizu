@@ -39,3 +39,8 @@ export const updateClass = async (classId, classData) => {
     const response = await api.put(`/classes/${classId}`, classData);
     return response.data;
 };
+
+export const deleteClass = async (classId) => {
+    const response = await api.delete(`/classes/${classId}`);
+    return response.data;
+};

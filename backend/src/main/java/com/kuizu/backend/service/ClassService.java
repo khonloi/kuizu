@@ -287,4 +287,18 @@ public class ClassService {
 
         return convertToClassInfoResponse(clazz, username);
     }
+
+    public void deleteClass(Long classId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApiException("User not found: " + username));
+        
+        Class clazz = classRepository.findByClassId(classId)
+                .orElseThrow(() -> new ApiException("Class not found: " + classId));
+
+        if (!clazz.getOwner().getUserId().equals(user.getUserId())) {
+            throw new ApiException("Only the class owner can delete the class");
+        }
+
+        classRepository.delete(clazz);
+    }
 }

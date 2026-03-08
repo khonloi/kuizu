@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClassDetails, leaveClass, getClassJoinCode } from '../../api/class';
+import { getClassDetails, leaveClass, getClassJoinCode, deleteClass } from '../../api/class';
 import { Button } from '../../components/ui';
-import { Users, File, Calendar, Share2, MoreVertical, Copy, Check } from 'lucide-react';
+import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2 } from 'lucide-react';
 import JoinClassModal from '../../components/Class/JoinClassModal';
 import LeaveClassModal from '../../components/Class/LeaveClassModal';
 import EditClassModal from '../../components/Class/EditClassModal';
+import DeleteClassModal from '../../components/Class/DeleteClassModal';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
@@ -17,8 +18,10 @@ const ClassDetailPage = () => {
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [localIsMember, setLocalIsMember] = useState(false); // Can be evaluated based on response later
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [localIsMember, setLocalIsMember] = useState(false);
     const [isLeaving, setIsLeaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [joinCode, setJoinCode] = useState(null);
     const [isLoadingCode, setIsLoadingCode] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -67,6 +70,19 @@ const ClassDetailPage = () => {
             console.error("Failed to leave class:", err);
             alert("Failed to leave the class. Please try again.");
             setIsLeaving(false);
+        }
+    };
+
+    const handleDeleteClass = async () => {
+        try {
+            setIsDeleting(true);
+            await deleteClass(classId);
+            setIsDeleteModalOpen(false);
+            navigate('/dashboard');
+        } catch (err) {
+            console.error("Failed to delete class:", err);
+            alert("Failed to delete the class. Please try again.");
+            setIsDeleting(false);
         }
     };
 
@@ -157,10 +173,20 @@ const ClassDetailPage = () => {
                             </Button>
                         )}
                         {classData?.isOwner && (
-                            <Button variant="outline" className="action-btn" onClick={() => setIsEditModalOpen(true)}>
-                                <Share2 size={18} />
-                                <span>Edit Class</span>
-                            </Button>
+                            <>
+                                <Button variant="outline" className="action-btn" onClick={() => setIsEditModalOpen(true)}>
+                                    <Share2 size={18} />
+                                    <span>Edit Class</span>
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    className="action-btn text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200" 
+                                    onClick={() => setIsDeleteModalOpen(true)}
+                                >
+                                    <Trash2 size={18} />
+                                    <span>Delete</span>
+                                </Button>
+                            </>
                         )}
                         <Button variant="ghost" className="action-btn-icon">
                             <MoreVertical size={18} />
@@ -336,6 +362,14 @@ const ClassDetailPage = () => {
                 onClose={() => setIsEditModalOpen(false)}
                 classData={classData}
                 onUpdateSuccess={handleUpdateSuccess}
+            />
+
+            <DeleteClassModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteClass}
+                isDeleting={isDeleting}
+                className={classData.className}
             />
         </div>
     );
