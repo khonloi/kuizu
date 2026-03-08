@@ -109,4 +109,16 @@ class ClassController {
         response.put("message", "Class deleted successfully");
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{classId}/members/{userId}")
+    public ResponseEntity<?> removeMember(@PathVariable Long classId, @PathVariable String userId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        classService.removeMember(classId, userId, principal.getName());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Member removed successfully");
+        return ResponseEntity.ok(response);
+    }
 }

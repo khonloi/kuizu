@@ -44,3 +44,8 @@ export const deleteClass = async (classId) => {
     const response = await api.delete(`/classes/${classId}`);
     return response.data;
 };
+
+export const removeMember = async (classId, userId) => {
+    const response = await api.delete(`/classes/${classId}/members/${userId}`);
+    return response.data;
+};

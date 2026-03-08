@@ -301,4 +301,26 @@ public class ClassService {
 
         classRepository.delete(clazz);
     }
+
+    public void removeMember(Long classId, String targetUserId, String requesterUsername) {
+        User requester = userRepository.findByUsername(requesterUsername)
+                .orElseThrow(() -> new ApiException("User not found: " + requesterUsername));
+        
+        Class clazz = classRepository.findByClassId(classId)
+                .orElseThrow(() -> new ApiException("Class not found: " + classId));
+
+        if (!clazz.getOwner().getUserId().equals(requester.getUserId())) {
+            throw new ApiException("Only the class owner can remove members");
+        }
+
+        if (clazz.getOwner().getUserId().equals(targetUserId)) {
+            throw new ApiException("Cannot remove the owner from the class");
+        }
+
+        ClassMember.ClassMemberId memberId = new ClassMember.ClassMemberId(classId, targetUserId);
+        ClassMember member = classMemberRepository.findById(memberId)
+                .orElseThrow(() -> new ApiException("User is not a member of this class"));
+
+        classMemberRepository.delete(member);
+    }
 }

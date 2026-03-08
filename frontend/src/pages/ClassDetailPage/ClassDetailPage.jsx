@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClassDetails, leaveClass, getClassJoinCode, deleteClass } from '../../api/class';
+import { getClassDetails, leaveClass, getClassJoinCode, deleteClass, removeMember } from '../../api/class';
 import { Button } from '../../components/ui';
 import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2 } from 'lucide-react';
 import JoinClassModal from '../../components/Class/JoinClassModal';
 import LeaveClassModal from '../../components/Class/LeaveClassModal';
 import EditClassModal from '../../components/Class/EditClassModal';
 import DeleteClassModal from '../../components/Class/DeleteClassModal';
+import RemoveMemberModal from '../../components/Class/RemoveMemberModal';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
@@ -19,9 +20,12 @@ const ClassDetailPage = () => {
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
     const [localIsMember, setLocalIsMember] = useState(false);
     const [isLeaving, setIsLeaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isRemoving, setIsRemoving] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
     const [joinCode, setJoinCode] = useState(null);
     const [isLoadingCode, setIsLoadingCode] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -83,6 +87,34 @@ const ClassDetailPage = () => {
             console.error("Failed to delete class:", err);
             alert("Failed to delete the class. Please try again.");
             setIsDeleting(false);
+        }
+    };
+
+    const handleRemoveMemberClick = (member) => {
+        setSelectedMember(member);
+        setIsRemoveModalOpen(true);
+    };
+
+    const handleRemoveMemberConfirm = async () => {
+        if (!selectedMember) return;
+
+        try {
+            setIsRemoving(true);
+            await removeMember(classId, selectedMember.userId);
+            
+            // Update local state
+            setClassData(prev => ({
+                ...prev,
+                members: prev.members.filter(m => m.userId !== selectedMember.userId)
+            }));
+            
+            setIsRemoveModalOpen(false);
+            setSelectedMember(null);
+        } catch (err) {
+            console.error("Failed to remove member:", err);
+            alert("Failed to remove the member. Please try again.");
+        } finally {
+            setIsRemoving(false);
         }
     };
 
@@ -293,7 +325,14 @@ const ClassDetailPage = () => {
                                             <span className={`member-role ${member.role.toLowerCase()}`}>{member.role}</span>
                                         </div>
                                         {member.userId !== classData.ownerUserId && (
-                                            <Button variant="ghost" size="sm" className="text-red-500">Remove</Button>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="text-red-500"
+                                                onClick={() => handleRemoveMemberClick(member)}
+                                            >
+                                                Remove
+                                            </Button>
                                         )}
                                     </div>
                                 ))}
@@ -370,6 +409,14 @@ const ClassDetailPage = () => {
                 onConfirm={handleDeleteClass}
                 isDeleting={isDeleting}
                 className={classData.className}
+            />
+
+            <RemoveMemberModal
+                isOpen={isRemoveModalOpen}
+                onClose={() => setIsRemoveModalOpen(false)}
+                onConfirm={handleRemoveMemberConfirm}
+                isRemoving={isRemoving}
+                memberName={selectedMember?.displayName}
             />
         </div>
     );
