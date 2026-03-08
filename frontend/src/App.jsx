@@ -3,6 +3,7 @@ import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage/HomePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+import ClassDetailPage from './pages/ClassDetailPage/ClassDetailPage';
 
 import MainLayout from './components/layout';
 
@@ -27,6 +28,10 @@ function App() {
                 <h1 style={{ fontSize: '32px', marginBottom: '24px' }}>Welcome back to Kuizu!</h1>
                 {/* Other dashboard components would go here */}
               </div>
+        <Route path="/classes/:classId" element={
+          <MainLayout>
+            <ProtectedRoute>
+              <ClassDetailPage />
             </ProtectedRoute>
           </MainLayout>
         } />
