@@ -53,4 +53,15 @@ class ClassController {
         response.put("message", "Join request processed");
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/{classId}/join-code")
+    public ResponseEntity<?> getJoinCode(@PathVariable Long classId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        String joinCode = classService.getJoinCode(classId, principal.getName());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("joinCode", joinCode);
+        return ResponseEntity.ok(response);
+    }
 }

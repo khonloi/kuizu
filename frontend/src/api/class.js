@@ -19,3 +19,7 @@ export const joinClass = async (classId, joinData) => {
     const response = await api.post(`/classes/${classId}/join`, joinData);
     return response.data;
 };
+export const getClassJoinCode = async (classId) => {
+    const response = await api.get(`/classes/${classId}/join-code`);
+    return response.data;
+};

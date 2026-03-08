@@ -153,4 +153,20 @@ public class ClassService {
                 
         classJoinRequestRepository.save(request);
     }
+    public String getJoinCode(Long classId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApiException("User not found: " + username));
+        
+        Class clazz = classRepository.findByClassId(classId)
+                .orElseThrow(() -> new ApiException("Class not found: " + classId));
+
+        boolean isOwner = clazz.getOwner().getUserId().equals(user.getUserId());
+        boolean isMember = classMemberRepository.existsById(new ClassMember.ClassMemberId(classId, user.getUserId()));
+
+        if (!isOwner && !isMember) {
+            throw new ApiException("Only class members or the owner can view the join code");
+        }
+
+        return clazz.getJoinCode();
+    }
 }
