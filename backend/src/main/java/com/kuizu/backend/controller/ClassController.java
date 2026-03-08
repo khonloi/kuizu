@@ -17,7 +17,7 @@ class ClassController {
     }
 
     @GetMapping("/{classId}")
-    public ResponseEntity<?> getClass(Long classId) {
+    public ResponseEntity<?> getClass(@PathVariable Long classId) {
         return ResponseEntity.ok(classService.findClassById(classId));
     }
 
