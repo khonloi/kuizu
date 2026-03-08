@@ -5,8 +5,10 @@ import com.kuizu.backend.dto.response.ClassMaterialResponse;
 import com.kuizu.backend.dto.response.ClassResponse;
 import com.kuizu.backend.entity.Class;
 import com.kuizu.backend.exception.ApiException;
+import com.kuizu.backend.entity.ClassJoinRequest;
 import com.kuizu.backend.entity.ClassMember;
 import com.kuizu.backend.entity.User;
+import com.kuizu.backend.repository.ClassJoinRequestRepository;
 import com.kuizu.backend.repository.ClassMemberRepository;
 import com.kuizu.backend.repository.ClassRepository;
 import com.kuizu.backend.repository.UserRepository;
@@ -21,14 +23,16 @@ public class ClassService {
     private final ClassRepository classRepository;
     private final UserRepository userRepository;
     private final ClassMemberRepository classMemberRepository;
+    private final ClassJoinRequestRepository classJoinRequestRepository;
 
-    public ClassService(ClassRepository classRepository, UserRepository userRepository, ClassMemberRepository classMemberRepository) {
+    public ClassService(ClassRepository classRepository, UserRepository userRepository, ClassMemberRepository classMemberRepository, ClassJoinRequestRepository classJoinRequestRepository) {
         this.classRepository = classRepository;
         this.userRepository = userRepository;
         this.classMemberRepository = classMemberRepository;
+        this.classJoinRequestRepository = classJoinRequestRepository;
     }
 
-    public ClassInfoResponse findClassById(Long classId) {
+    public ClassInfoResponse findClassById(Long classId, String username) {
         Class clazz = classRepository.findByClassId(classId).orElseThrow(() -> new ApiException("Class not found with id: " + classId));
         List<ClassMaterialResponse> classMaterialResponseList = clazz.getClassMaterials()
                 .stream()
@@ -38,13 +42,26 @@ public class ClassService {
                         m.getMaterialRefId()
                 )).toList();
 
+        Boolean isOwner = false;
+        Boolean isMember = false;
+
+        if (username != null) {
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null) {
+                isOwner = clazz.getOwner().getUserId().equals(user.getUserId());
+                isMember = classMemberRepository.existsById(new ClassMember.ClassMemberId(classId, user.getUserId()));
+            }
+        }
+
         return new ClassInfoResponse(
                 clazz.getClassId(),
                 clazz.getOwner().getUserId(),
                 clazz.getOwner().getDisplayName(),
                 clazz.getClassName(),
                 clazz.getDescription(),
-                classMaterialResponseList
+                classMaterialResponseList,
+                isMember,
+                isOwner
         );
     }
 
@@ -83,5 +100,57 @@ public class ClassService {
                         c.getDescription()
                 ))
                 .toList();
+    }
+
+    public void joinClass(Long classId, String username, String joinCode, String message) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApiException("User not found: " + username));
+        
+        Class clazz = classRepository.findByClassId(classId)
+                .orElseThrow(() -> new ApiException("Class not found: " + classId));
+
+        // Check if user is owner
+        if (clazz.getOwner().getUserId().equals(user.getUserId())) {
+            throw new ApiException("User is already the owner of this class");
+        }
+
+        // Check if user is already a member
+        ClassMember.ClassMemberId memberId = new ClassMember.ClassMemberId(classId, user.getUserId());
+        if (classMemberRepository.existsById(memberId)) {
+            throw new ApiException("User is already a member of this class");
+        }
+
+        if (joinCode != null && !joinCode.isEmpty()) {
+            joinClassByCode(clazz, user, joinCode);
+        } else {
+            requestToJoinClass(clazz, user, message);
+        }
+    }
+
+    private void joinClassByCode(Class clazz, User user, String joinCode) {
+        if (!joinCode.equals(clazz.getJoinCode())) {
+            throw new ApiException("Invalid join code provided");
+        }
+
+        ClassMember member = ClassMember.builder()
+                .id(new ClassMember.ClassMemberId(clazz.getClassId(), user.getUserId()))
+                .clazz(clazz)
+                .user(user)
+                .role("MEMBER")
+                .joinedBy(user.getUserId())
+                .build();
+        
+        classMemberRepository.save(member);
+    }
+
+    private void requestToJoinClass(Class clazz, User user, String message) {
+        ClassJoinRequest request = ClassJoinRequest.builder()
+                .clazz(clazz)
+                .user(user)
+                .message(message)
+                .status("PENDING")
+                .build();
+                
+        classJoinRequestRepository.save(request);
     }
 }

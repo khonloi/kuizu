@@ -7,7 +7,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.kuizu.backend.dto.request.JoinClassRequest;
 import java.security.Principal;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/classes")
@@ -19,8 +24,9 @@ class ClassController {
     }
 
     @GetMapping("/{classId}")
-    public ResponseEntity<?> getClass(@PathVariable Long classId) {
-        return ResponseEntity.ok(classService.findClassById(classId));
+    public ResponseEntity<?> getClass(@PathVariable Long classId, Principal principal) {
+        String username = principal != null ? principal.getName() : null;
+        return ResponseEntity.ok(classService.findClassById(classId, username));
     }
 
     @GetMapping("/search")
@@ -36,4 +42,15 @@ class ClassController {
         return ResponseEntity.ok(classService.getUserClasses(principal.getName()));
     }
 
+    @PostMapping("/{classId}/join")
+    public ResponseEntity<?> joinClass(@PathVariable Long classId, @RequestBody JoinClassRequest request, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        classService.joinClass(classId, principal.getName(), request.getJoinCode(), request.getMessage());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Join request processed");
+        return ResponseEntity.ok(response);
+    }
 }

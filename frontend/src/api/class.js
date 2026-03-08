@@ -14,3 +14,8 @@ export const searchClasses = async (query) => {
     const response = await api.get(`/classes/search`, { params: { query } });
     return response.data;
 };
+
+export const joinClass = async (classId, joinData) => {
+    const response = await api.post(`/classes/${classId}/join`, joinData);
+    return response.data;
+};

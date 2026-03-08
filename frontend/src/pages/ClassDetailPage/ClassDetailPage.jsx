@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getClassDetails } from '../../api/class';
 import { Button } from '../../components/ui';
 import { Users, File, Calendar, Share2, MoreVertical } from 'lucide-react';
+import JoinClassModal from '../../components/common/JoinClassModal';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
@@ -11,6 +12,14 @@ const ClassDetailPage = () => {
     const [classData, setClassData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+    const [localIsMember, setLocalIsMember] = useState(false); // Can be evaluated based on response later
+
+    const handleJoinSuccess = (joinedInstantly) => {
+        if (joinedInstantly) {
+            setLocalIsMember(true);
+        }
+    };
 
     useEffect(() => {
         const fetchClassDetails = async () => {
@@ -59,10 +68,12 @@ const ClassDetailPage = () => {
                     <p className="class-owner">Created by <strong>{classData.ownerDisplayName}</strong></p>
                     
                     <div className="class-actions">
-                        <Button variant="primary" className="action-btn">
-                            <Users size={18} />
-                            <span>Join Class</span>
-                        </Button>
+                        {(!classData?.isOwner && !classData?.isMember && !localIsMember) && (
+                            <Button variant="primary" className="action-btn" onClick={() => setIsJoinModalOpen(true)}>
+                                <Users size={18} />
+                                <span>Join Class</span>
+                            </Button>
+                        )}
                         <Button variant="outline" className="action-btn-icon">
                             <Share2 size={18} />
                         </Button>
@@ -122,6 +133,13 @@ const ClassDetailPage = () => {
                     )}
                 </div>
             </main>
+
+            <JoinClassModal 
+                isOpen={isJoinModalOpen}
+                onClose={() => setIsJoinModalOpen(false)}
+                classId={classId}
+                onJoinSuccess={handleJoinSuccess}
+            />
         </div>
     );
 };

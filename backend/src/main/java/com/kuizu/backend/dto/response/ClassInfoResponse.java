@@ -8,5 +8,7 @@ import java.util.List;
  */
 public record ClassInfoResponse(Long classId, String ownerUserId, String ownerDisplayName, String className,
                                 String description,
-                                List<ClassMaterialResponse> classMaterials) implements Serializable {
+                                List<ClassMaterialResponse> classMaterials,
+                                Boolean isMember,
+                                Boolean isOwner) implements Serializable {
 }
