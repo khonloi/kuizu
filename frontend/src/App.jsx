@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage/HomePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import ClassDetailPage from './pages/ClassDetailPage/ClassDetailPage';
+import SearchPage from './pages/SearchPage/SearchPage';
 
 import MainLayout from './components/layout';
 
@@ -34,6 +35,14 @@ function App() {
           <MainLayout>
             <ProtectedRoute>
               <ClassDetailPage />
+            </ProtectedRoute>
+          </MainLayout>
+        } />
+
+        <Route path="/search" element={
+          <MainLayout>
+            <ProtectedRoute>
+              <SearchPage />
             </ProtectedRoute>
           </MainLayout>
         } />
