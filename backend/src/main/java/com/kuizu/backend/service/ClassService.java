@@ -9,6 +9,7 @@ import com.kuizu.backend.entity.ClassJoinRequest;
 import com.kuizu.backend.entity.ClassMember;
 import com.kuizu.backend.entity.User;
 import com.kuizu.backend.dto.request.CreateClassRequest;
+import com.kuizu.backend.dto.request.UpdateClassRequest;
 import java.util.UUID;
 import com.kuizu.backend.repository.ClassJoinRequestRepository;
 import com.kuizu.backend.repository.ClassMemberRepository;
@@ -223,5 +224,39 @@ public class ClassService {
         }
 
         return clazz.getJoinCode();
+    }
+
+    public ClassResponse updateClass(Long classId, UpdateClassRequest request, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApiException("User not found: " + username));
+        
+        Class clazz = classRepository.findByClassId(classId)
+                .orElseThrow(() -> new ApiException("Class not found: " + classId));
+
+        if (!clazz.getOwner().getUserId().equals(user.getUserId())) {
+            throw new ApiException("Only the class owner can update class details");
+        }
+
+        if (request.getClassName() != null && !request.getClassName().isBlank()) {
+            clazz.setClassName(request.getClassName());
+        }
+        
+        if (request.getDescription() != null) {
+            clazz.setDescription(request.getDescription());
+        }
+
+        if (request.getVisibility() != null) {
+            clazz.setVisibility(request.getVisibility());
+        }
+
+        clazz = classRepository.save(clazz);
+
+        return new ClassResponse(
+                clazz.getClassId(),
+                clazz.getOwner().getUserId(),
+                clazz.getOwner().getDisplayName(),
+                clazz.getClassName(),
+                clazz.getDescription()
+        );
     }
 }

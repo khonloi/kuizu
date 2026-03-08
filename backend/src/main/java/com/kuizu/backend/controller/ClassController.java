@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuizu.backend.dto.request.JoinClassRequest;
 import com.kuizu.backend.dto.request.CreateClassRequest;
+import com.kuizu.backend.dto.request.UpdateClassRequest;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import java.security.Principal;
 import java.util.Map;
@@ -50,6 +52,14 @@ class ClassController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(classService.createClass(request, principal.getName()));
+    }
+
+    @PutMapping("/{classId}")
+    public ResponseEntity<?> updateClass(@PathVariable Long classId, @RequestBody UpdateClassRequest request, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(classService.updateClass(classId, request, principal.getName()));
     }
 
     @PostMapping("/{classId}/join")

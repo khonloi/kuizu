@@ -34,3 +34,8 @@ export const getClassJoinCode = async (classId) => {
     const response = await api.get(`/classes/${classId}/join-code`);
     return response.data;
 };
+
+export const updateClass = async (classId, classData) => {
+    const response = await api.put(`/classes/${classId}`, classData);
+    return response.data;
+};

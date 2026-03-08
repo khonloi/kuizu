@@ -5,6 +5,7 @@ import { Button } from '../../components/ui';
 import { Users, File, Calendar, Share2, MoreVertical, Copy, Check } from 'lucide-react';
 import JoinClassModal from '../../components/Class/JoinClassModal';
 import LeaveClassModal from '../../components/Class/LeaveClassModal';
+import EditClassModal from '../../components/Class/EditClassModal';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
@@ -15,6 +16,7 @@ const ClassDetailPage = () => {
     const [error, setError] = useState(null);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [localIsMember, setLocalIsMember] = useState(false); // Can be evaluated based on response later
     const [isLeaving, setIsLeaving] = useState(false);
     const [joinCode, setJoinCode] = useState(null);
@@ -65,6 +67,15 @@ const ClassDetailPage = () => {
             alert("Failed to leave the class. Please try again.");
             setIsLeaving(false);
         }
+    };
+
+    const handleUpdateSuccess = (updatedClass) => {
+        setClassData(prev => ({
+            ...prev,
+            className: updatedClass.className,
+            description: updatedClass.description,
+            visibility: updatedClass.visibility
+        }));
     };
 
     useEffect(() => {
@@ -149,6 +160,12 @@ const ClassDetailPage = () => {
                                 <span>{isLeaving ? 'Leaving...' : 'Leave Class'}</span>
                             </Button>
                         )}
+                        {classData?.isOwner && (
+                            <Button variant="outline" className="action-btn" onClick={() => setIsEditModalOpen(true)}>
+                                <Share2 size={18} />
+                                <span>Edit Class</span>
+                            </Button>
+                        )}
                         <Button variant="ghost" className="action-btn-icon">
                             <MoreVertical size={18} />
                         </Button>
@@ -218,6 +235,13 @@ const ClassDetailPage = () => {
                 onClose={() => setIsLeaveModalOpen(false)}
                 onConfirm={handleLeaveClass}
                 isLeaving={isLeaving}
+            />
+
+            <EditClassModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                classData={classData}
+                onUpdateSuccess={handleUpdateSuccess}
             />
         </div>
     );
