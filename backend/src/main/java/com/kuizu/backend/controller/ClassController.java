@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuizu.backend.dto.request.JoinClassRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import java.security.Principal;
 import java.util.Map;
 import java.util.HashMap;
@@ -53,6 +54,19 @@ class ClassController {
         response.put("message", "Join request processed");
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{classId}/leave")
+    public ResponseEntity<?> leaveClass(@PathVariable Long classId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        classService.leaveClass(classId, principal.getName());
+        
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Successfully left the class");
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{classId}/join-code")
     public ResponseEntity<?> getJoinCode(@PathVariable Long classId, Principal principal) {
         if (principal == null) {

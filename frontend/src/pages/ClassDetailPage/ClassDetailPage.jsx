@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClassDetails } from '../../api/class';
+import { getClassDetails, leaveClass, getClassJoinCode } from '../../api/class';
 import { Button } from '../../components/ui';
-import { Users, File, Calendar, Share2, MoreVertical } from 'lucide-react';
+import { Users, File, Calendar, Share2, MoreVertical, Copy, Check } from 'lucide-react';
 import JoinClassModal from '../../components/common/JoinClassModal';
+import LeaveClassModal from '../../components/common/LeaveClassModal';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
@@ -13,11 +14,56 @@ const ClassDetailPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [localIsMember, setLocalIsMember] = useState(false); // Can be evaluated based on response later
+    const [isLeaving, setIsLeaving] = useState(false);
+    const [joinCode, setJoinCode] = useState(null);
+    const [isLoadingCode, setIsLoadingCode] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const handleGetJoinCode = async () => {
+        if (joinCode) {
+            handleCopyCode(joinCode);
+            return;
+        }
+
+        try {
+            setIsLoadingCode(true);
+            const data = await getClassJoinCode(classId);
+            setJoinCode(data.joinCode);
+            handleCopyCode(data.joinCode);
+        } catch (err) {
+            console.error("Failed to fetch join code:", err);
+            alert("Failed to fetch join code.");
+        } finally {
+            setIsLoadingCode(false);
+        }
+    };
+
+    const handleCopyCode = (code) => {
+        if (code) {
+            navigator.clipboard.writeText(code);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     const handleJoinSuccess = (joinedInstantly) => {
         if (joinedInstantly) {
             setLocalIsMember(true);
+        }
+    };
+
+    const handleLeaveClass = async () => {
+        try {
+            setIsLeaving(true);
+            await leaveClass(classId);
+            setIsLeaveModalOpen(false);
+            navigate('/dashboard');
+        } catch (err) {
+            console.error("Failed to leave class:", err);
+            alert("Failed to leave the class. Please try again.");
+            setIsLeaving(false);
         }
     };
 
@@ -68,15 +114,41 @@ const ClassDetailPage = () => {
                     <p className="class-owner">Created by <strong>{classData.ownerDisplayName}</strong></p>
                     
                     <div className="class-actions">
+                        {(classData?.isOwner || classData?.isMember || localIsMember) && (
+                            <Button
+                                variant="outline"
+                                className="action-btn"
+                                onClick={handleGetJoinCode}
+                                disabled={isLoadingCode}
+                            >
+                                {isLoadingCode ? (
+                                    <span>...</span>
+                                ) : joinCode ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span>{joinCode}</span>
+                                        {copied ? <Check size={16} style={{ color: '#48bb78' }} /> : <Copy size={16} />}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Share2 size={18} />
+                                        <span>Join Code</span>
+                                    </>
+                                )}
+                            </Button>
+                        )}
+
                         {(!classData?.isOwner && !classData?.isMember && !localIsMember) && (
                             <Button variant="primary" className="action-btn" onClick={() => setIsJoinModalOpen(true)}>
                                 <Users size={18} />
                                 <span>Join Class</span>
                             </Button>
                         )}
-                        <Button variant="outline" className="action-btn-icon">
-                            <Share2 size={18} />
-                        </Button>
+                        {(!classData?.isOwner && (classData?.isMember || localIsMember)) && (
+                            <Button variant="outline" className="action-btn text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200" onClick={() => setIsLeaveModalOpen(true)} disabled={isLeaving}>
+                                <Users size={18} />
+                                <span>{isLeaving ? 'Leaving...' : 'Leave Class'}</span>
+                            </Button>
+                        )}
                         <Button variant="ghost" className="action-btn-icon">
                             <MoreVertical size={18} />
                         </Button>
@@ -139,6 +211,13 @@ const ClassDetailPage = () => {
                 onClose={() => setIsJoinModalOpen(false)}
                 classId={classId}
                 onJoinSuccess={handleJoinSuccess}
+            />
+
+            <LeaveClassModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setIsLeaveModalOpen(false)}
+                onConfirm={handleLeaveClass}
+                isLeaving={isLeaving}
             />
         </div>
     );

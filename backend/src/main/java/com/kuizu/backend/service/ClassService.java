@@ -153,6 +153,25 @@ public class ClassService {
                 
         classJoinRequestRepository.save(request);
     }
+
+    public void leaveClass(Long classId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApiException("User not found: " + username));
+        
+        Class clazz = classRepository.findByClassId(classId)
+                .orElseThrow(() -> new ApiException("Class not found: " + classId));
+
+        if (clazz.getOwner().getUserId().equals(user.getUserId())) {
+            throw new ApiException("Owner cannot leave their own class");
+        }
+
+        ClassMember.ClassMemberId memberId = new ClassMember.ClassMemberId(classId, user.getUserId());
+        ClassMember member = classMemberRepository.findById(memberId)
+                .orElseThrow(() -> new ApiException("User is not a member of this class"));
+
+        classMemberRepository.delete(member);
+    }
+
     public String getJoinCode(Long classId, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApiException("User not found: " + username));
