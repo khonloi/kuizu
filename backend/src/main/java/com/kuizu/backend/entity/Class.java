@@ -59,15 +59,15 @@ public class Class {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "clazz")
+    @OneToMany(mappedBy = "clazz", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ClassMember> classMembers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "clazz")
+    @OneToMany(mappedBy = "clazz", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ClassMaterial> classMaterials = new ArrayList<>();
 
-    @OneToMany(mappedBy = "clazz")
+    @OneToMany(mappedBy = "clazz", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ClassJoinRequest> classJoinRequests = new ArrayList<>();
 }

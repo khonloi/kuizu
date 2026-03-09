@@ -1,0 +1,30 @@
+.leave-class-content {
+    padding: 10px 0;
+}
+
+.leave-class-content p {
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.leave-warning-text {
+    font-size: 0.9rem;
+    color: #e53e3e !important;
+}
+
+.leave-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    width: 100%;
+}
+
+.leave-confirm-btn {
+    background-color: #e53e3e !important;
+    border-color: #e53e3e !important;
+}
+
+.leave-confirm-btn:hover:not(:disabled) {
+    background-color: #c53030 !important;
+    border-color: #c53030 !important;
+}

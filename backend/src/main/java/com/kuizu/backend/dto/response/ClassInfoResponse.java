@@ -7,6 +7,10 @@ import java.util.List;
  * DTO for {@link com.kuizu.backend.entity.Class}
  */
 public record ClassInfoResponse(Long classId, String ownerUserId, String ownerDisplayName, String className,
-                                String description,
-                                List<ClassMaterialResponse> classMaterials) implements Serializable {
+                                String description, String visibility,
+                                List<ClassMaterialResponse> classMaterials,
+                                Boolean isMember,
+                                Boolean isOwner,
+                                List<ClassMemberResponse> members,
+                                List<ClassJoinRequestResponse> joinRequests) implements Serializable {
 }
