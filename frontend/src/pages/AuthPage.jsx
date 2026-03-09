@@ -16,7 +16,9 @@ const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
 
     if (user) {
-
+        if (user.role === 'ROLE_ADMIN') {
+            return <Navigate to="/admin/dashboard" replace />;
+        }
         return <Navigate to="/dashboard" replace />;
     }
 

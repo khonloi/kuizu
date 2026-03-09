@@ -4,6 +4,7 @@ import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage/HomePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
+import AdminDashboard from './pages/Admin/AdminDashboard';
 import ClassDetailPage from './pages/ClassDetailPage/ClassDetailPage';
 import SearchPage from './pages/SearchPage/SearchPage';
 
@@ -30,7 +31,15 @@ function App() {
             </ProtectedRoute>
           </MainLayout>
         } />
-        
+
+        <Route path="/admin/dashboard" element={
+          <MainLayout>
+            <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          </MainLayout>
+        } />
+
         <Route path="/classes/:classId" element={
           <MainLayout>
             <ProtectedRoute>

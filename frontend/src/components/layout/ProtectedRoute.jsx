@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Loader } from '../ui';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     const { user, loading } = useAuth();
     const location = useLocation();
 
@@ -14,6 +14,11 @@ const ProtectedRoute = ({ children }) => {
     if (!user) {
         // Store the attempted URL to redirect back after login
         return <Navigate to="/auth" state={{ from: location }} replace />;
+    }
+
+    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+        // User doesn't have the required role
+        return <Navigate to="/dashboard" replace />;
     }
 
     return children;

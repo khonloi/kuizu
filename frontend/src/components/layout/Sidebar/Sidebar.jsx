@@ -8,18 +8,21 @@ import {
     Folder,
     GraduationCap,
     Menu,
-    ChevronLeft
+    ChevronLeft,
+    Shield
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import { Button, ComingSoonModal } from '../../ui';
 import './Sidebar.css';
 
 const Sidebar = ({ isCollapsed, onToggle, activePath = '/dashboard' }) => {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
     const [currentFeature, setCurrentFeature] = useState('');
 
-    const implementedRoutes = ['/dashboard', '/profile', '/search', '/auth', '/'];
+    const implementedRoutes = ['/dashboard', '/admin/dashboard', '/profile', '/search', '/auth', '/'];
 
     const handleNavigation = (path, label) => {
         // Special check for dynamic class route
@@ -32,6 +35,7 @@ const Sidebar = ({ isCollapsed, onToggle, activePath = '/dashboard' }) => {
     };
 
     const mainLinks = [
+        ...(user?.role === 'ROLE_ADMIN' ? [{ icon: <Shield size={22} />, label: 'Admin Panel', path: '/admin/dashboard' }] : []),
         { icon: <Home size={22} />, label: 'Home', path: '/dashboard' },
         { icon: <Library size={22} />, label: 'Library', path: '/library' },
     ];

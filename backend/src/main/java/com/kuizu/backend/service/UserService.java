@@ -79,6 +79,15 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public UserResponse updateUserStatus(String userId, User.UserStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found"));
+        user.setStatus(status);
+        userRepository.save(user);
+        return mapToUserResponse(user);
+    }
+
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
                 .userId(user.getUserId())
