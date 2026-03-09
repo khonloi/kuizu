@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, Input } from '../ui';
+import { Modal, Button, Input, Dropdown } from '../ui';
 import { createClass } from '../../api/class';
 import { useToast } from '../../context/ToastContext';
 import './CreateClassModal.css';
@@ -10,6 +10,11 @@ const CreateClassModal = ({ isOpen, onClose, onCreateSuccess }) => {
     const [description, setDescription] = useState('');
     const [visibility, setVisibility] = useState('PUBLIC');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const visibilityOptions = [
+        { label: 'Public', value: 'PUBLIC' },
+        { label: 'Private', value: 'PRIVATE' },
+    ];
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
@@ -102,14 +107,13 @@ const CreateClassModal = ({ isOpen, onClose, onCreateSuccess }) => {
 
                     <div className="form-group slide-in" style={{ animationDelay: '0.2s' }}>
                         <label>Visibility</label>
-                        <select
-                            className="create-class-select"
-                            value={visibility}
-                            onChange={(e) => setVisibility(e.target.value)}
-                        >
-                            <option value="PUBLIC">Public</option>
-                            <option value="PRIVATE">Private</option>
-                        </select>
+                        <Dropdown
+                            variant="select"
+                            label={visibilityOptions.find(opt => opt.value === visibility).label}
+                            items={visibilityOptions}
+                            onItemClick={(item) => setVisibility(item.value)}
+                            className="w-full"
+                        />
                         <p className="help-text">
                             {visibility === 'PUBLIC'
                                 ? 'Anyone can find and request to join this class.'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Input } from '../ui';
+import { Modal, Button, Input, Dropdown } from '../ui';
 import { updateClass } from '../../api/class';
 import { useToast } from '../../context/ToastContext';
 import './EditClassModal.css';
@@ -10,6 +10,11 @@ const EditClassModal = ({ isOpen, onClose, classData, onUpdateSuccess }) => {
     const [description, setDescription] = useState('');
     const [visibility, setVisibility] = useState('PUBLIC');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const visibilityOptions = [
+        { label: 'Public', value: 'PUBLIC' },
+        { label: 'Private', value: 'PRIVATE' },
+    ];
 
     useEffect(() => {
         if (classData) {
@@ -104,14 +109,13 @@ const EditClassModal = ({ isOpen, onClose, classData, onUpdateSuccess }) => {
 
                     <div className="form-group slide-in" style={{ animationDelay: '0.2s' }}>
                         <label>Visibility</label>
-                        <select
-                            className="edit-class-select"
-                            value={visibility}
-                            onChange={(e) => setVisibility(e.target.value)}
-                        >
-                            <option value="PUBLIC">Public</option>
-                            <option value="PRIVATE">Private</option>
-                        </select>
+                        <Dropdown
+                            variant="select"
+                            label={visibilityOptions.find(opt => opt.value === visibility).label}
+                            items={visibilityOptions}
+                            onItemClick={(item) => setVisibility(item.value)}
+                            className="w-full"
+                        />
                         <p className="help-text">
                             {visibility === 'PUBLIC'
                                 ? 'Anyone can find and request to join this class.'

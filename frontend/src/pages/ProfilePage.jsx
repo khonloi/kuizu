@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck, Palette, Lock } from 'lucide-react';
 import './ProfilePage.css';
 import { updateProfile, changePassword } from '../api/user';
-import { Button, Card, Input, Modal } from '../components/ui';
+import { Button, Card, Input, Modal, Dropdown } from '../components/ui';
 import MainLayout from '../components/layout';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -120,6 +120,17 @@ const ProfilePage = () => {
         performUpdate({ preferences: JSON.stringify({ theme: newTheme }) });
     };
 
+    const timezoneOptions = [
+        { label: 'UTC (GMT+0)', value: 'UTC' },
+        { label: 'Vietnam (GMT+7)', value: 'Asia/Ho_Chi_Minh' },
+        { label: 'Japan (GMT+9)', value: 'Asia/Tokyo' },
+        { label: 'Singapore (GMT+8)', value: 'Asia/Singapore' },
+        { label: 'London (GMT+0/1)', value: 'Europe/London' },
+        { label: 'Paris (GMT+1/2)', value: 'Europe/Paris' },
+        { label: 'New York (GMT-5/4)', value: 'America/New_York' },
+        { label: 'Los Angeles (GMT-8/7)', value: 'America/Los_Angeles' },
+    ];
+
     const avatars = [
         'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
         'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
@@ -236,21 +247,13 @@ const ProfilePage = () => {
                                         <h4>Timezone</h4>
                                         <p>Your current time zone settings</p>
                                     </div>
-                                    <select
-                                        className="timezone-select"
-                                        value={user?.timezone || 'UTC'}
-                                        onChange={(e) => performUpdate({ timezone: e.target.value })}
-                                        disabled={loading}
-                                    >
-                                        <option value="UTC">UTC (GMT+0)</option>
-                                        <option value="Asia/Ho_Chi_Minh">Vietnam (GMT+7)</option>
-                                        <option value="Asia/Tokyo">Japan (GMT+9)</option>
-                                        <option value="Asia/Singapore">Singapore (GMT+8)</option>
-                                        <option value="Europe/London">London (GMT+0/1)</option>
-                                        <option value="Europe/Paris">Paris (GMT+1/2)</option>
-                                        <option value="America/New_York">New York (GMT-5/4)</option>
-                                        <option value="America/Los_Angeles">Los Angeles (GMT-8/7)</option>
-                                    </select>
+                                    <Dropdown
+                                        variant="select"
+                                        label={timezoneOptions.find(opt => opt.value === (user?.timezone || 'UTC'))?.label || 'UTC (GMT+0)'}
+                                        items={timezoneOptions}
+                                        onItemClick={(item) => performUpdate({ timezone: item.value })}
+                                        className="timezone-dropdown"
+                                    />
                                 </div>
                             </div>
 

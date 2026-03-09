@@ -8,3 +8,4 @@ export { default as Tabs } from "./Tabs/Tabs";
 export { default as Loader } from "./Loader/Loader";
 export { default as Toast } from "./Toast/Toast";
 export { default as ComingSoonModal } from "./ComingSoonModal/ComingSoonModal";
+export { default as Dropdown } from "./Dropdown/Dropdown";
