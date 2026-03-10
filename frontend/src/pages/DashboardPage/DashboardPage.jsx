@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMyClasses } from '../../api/class';
 import CreateClassModal from '../../components/Class/CreateClassModal';
 import { useAuth } from '../../context/AuthContext';
-import { Button, Card, Loader, ComingSoonModal, EmptyState, ItemCard } from '../../components/ui';
+import { Button, Card, Loader, EmptyState, ItemCard } from '../../components/ui';
 import './DashboardPage.css';
 
 const DashboardPage = () => {
@@ -11,8 +11,6 @@ const DashboardPage = () => {
     const [classes, setClasses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
-    const [currentFeature, setCurrentFeature] = useState('');
     const navigate = useNavigate();
 
     const isTeacherOrAdmin = user?.role === 'ROLE_TEACHER' || user?.role === 'ROLE_ADMIN';
@@ -42,13 +40,9 @@ const DashboardPage = () => {
         setIsCreateModalOpen(false);
     };
 
-    const toggleComingSoon = (feature = '') => {
-        if (typeof feature === 'string') {
-            setCurrentFeature(feature);
-        } else {
-            setCurrentFeature('');
-        }
-        setIsComingSoonOpen(!isComingSoonOpen);
+    const triggerComingSoon = (feature = '') => {
+        const query = feature ? `?feature=${encodeURIComponent(feature)}` : '';
+        navigate(`/coming-soon${query}`);
     };
 
     if (isLoading) {
@@ -63,15 +57,10 @@ const DashboardPage = () => {
             <section className="dashboard-section">
                 <div className="dashboard-section-header">
                     <h2>Recent Flashcard Sets</h2>
-                    <div className="section-actions">
-                        <Button variant="outline" size="sm" onClick={() => toggleComingSoon('Flashcard creation')}>Create Set</Button>
-                        <Button variant="ghost" size="sm" onClick={() => toggleComingSoon('Sets Library')}>View all</Button>
-                    </div>
                 </div>
-
                 <EmptyState
                     description="No flashcard sets yet. Start creating your first set!"
-                    action={<Button variant="primary" onClick={() => toggleComingSoon('Flashcard creation')}>Create Flashcard Set</Button>}
+                    action={<Button variant="primary" onClick={() => triggerComingSoon('Flashcard creation')}>Create Flashcard Set</Button>}
                 />
             </section>
 
@@ -79,15 +68,10 @@ const DashboardPage = () => {
             <section className="dashboard-section">
                 <div className="dashboard-section-header">
                     <h2>My Folders</h2>
-                    <div className="section-actions">
-                        <Button variant="outline" size="sm" onClick={() => toggleComingSoon('Folder creation')}>New Folder</Button>
-                        <Button variant="ghost" size="sm" onClick={() => toggleComingSoon('Folders Library')}>View all</Button>
-                    </div>
                 </div>
-
                 <EmptyState
                     description="Organize your sets into folders for better study flow."
-                    action={<Button variant="outline" onClick={() => toggleComingSoon('Folder creation')}>Create Folder</Button>}
+                    action={<Button variant="outline" onClick={() => triggerComingSoon('Folder creation')}>Create Folder</Button>}
                 />
             </section>
 
@@ -99,7 +83,7 @@ const DashboardPage = () => {
                         {isTeacherOrAdmin && (
                             <Button variant="outline" size="sm" onClick={() => setIsCreateModalOpen(true)}>Create Class</Button>
                         )}
-                        <Button variant="ghost" size="sm" onClick={() => toggleComingSoon('Classes Library')}>View all</Button>
+                        <Button variant="ghost" size="sm" onClick={() => triggerComingSoon('Classes Library')}>View all</Button>
                     </div>
                 </div>
 
@@ -119,7 +103,7 @@ const DashboardPage = () => {
                 ) : (
                     <EmptyState
                         description="You haven't joined any classes yet."
-                        action={<Button variant="primary" onClick={() => toggleComingSoon('Explore Classes')}>Explore Classes</Button>}
+                        action={<Button variant="primary" onClick={() => triggerComingSoon('Explore Classes')}>Explore Classes</Button>}
                     />
                 )}
             </section>
@@ -128,12 +112,6 @@ const DashboardPage = () => {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onCreateSuccess={handleClassCreated}
-            />
-
-            <ComingSoonModal
-                isOpen={isComingSoonOpen}
-                onClose={toggleComingSoon}
-                featureName={currentFeature}
             />
         </div>
     );

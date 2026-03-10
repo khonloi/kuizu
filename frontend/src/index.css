@@ -62,6 +62,7 @@ h4 {
 p {
   color: var(--text-light);
   line-height: 1.6;
+  font-weight: 500;
 }
 
 label,
@@ -69,7 +70,6 @@ label,
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--text-dark);
-  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 

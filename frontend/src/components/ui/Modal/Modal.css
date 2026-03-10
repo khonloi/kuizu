@@ -9,7 +9,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1101;
+    z-index: 2000;
     transition: opacity 0.3s ease;
     animation: modal-fade-in 0.3s ease;
 }
@@ -41,7 +41,7 @@
 }
 
 .modal-header {
-    padding: 24px 32px;
+    padding: 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -80,7 +80,7 @@
 }
 
 .modal-footer {
-    padding: 24px 32px;
+    padding: 24px;
     display: flex;
     justify-content: flex-end;
     gap: 12px;

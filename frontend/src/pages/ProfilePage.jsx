@@ -273,9 +273,9 @@ const ProfilePage = () => {
                                 <div className="field-row">
                                     <div className="field-info">
                                         <h4>Account Status</h4>
-                                        <p style={{ color: user?.status === 'ACTIVE' ? 'var(--primary)' : 'var(--error)' }}>
-                                            {user?.status || 'Unknown'}
-                                        </p>
+                                    </div>
+                                    <div className={`account-status-badge ${user?.status?.toLowerCase() || 'unknown'}`}>
+                                        {user?.status || 'Unknown'}
                                     </div>
                                 </div>
                             </div>
