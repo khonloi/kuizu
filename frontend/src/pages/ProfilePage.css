@@ -57,7 +57,14 @@
     flex-wrap: wrap;
     gap: 16px;
     align-items: center;
+    transition: opacity 0.3s ease;
 }
+
+.avatar-selection.submitting {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 
 .avatar-main {
     width: 96px;

@@ -12,6 +12,7 @@ const ProfilePage = () => {
     const { user, checkAuth, loading: authLoading } = useAuth();
     const toast = useToast();
     const [loading, setLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [error, setError] = useState(null);
     const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'Light');
@@ -35,15 +36,14 @@ const ProfilePage = () => {
 
     const handleUpdateAvatar = async (url) => {
         try {
-            setLoading(true);
+            setIsSubmitting(true);
             await updateProfile({ profilePictureUrl: url });
             await checkAuth(); // Sync global state
             toast.success('Avatar updated successfully');
         } catch (err) {
             toast.error('Failed to update avatar');
         } finally {
-
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -62,15 +62,14 @@ const ProfilePage = () => {
 
     const performUpdate = async (data) => {
         try {
-            setLoading(true);
+            setIsSubmitting(true);
             await updateProfile(data);
             await checkAuth(); // Sync global state
             toast.success('Profile updated successfully');
         } catch (err) {
             toast.error('Update failed');
         } finally {
-
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -97,7 +96,7 @@ const ProfilePage = () => {
         }
 
         try {
-            setLoading(true);
+            setIsSubmitting(true);
             await changePassword({
                 oldPassword: passwordData.oldPassword,
                 newPassword: passwordData.newPassword
@@ -108,7 +107,7 @@ const ProfilePage = () => {
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to change password');
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
@@ -164,7 +163,7 @@ const ProfilePage = () => {
                             {/* Profile Picture */}
                             <div className="settings-group">
                                 <h3 className="group-title">Profile Picture</h3>
-                                <div className="avatar-selection">
+                                <div className={`avatar-selection ${isSubmitting ? 'submitting' : ''}`}>
                                     <img
                                         src={user?.profilePictureUrl || avatars[0]}
                                         alt="Profile"
@@ -176,7 +175,7 @@ const ProfilePage = () => {
                                             src={url}
                                             alt={`Option ${index}`}
                                             className={`avatar-option ${user?.profilePictureUrl === url ? 'selected' : ''}`}
-                                            onClick={() => handleUpdateAvatar(url)}
+                                            onClick={() => !isSubmitting && handleUpdateAvatar(url)}
                                         />
                                     ))}
                                     <div className="avatar-add">
@@ -341,8 +340,8 @@ const ProfilePage = () => {
                         title={`Edit ${fieldLabels[editingField]}`}
                         footer={
                             <>
-                                <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                                <Button variant="primary" onClick={handleEditSubmit}>Save Changes</Button>
+                                <Button variant="ghost" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
+                                <Button variant="primary" onClick={handleEditSubmit} isLoading={isSubmitting}>Save Changes</Button>
                             </>
                         }
                     >
@@ -372,8 +371,8 @@ const ProfilePage = () => {
                         title="Change Password"
                         footer={
                             <>
-                                <Button variant="ghost" onClick={() => setIsPasswordModalOpen(false)}>Cancel</Button>
-                                <Button variant="primary" onClick={handlePasswordSubmit}>Update Password</Button>
+                                <Button variant="ghost" onClick={() => setIsPasswordModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
+                                <Button variant="primary" onClick={handlePasswordSubmit} isLoading={isSubmitting}>Update Password</Button>
                             </>
                         }
                     >
