@@ -41,10 +41,8 @@ services:
           target: /app/src
         - path: ./backend/pom.xml
           action: rebuild
-        - path: ./backend/.mvn
-          action: rebuild
-        - path: ./backend/mvnw
-          action: rebuild
+    volumes:
+      - maven-cache:/root/.m2
     depends_on:
       db:
         condition: service_healthy
