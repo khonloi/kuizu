@@ -24,9 +24,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                                                 .orElseThrow(() -> new UsernameNotFoundException(
                                                                 "User not found with username or email: " + username)));
 
+                boolean enabled = user.getStatus() == User.UserStatus.ACTIVE;
+                boolean accountNonLocked = user.getStatus() != User.UserStatus.LOCKED && user.getStatus() != User.UserStatus.SUSPENDED;
+
                 return new org.springframework.security.core.userdetails.User(
                                 user.getUsername(),
                                 user.getPasswordHash(),
+                                enabled,
+                                true, // accountNonExpired
+                                true, // credentialsNonExpired
+                                accountNonLocked,
                                 Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name())));
         }
 }

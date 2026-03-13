@@ -20,11 +20,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SessionService sessionService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SessionService sessionService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sessionService = sessionService;
     }
 
     public Page<UserResponse> getAllUsers(Pageable pageable) {
@@ -85,6 +87,11 @@ public class UserService {
                 .orElseThrow(() -> new ApiException("User not found"));
         user.setStatus(status);
         userRepository.save(user);
+
+        if (status == User.UserStatus.SUSPENDED || status == User.UserStatus.LOCKED) {
+            sessionService.revokeAllUserSessions(user);
+        }
+
         return mapToUserResponse(user);
     }
 

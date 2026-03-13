@@ -10,7 +10,7 @@ import {
     approveClass,
     rejectClass
 } from '../../api/moderation';
-import { Button, Card, Loader, Badge, Modal, Tabs } from '../../components/ui';
+import { Button, Card, Loader, Badge, Modal, Tabs, EmptyState } from '../../components/ui';
 import { useToast } from '../../context/ToastContext';
 import {
     Users,
@@ -34,6 +34,48 @@ import {
     Shield
 } from 'lucide-react';
 import './AdminDashboard.css';
+
+const AdminTable = ({ columns, isLoading, data, emptyIcon, emptyTitle, emptyDescription, renderRow }) => {
+    if (isLoading) {
+        return <Loader size="lg" className="m-auto py-10" />;
+    }
+
+    if (!data || data.length === 0) {
+        return (
+            <div className="py-10">
+                <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyDescription} />
+            </div>
+        );
+    }
+
+    return (
+        <div className="table-responsive">
+            <table className="admin-table">
+                <thead>
+                    <tr>
+                        {columns.map((col, index) => (
+                            <th key={index}>{col}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((item, index) => renderRow(item, index))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+
+const AdminPagination = ({ currentPage, totalPages, onPageChange }) => {
+    if (totalPages <= 1) return null;
+    return (
+        <div className="pagination">
+            <Button disabled={currentPage === 0} onClick={() => onPageChange(currentPage - 1)} variant="outline" size="sm">Previous</Button>
+            <span className="page-info">Page {currentPage + 1} of {totalPages}</span>
+            <Button disabled={currentPage === totalPages - 1} onClick={() => onPageChange(currentPage + 1)} variant="outline" size="sm">Next</Button>
+        </div>
+    );
+};
 
 const AdminDashboard = () => {
     const location = useLocation();
@@ -221,71 +263,60 @@ const AdminDashboard = () => {
                             <h2>Platform Users</h2>
                             <Button variant="ghost" size="sm" onClick={fetchUsers}>Refresh</Button>
                         </div>
-                        {isUsersLoading ? <Loader size="lg" className="m-auto py-10" /> : (
-                            <div className="table-responsive">
-                                <table className="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Joined</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {users.map(user => (
-                                            <tr key={user.userId}>
-                                                <td>
-                                                    <div className="user-cell">
-                                                        <div className="user-avatar-small">
-                                                            {user.profilePictureUrl ? <img src={user.profilePictureUrl} alt="" /> : user.username.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <div className="user-info-cell">
-                                                            <span className="user-display-name">{user.displayName || user.username}</span>
-                                                            <span className="user-email">{user.email}</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <Badge variant={user.role === 'ROLE_ADMIN' ? 'error' : user.role === 'ROLE_TEACHER' ? 'success' : 'primary'}>
-                                                        {user.role.replace('ROLE_', '')}
-                                                    </Badge>
-                                                </td>
-                                                <td>
-                                                    <Badge variant={user.status === 'ACTIVE' ? 'success' : user.status === 'SUSPENDED' ? 'error' : 'warning'}>
-                                                        {user.status}
-                                                    </Badge>
-                                                </td>
-                                                <td>{formatDate(user.createdAt)}</td>
-                                                <td>
-                                                    <div className="table-actions">
-                                                        <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setIsUserModalOpen(true); }}><Info size={18} /></Button>
-                                                        {user.role !== 'ROLE_ADMIN' && (
-                                                            <Button
-                                                                variant="ghost" size="icon"
-                                                                className={user.status === 'SUSPENDED' ? 'action-activate' : 'action-suspend'}
-                                                                onClick={() => handleUserStatusUpdate(user.userId, user.status)}
-                                                                disabled={isUpdatingUser === user.userId}
-                                                            >
-                                                                {isUpdatingUser === user.userId ? <Loader size="xs" /> : (user.status === 'SUSPENDED' ? <UserCheck size={18} /> : <UserX size={18} />)}
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                        {userTotalPages > 1 && (
-                            <div className="pagination">
-                                <Button disabled={userPage === 0} onClick={() => setUserPage(userPage - 1)} variant="outline" size="sm">Previous</Button>
-                                <span className="page-info">Page {userPage + 1} of {userTotalPages}</span>
-                                <Button disabled={userPage === userTotalPages - 1} onClick={() => setUserPage(userPage + 1)} variant="outline" size="sm">Next</Button>
-                            </div>
-                        )}
+                        <AdminTable
+                            columns={['User', 'Role', 'Status', 'Joined', 'Actions']}
+                            isLoading={isUsersLoading}
+                            data={users}
+                            emptyIcon={Users}
+                            emptyTitle="No platform users found"
+                            emptyDescription="There are currently no users registered on the platform."
+                            renderRow={(user) => (
+                                <tr key={user.userId}>
+                                    <td>
+                                        <div className="user-cell">
+                                            <div className="user-avatar-small">
+                                                {user.profilePictureUrl ? <img src={user.profilePictureUrl} alt="" /> : user.username.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="user-info-cell">
+                                                <span className="user-display-name">{user.displayName || user.username}</span>
+                                                <span className="user-email">{user.email}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <Badge variant={user.role === 'ROLE_ADMIN' ? 'error' : user.role === 'ROLE_TEACHER' ? 'success' : 'primary'}>
+                                            {user.role.replace('ROLE_', '')}
+                                        </Badge>
+                                    </td>
+                                    <td>
+                                        <Badge variant={user.status === 'ACTIVE' ? 'success' : user.status === 'SUSPENDED' ? 'error' : 'warning'}>
+                                            {user.status}
+                                        </Badge>
+                                    </td>
+                                    <td>{formatDate(user.createdAt)}</td>
+                                    <td>
+                                        <div className="table-actions">
+                                            <Button variant="ghost" size="icon" onClick={() => { setSelectedUser(user); setIsUserModalOpen(true); }}><Info size={18} /></Button>
+                                            {user.role !== 'ROLE_ADMIN' && (
+                                                <Button
+                                                    variant="ghost" size="icon"
+                                                    className={user.status === 'SUSPENDED' ? 'action-activate' : 'action-suspend'}
+                                                    onClick={() => handleUserStatusUpdate(user.userId, user.status)}
+                                                    disabled={isUpdatingUser === user.userId}
+                                                >
+                                                    {isUpdatingUser === user.userId ? <Loader size="xs" /> : (user.status === 'SUSPENDED' ? <UserCheck size={18} /> : <UserX size={18} />)}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        />
+                        <AdminPagination 
+                            currentPage={userPage} 
+                            totalPages={userTotalPages} 
+                            onPageChange={setUserPage} 
+                        />
                     </Card>
                 </div>
             )
@@ -303,43 +334,32 @@ const AdminDashboard = () => {
                             <h2>Flashcard Set Submissions</h2>
                             <Button variant="ghost" size="sm" onClick={fetchPendingSets}>Refresh</Button>
                         </div>
-                        {isSetsLoading ? <Loader size="lg" className="m-auto py-10" /> : (
-                            <div className="table-responsive">
-                                <table className="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Set Title</th>
-                                            <th>Owner</th>
-                                            <th>Visibility</th>
-                                            <th>Submitted At</th>
-                                            <th>Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {pendingSets.length > 0 ? pendingSets.map(set => (
-                                            <tr key={set.setId}>
-                                                <td className="font-semibold">{set.title}</td>
-                                                <td>{set.ownerDisplayName} (@{set.ownerUsername})</td>
-                                                <td><Badge variant="outline">{set.visibility}</Badge></td>
-                                                <td>{formatDate(set.submittedAt)}</td>
-                                                <td>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="sm" 
-                                                        onClick={() => { setSelectedSet(set); setIsSetModalOpen(true); }}
-                                                        className="flex items-center gap-1"
-                                                    >
-                                                        <Eye size={14} /> View
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr><td colSpan="5" className="text-center py-10 text-slate-400">No pending flashcard sets found.</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <AdminTable
+                            columns={['Set Title', 'Owner', 'Visibility', 'Submitted At', 'Details']}
+                            isLoading={isSetsLoading}
+                            data={pendingSets}
+                            emptyIcon={BookOpen}
+                            emptyTitle="No pending flashcard sets"
+                            emptyDescription="There are no pending flashcard sets to review at this time."
+                            renderRow={(set) => (
+                                <tr key={set.setId}>
+                                    <td className="font-semibold">{set.title}</td>
+                                    <td>{set.ownerDisplayName} (@{set.ownerUsername})</td>
+                                    <td><Badge variant="outline">{set.visibility}</Badge></td>
+                                    <td>{formatDate(set.submittedAt)}</td>
+                                    <td>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => { setSelectedSet(set); setIsSetModalOpen(true); }}
+                                            className="flex items-center gap-1"
+                                        >
+                                            <Eye size={14} /> View
+                                        </Button>
+                                    </td>
+                                </tr>
+                            )}
+                        />
                     </Card>
                 </div>
             )
@@ -357,43 +377,32 @@ const AdminDashboard = () => {
                             <h2>Class Submissions</h2>
                             <Button variant="ghost" size="sm" onClick={fetchPendingClasses}>Refresh</Button>
                         </div>
-                        {isClassesLoading ? <Loader size="lg" className="m-auto py-10" /> : (
-                            <div className="table-responsive">
-                                <table className="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Class Name</th>
-                                            <th>Owner</th>
-                                            <th>Join Code</th>
-                                            <th>Submitted At</th>
-                                            <th>Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {pendingClasses.length > 0 ? pendingClasses.map(cls => (
-                                            <tr key={cls.classId}>
-                                                <td className="font-semibold">{cls.className}</td>
-                                                <td>{cls.ownerDisplayName || 'N/A'}</td>
-                                                <td><code>{cls.joinCode}</code></td>
-                                                <td>{formatDate(cls.submittedAt)}</td>
-                                                <td>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="sm" 
-                                                        onClick={() => { setSelectedClass(cls); setIsClassModalOpen(true); }}
-                                                        className="flex items-center gap-1"
-                                                    >
-                                                        <Eye size={14} /> View
-                                                    </Button>
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr><td colSpan="5" className="text-center py-10 text-slate-400">No pending classes found.</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <AdminTable
+                            columns={['Class Name', 'Owner', 'Join Code', 'Submitted At', 'Details']}
+                            isLoading={isClassesLoading}
+                            data={pendingClasses}
+                            emptyIcon={GraduationCap}
+                            emptyTitle="No pending classes"
+                            emptyDescription="There are no pending classes to review at this time."
+                            renderRow={(cls) => (
+                                <tr key={cls.classId}>
+                                    <td className="font-semibold">{cls.className}</td>
+                                    <td>{cls.ownerDisplayName || 'N/A'}</td>
+                                    <td><code>{cls.joinCode}</code></td>
+                                    <td>{formatDate(cls.submittedAt)}</td>
+                                    <td>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => { setSelectedClass(cls); setIsClassModalOpen(true); }}
+                                            className="flex items-center gap-1"
+                                        >
+                                            <Eye size={14} /> View
+                                        </Button>
+                                    </td>
+                                </tr>
+                            )}
+                        />
                     </Card>
                 </div>
             )
@@ -411,34 +420,23 @@ const AdminDashboard = () => {
                             <h2>Recent Actions</h2>
                             <Button variant="ghost" size="sm" onClick={fetchHistory}>Refresh</Button>
                         </div>
-                        {isHistoryLoading ? <Loader size="lg" className="m-auto py-10" /> : (
-                            <div className="table-responsive">
-                                <table className="admin-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Moderator</th>
-                                            <th>Action</th>
-                                            <th>Entity</th>
-                                            <th>Time</th>
-                                            <th>Notes</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {modHistory.length > 0 ? modHistory.map(entry => (
-                                            <tr key={entry.modId}>
-                                                <td>{entry.moderatorDisplayName}</td>
-                                                <td><Badge variant={entry.action === 'APPROVE' ? 'success' : entry.action === 'REJECT' ? 'error' : 'primary'}>{entry.action}</Badge></td>
-                                                <td>{entry.entityType} ({entry.entityId})</td>
-                                                <td>{formatDate(entry.createdAt)}</td>
-                                                <td className="max-w-xs truncate" title={entry.notes}>{entry.notes || '-'}</td>
-                                            </tr>
-                                        )) : (
-                                            <tr><td colSpan="5" className="text-center py-10 text-slate-400">No moderation history records found.</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <AdminTable
+                            columns={['Moderator', 'Action', 'Entity', 'Time', 'Notes']}
+                            isLoading={isHistoryLoading}
+                            data={modHistory}
+                            emptyIcon={HistoryIcon}
+                            emptyTitle="No moderation history"
+                            emptyDescription="There are no moderation history records found."
+                            renderRow={(entry) => (
+                                <tr key={entry.modId}>
+                                    <td>{entry.moderatorDisplayName}</td>
+                                    <td><Badge variant={entry.action === 'APPROVE' ? 'success' : entry.action === 'REJECT' ? 'error' : 'primary'}>{entry.action}</Badge></td>
+                                    <td>{entry.entityType} ({entry.entityId})</td>
+                                    <td>{formatDate(entry.createdAt)}</td>
+                                    <td className="max-w-xs truncate" title={entry.notes}>{entry.notes || '-'}</td>
+                                </tr>
+                            )}
+                        />
                     </Card>
                 </div>
             )
@@ -455,10 +453,12 @@ const AdminDashboard = () => {
                         <div className="card-header-flex">
                             <h2>Flashcard Set Statistics</h2>
                         </div>
-                        <div className="p-20 text-center">
-                            <BarChart3 size={48} className="m-auto mb-4 text-slate-300" />
-                            <h3 className="text-xl font-bold mb-2">Statistics Coming Soon</h3>
-                            <p className="text-slate-500">Detailed analytics for flashcard sets are currently being developed.</p>
+                        <div className="py-20">
+                            <EmptyState 
+                                icon={BarChart3} 
+                                title="Statistics Coming Soon" 
+                                description="Detailed analytics for flashcard sets are currently being developed." 
+                            />
                         </div>
                     </Card>
                 </div>
@@ -476,10 +476,12 @@ const AdminDashboard = () => {
                         <div className="card-header-flex">
                             <h2>System Activity & Statistics</h2>
                         </div>
-                        <div className="p-20 text-center">
-                            <Activity size={48} className="m-auto mb-4 text-slate-300" />
-                            <h3 className="text-xl font-bold mb-2">Health Monitor Coming Soon</h3>
-                            <p className="text-slate-500">Real-time system health and usage metrics will be available here.</p>
+                        <div className="py-20">
+                            <EmptyState 
+                                icon={Activity} 
+                                title="Health Monitor Coming Soon" 
+                                description="Real-time system health and usage metrics will be available here." 
+                            />
                         </div>
                     </Card>
                 </div>

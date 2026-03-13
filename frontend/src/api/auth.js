@@ -15,6 +15,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      window.dispatchEvent(new CustomEvent('force-logout'));
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const login = async (usernameOrEmail, password) => {
   const response = await api.post('/auth/login', { usernameOrEmail, password });
   return response.data;

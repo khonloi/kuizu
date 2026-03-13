@@ -113,6 +113,11 @@ public class AuthService {
                     "Your account is locked due to multiple failed login attempts. Please contact support.");
         }
 
+        if (user.getStatus() == User.UserStatus.SUSPENDED) {
+            throw new ApiException(
+                    "Your account has been suspended by an administrator. Please contact support.");
+        }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword()));
