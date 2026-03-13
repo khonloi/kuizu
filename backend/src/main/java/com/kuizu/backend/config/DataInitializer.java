@@ -309,7 +309,7 @@ public class DataInitializer {
                         moderationHistoryRepository.save(ModerationHistory.builder()
                                         .moderator(admin)
                                         .entityType("SET")
-                                        .entityId(javaBasics.getSetId())
+                                        .entityId(String.valueOf(javaBasics.getSetId()))
                                         .action("APPROVE")
                                         .notes("Content quality is high.")
                                         .build());

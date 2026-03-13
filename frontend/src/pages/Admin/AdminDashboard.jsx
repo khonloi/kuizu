@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getAllUsers, updateUserStatus, updateUserRole } from '../../api/user';
-import { 
-    getPendingFlashcardSets, 
-    getPendingClasses, 
+import {
+    getPendingFlashcardSets,
+    getPendingClasses,
     getModerationHistory,
     approveFlashcardSet,
     rejectFlashcardSet,
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
     const [isSetsLoading, setIsSetsLoading] = useState(false);
     const [selectedSet, setSelectedSet] = useState(null);
     const [isSetModalOpen, setIsSetModalOpen] = useState(false);
-    
+
     const [pendingClasses, setPendingClasses] = useState([]);
     const [isClassesLoading, setIsClassesLoading] = useState(false);
     const [selectedClass, setSelectedClass] = useState(null);
@@ -314,10 +314,10 @@ const AdminDashboard = () => {
                                 </tr>
                             )}
                         />
-                        <AdminPagination 
-                            currentPage={userPage} 
-                            totalPages={userTotalPages} 
-                            onPageChange={setUserPage} 
+                        <AdminPagination
+                            currentPage={userPage}
+                            totalPages={userTotalPages}
+                            onPageChange={setUserPage}
                         />
                     </Card>
                 </div>
@@ -350,9 +350,9 @@ const AdminDashboard = () => {
                                     <td><Badge variant="outline">{set.visibility}</Badge></td>
                                     <td>{formatDate(set.submittedAt)}</td>
                                     <td>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => { setSelectedSet(set); setIsSetModalOpen(true); }}
                                             className="flex items-center gap-1"
                                         >
@@ -393,9 +393,9 @@ const AdminDashboard = () => {
                                     <td><code>{cls.joinCode}</code></td>
                                     <td>{formatDate(cls.submittedAt)}</td>
                                     <td>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => { setSelectedClass(cls); setIsClassModalOpen(true); }}
                                             className="flex items-center gap-1"
                                         >
@@ -432,8 +432,25 @@ const AdminDashboard = () => {
                             renderRow={(entry) => (
                                 <tr key={entry.modId}>
                                     <td>{entry.moderatorDisplayName}</td>
-                                    <td><Badge variant={entry.action === 'APPROVE' ? 'success' : entry.action === 'REJECT' ? 'error' : 'primary'}>{entry.action}</Badge></td>
-                                    <td>{entry.entityType} ({entry.entityId})</td>
+                                    <td>
+                                        <Badge variant={
+                                            entry.action === 'APPROVE' ? 'success' :
+                                                entry.action === 'REJECT' ? 'error' :
+                                                    entry.action.includes('UPDATE') ? 'info' : 'primary'
+                                        }>
+                                            {entry.action.replace('_', ' ')}
+                                        </Badge>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-slate-800">{entry.entityName} </span>
+                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                                {entry.entityType === 'SET' ? 'Flashcard Set' :
+                                                    entry.entityType === 'CLASS' ? 'Class' :
+                                                        entry.entityType === 'USER' ? 'User' : entry.entityType}
+                                            </span>
+                                        </div>
+                                    </td>
                                     <td>{formatDate(entry.createdAt)}</td>
                                     <td className="max-w-xs truncate" title={entry.notes}>{entry.notes || '-'}</td>
                                 </tr>
@@ -456,10 +473,10 @@ const AdminDashboard = () => {
                             <h2>Flashcard Set Statistics</h2>
                         </div>
                         <div className="py-20">
-                            <EmptyState 
-                                icon={BarChart3} 
-                                title="Statistics Coming Soon" 
-                                description="Detailed analytics for flashcard sets are currently being developed." 
+                            <EmptyState
+                                icon={BarChart3}
+                                title="Statistics Coming Soon"
+                                description="Detailed analytics for flashcard sets are currently being developed."
                             />
                         </div>
                     </Card>
@@ -479,10 +496,10 @@ const AdminDashboard = () => {
                             <h2>System Activity & Statistics</h2>
                         </div>
                         <div className="py-20">
-                            <EmptyState 
-                                icon={Activity} 
-                                title="Health Monitor Coming Soon" 
-                                description="Real-time system health and usage metrics will be available here." 
+                            <EmptyState
+                                icon={Activity}
+                                title="Health Monitor Coming Soon"
+                                description="Real-time system health and usage metrics will be available here."
                             />
                         </div>
                     </Card>
@@ -537,7 +554,7 @@ const AdminDashboard = () => {
                         <div className="detail-item role-management-section">
                             <label><Shield size={14} /> Role Management</label>
                             <div className="role-updater-flex">
-                                <select 
+                                <select
                                     className="role-select"
                                     value={selectedUser.role}
                                     onChange={(e) => handleUserRoleUpdate(selectedUser.userId, e.target.value)}
@@ -607,23 +624,23 @@ const AdminDashboard = () => {
                         <div className="moderation-actions-section">
                             <div className="notes-field">
                                 <label><MessageSquare size={14} /> Moderation Notes (Optional)</label>
-                                <textarea 
+                                <textarea
                                     placeholder="Reason for approval or rejection..."
                                     value={moderationNotes}
                                     onChange={(e) => setModerationNotes(e.target.value)}
                                 />
                             </div>
                             <div className="actions-flex">
-                                <Button 
-                                    variant="success" 
+                                <Button
+                                    variant="success"
                                     className="flex-1"
                                     onClick={() => handleModeration('SET', selectedSet.setId, 'APPROVE')}
                                     disabled={isProcessingModeration}
                                 >
                                     {isProcessingModeration ? <Loader size="xs" /> : <><CheckCircle size={18} /> Approve</>}
                                 </Button>
-                                <Button 
-                                    variant="error" 
+                                <Button
+                                    variant="error"
                                     className="flex-1"
                                     onClick={() => handleModeration('SET', selectedSet.setId, 'REJECT')}
                                     disabled={isProcessingModeration}
@@ -659,23 +676,23 @@ const AdminDashboard = () => {
                         <div className="moderation-actions-section">
                             <div className="notes-field">
                                 <label><MessageSquare size={14} /> Moderation Notes (Optional)</label>
-                                <textarea 
+                                <textarea
                                     placeholder="Reason for approval or rejection..."
                                     value={moderationNotes}
                                     onChange={(e) => setModerationNotes(e.target.value)}
                                 />
                             </div>
                             <div className="actions-flex">
-                                <Button 
-                                    variant="success" 
+                                <Button
+                                    variant="success"
                                     className="flex-1"
                                     onClick={() => handleModeration('CLASS', selectedClass.classId, 'APPROVE')}
                                     disabled={isProcessingModeration}
                                 >
                                     {isProcessingModeration ? <Loader size="xs" /> : <><CheckCircle size={18} /> Approve</>}
                                 </Button>
-                                <Button 
-                                    variant="error" 
+                                <Button
+                                    variant="error"
                                     className="flex-1"
                                     onClick={() => handleModeration('CLASS', selectedClass.classId, 'REJECT')}
                                     disabled={isProcessingModeration}

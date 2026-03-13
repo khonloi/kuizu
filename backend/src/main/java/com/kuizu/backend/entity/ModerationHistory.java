@@ -27,8 +27,8 @@ public class ModerationHistory {
     @Column(name = "entity_type", length = 50)
     private String entityType;
 
-    @Column(name = "entity_id")
-    private Long entityId;
+    @Column(name = "entity_id", length = 50)
+    private String entityId;
 
     @Column(length = 20)
     private String action;

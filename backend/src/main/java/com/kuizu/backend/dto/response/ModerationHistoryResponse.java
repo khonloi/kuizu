@@ -16,7 +16,8 @@ public class ModerationHistoryResponse {
     private String moderatorUsername;
     private String moderatorDisplayName;
     private String entityType;
-    private Long entityId;
+    private String entityId;
+    private String entityName;
     private String action;
     private String notes;
     private LocalDateTime createdAt;

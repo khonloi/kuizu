@@ -84,7 +84,7 @@ public class ModerationService {
         set.setModeratedAt(LocalDateTime.now());
         set.setModerationNotes(request.getNotes());
         flashcardSetRepository.save(set);
-        logModerationAction(moderator, "SET", setId, "APPROVE", request.getNotes());
+        logModerationAction(moderator, "SET", String.valueOf(setId), "APPROVE", request.getNotes());
     }
 
     @Transactional
@@ -97,7 +97,7 @@ public class ModerationService {
         set.setModeratedAt(LocalDateTime.now());
         set.setModerationNotes(request.getNotes());
         flashcardSetRepository.save(set);
-        logModerationAction(moderator, "SET", setId, "REJECT", request.getNotes());
+        logModerationAction(moderator, "SET", String.valueOf(setId), "REJECT", request.getNotes());
     }
 
     @Transactional
@@ -110,7 +110,7 @@ public class ModerationService {
         cls.setModeratedAt(LocalDateTime.now());
         cls.setModerationNotes(request.getNotes());
         classRepository.save(cls);
-        logModerationAction(moderator, "CLASS", classId, "APPROVE", request.getNotes());
+        logModerationAction(moderator, "CLASS", String.valueOf(classId), "APPROVE", request.getNotes());
     }
 
     @Transactional
@@ -123,7 +123,7 @@ public class ModerationService {
         cls.setModeratedAt(LocalDateTime.now());
         cls.setModerationNotes(request.getNotes());
         classRepository.save(cls);
-        logModerationAction(moderator, "CLASS", classId, "REJECT", request.getNotes());
+        logModerationAction(moderator, "CLASS", String.valueOf(classId), "REJECT", request.getNotes());
     }
 
     private User getCurrentUser() {
@@ -132,7 +132,12 @@ public class ModerationService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    private void logModerationAction(User moderator, String entityType, Long entityId, String action, String notes) {
+    public void logUserModeration(String targetUserId, String action, String notes) {
+        User moderator = getCurrentUser();
+        logModerationAction(moderator, "USER", targetUserId, action, notes);
+    }
+
+    private void logModerationAction(User moderator, String entityType, String entityId, String action, String notes) {
         ModerationHistory history = ModerationHistory.builder()
                 .moderator(moderator)
                 .entityType(entityType)
@@ -174,12 +179,30 @@ public class ModerationService {
     }
 
     private ModerationHistoryResponse mapToModerationHistoryResponse(ModerationHistory history) {
+        String entityName = "Unknown";
+        try {
+            if ("SET".equals(history.getEntityType())) {
+                entityName = flashcardSetRepository.findById(Long.parseLong(history.getEntityId()))
+                        .map(FlashcardSet::getTitle).orElse("Deleted Set");
+            } else if ("CLASS".equals(history.getEntityType())) {
+                entityName = classRepository.findById(Long.parseLong(history.getEntityId()))
+                        .map(Class::getClassName).orElse("Deleted Class");
+            } else if ("USER".equals(history.getEntityType())) {
+                entityName = userRepository.findById(history.getEntityId())
+                        .map(user -> user.getDisplayName() != null ? user.getDisplayName() : user.getUsername())
+                        .orElse("Deleted User");
+            }
+        } catch (Exception e) {
+            entityName = "Invalid ID";
+        }
+
         return ModerationHistoryResponse.builder()
                 .modId(history.getModId())
                 .moderatorUsername(history.getModerator() != null ? history.getModerator().getUsername() : null)
                 .moderatorDisplayName(history.getModerator() != null ? history.getModerator().getDisplayName() : null)
                 .entityType(history.getEntityType())
                 .entityId(history.getEntityId())
+                .entityName(entityName)
                 .action(history.getAction())
                 .notes(history.getNotes())
                 .createdAt(history.getCreatedAt())

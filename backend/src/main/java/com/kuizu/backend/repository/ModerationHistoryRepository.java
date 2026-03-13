@@ -11,5 +11,5 @@ import java.util.List;
 public interface ModerationHistoryRepository extends JpaRepository<ModerationHistory, Long> {
     List<ModerationHistory> findByModerator(User moderator);
 
-    List<ModerationHistory> findByEntityTypeAndEntityId(String entityType, Long entityId);
+    List<ModerationHistory> findByEntityTypeAndEntityId(String entityType, String entityId);
 }
