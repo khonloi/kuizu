@@ -12,6 +12,7 @@ import {
 } from '../../api/moderation';
 import { Button, Card, Loader, Badge, Modal, Tabs, EmptyState } from '../../components/ui';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 import {
     Users,
     UserCheck,
@@ -81,6 +82,7 @@ const AdminDashboard = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const toast = useToast();
+    const { user: currentUser } = useAuth();
 
     // Map paths to tab index
     const getActiveTabFromPath = (path) => {
@@ -528,26 +530,29 @@ const AdminDashboard = () => {
                         </div>
                         <div className="detail-modal-grid">
                             <div className="detail-item"><label>Email</label><span>{selectedUser.email}</span></div>
-                            <div className="detail-item">
-                                <label><Shield size={14} /> Role Management</label>
-                                <div className="role-updater-flex">
-                                    <select 
-                                        className="role-select"
-                                        value={selectedUser.role}
-                                        onChange={(e) => handleUserRoleUpdate(selectedUser.userId, e.target.value)}
-                                        disabled={isUpdatingUser === selectedUser.userId}
-                                    >
-                                        <option value="ROLE_STUDENT">Student</option>
-                                        <option value="ROLE_TEACHER">Teacher</option>
-                                        <option value="ROLE_ADMIN">Administrator</option>
-                                    </select>
-                                    {isUpdatingUser === selectedUser.userId && <Loader size="xs" />}
-                                </div>
-                            </div>
+                            <div className="detail-item"><label>Bio</label><span className="truncate" title={selectedUser.bio}>{selectedUser.bio || 'None'}</span></div>
                             <div className="detail-item"><label><Calendar size={14} /> Created</label><span>{formatDate(selectedUser.createdAt)}</span></div>
                             <div className="detail-item"><label><Clock size={14} /> Last Login</label><span>{formatDate(selectedUser.lastLoginAt)}</span></div>
                         </div>
-                        <div className="detail-item bio-section"><label>Bio</label><p className="bio-text">{selectedUser.bio || 'No bio provided'}</p></div>
+                        <div className="detail-item role-management-section">
+                            <label><Shield size={14} /> Role Management</label>
+                            <div className="role-updater-flex">
+                                <select 
+                                    className="role-select"
+                                    value={selectedUser.role}
+                                    onChange={(e) => handleUserRoleUpdate(selectedUser.userId, e.target.value)}
+                                    disabled={isUpdatingUser === selectedUser.userId || selectedUser.userId === currentUser?.userId}
+                                >
+                                    <option value="ROLE_STUDENT">Student</option>
+                                    <option value="ROLE_TEACHER">Teacher</option>
+                                    <option value="ROLE_ADMIN">Administrator</option>
+                                </select>
+                                {isUpdatingUser === selectedUser.userId && <Loader size="xs" />}
+                                {selectedUser.userId === currentUser?.userId && (
+                                    <span className="text-xs text-slate-400 italic ml-2">You cannot change your own role</span>
+                                )}
+                            </div>
+                        </div>
                         <div className="detail-modal-actions">
                             {selectedUser.role !== 'ROLE_ADMIN' && (
                                 <Button
