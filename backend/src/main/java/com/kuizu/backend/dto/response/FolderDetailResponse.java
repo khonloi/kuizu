@@ -32,5 +32,18 @@ public class FolderDetailResponse {
         private String ownerDisplayName;
         private String ownerUsername;
         private LocalDateTime createdAt;
+        private List<FlashcardItem> flashcards;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class FlashcardItem {
+        private Long cardId;
+        private String term;
+        private String definition;
+        private Integer orderIndex;
     }
 }

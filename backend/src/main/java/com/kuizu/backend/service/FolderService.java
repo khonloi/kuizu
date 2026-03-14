@@ -2,6 +2,7 @@ package com.kuizu.backend.service;
 
 import com.kuizu.backend.dto.response.FolderDetailResponse;
 import com.kuizu.backend.dto.response.FolderResponse;
+import com.kuizu.backend.entity.Flashcard;
 import com.kuizu.backend.entity.Folder;
 import com.kuizu.backend.entity.FolderSet;
 import com.kuizu.backend.entity.User;
@@ -58,14 +59,28 @@ public class FolderService {
         List<FolderDetailResponse.FlashcardSetSummary> sets = folderSets.stream()
                 .map(fs -> {
                     var flashcardSet = fs.getFlashcardSet();
+
+                    List<Flashcard> cards = flashcardRepository
+                            .findByFlashcardSetAndIsDeletedFalseOrderByOrderIndexAsc(flashcardSet);
+
+                    List<FolderDetailResponse.FlashcardItem> flashcardItems = cards.stream()
+                            .map(card -> FolderDetailResponse.FlashcardItem.builder()
+                                    .cardId(card.getCardId())
+                                    .term(card.getTerm())
+                                    .definition(card.getDefinition())
+                                    .orderIndex(card.getOrderIndex())
+                                    .build())
+                            .collect(Collectors.toList());
+
                     return FolderDetailResponse.FlashcardSetSummary.builder()
                             .setId(flashcardSet.getSetId())
                             .title(flashcardSet.getTitle())
                             .description(flashcardSet.getDescription())
-                            .termCount(flashcardRepository.countByFlashcardSetAndIsDeletedFalse(flashcardSet))
+                            .termCount(cards.size())
                             .ownerDisplayName(flashcardSet.getOwner().getDisplayName())
                             .ownerUsername(flashcardSet.getOwner().getUsername())
                             .createdAt(flashcardSet.getCreatedAt())
+                            .flashcards(flashcardItems)
                             .build();
                 })
                 .collect(Collectors.toList());
