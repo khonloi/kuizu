@@ -423,3 +423,57 @@
     font-size: 15px;
     margin: 0;
 }
+
+/* Add Set Button */
+.fd-add-set-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fd-add-set-btn:hover {
+    background: var(--primary-hover, #3a4de6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 85, 255, 0.3);
+}
+
+.fd-add-set-btn.primary {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Remove Set Button */
+.fd-remove-set-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.fd-remove-set-btn:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.fd-remove-set-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+

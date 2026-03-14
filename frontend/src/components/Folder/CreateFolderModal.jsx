@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input } from '../ui';
-import { createFolder } from '../../api/folder';
+import { createFolder, getMySets } from '../../api/folder';
 import { useToast } from '../../context/ToastContext';
+import { BookOpen, Check } from 'lucide-react';
 import './CreateFolderModal.css';
 
 const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
@@ -10,6 +11,40 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
     const [description, setDescription] = useState('');
     const [visibility, setVisibility] = useState('PUBLIC');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const [mySets, setMySets] = useState([]);
+    const [selectedSetIds, setSelectedSetIds] = useState([]);
+    const [isLoadingSets, setIsLoadingSets] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setFolderName('');
+            setDescription('');
+            setVisibility('PUBLIC');
+            setSelectedSetIds([]);
+            
+            const fetchSets = async () => {
+                setIsLoadingSets(true);
+                try {
+                    const data = await getMySets();
+                    setMySets(data);
+                } catch (error) {
+                    console.error('Failed to fetch user sets:', error);
+                } finally {
+                    setIsLoadingSets(false);
+                }
+            };
+            fetchSets();
+        }
+    }, [isOpen]);
+
+    const toggleSetSelection = (setId) => {
+        setSelectedSetIds(prev => 
+            prev.includes(setId) 
+                ? prev.filter(id => id !== setId)
+                : [...prev, setId]
+        );
+    };
 
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
@@ -26,15 +61,12 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
             const folderData = {
                 name: folderName,
                 description,
-                visibility
+                visibility,
+                setIds: selectedSetIds
             };
 
             const newFolder = await createFolder(folderData);
             toast.success('Tạo thư mục thành công!');
-
-            setFolderName('');
-            setDescription('');
-            setVisibility('PUBLIC');
 
             if (onCreateSuccess) {
                 onCreateSuccess(newFolder);
@@ -93,8 +125,38 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
                             placeholder="Mô tả nội dung thư mục..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            rows={3}
+                            rows={2}
                         ></textarea>
+                    </div>
+
+                    <div className="form-group slide-in" style={{ animationDelay: '0.15s' }}>
+                        <label>Đề xuất học phần (Không bắt buộc)</label>
+                        <div className="suggested-sets-list">
+                            {isLoadingSets ? (
+                                <div className="loading-sets">Đang tải học phần...</div>
+                            ) : mySets.length === 0 ? (
+                                <div className="empty-sets-msg">Bạn chưa có học phần nào.</div>
+                            ) : (
+                                mySets.map(set => (
+                                    <div 
+                                        key={set.setId} 
+                                        className={`suggested-set-item ${selectedSetIds.includes(set.setId) ? 'selected' : ''}`}
+                                        onClick={() => toggleSetSelection(set.setId)}
+                                    >
+                                        <div className="set-item-main">
+                                            <BookOpen size={16} className="set-icon" />
+                                            <div className="set-info-minimal">
+                                                <div className="set-title">{set.title}</div>
+                                                <div className="set-terms">{set.termCount} thuật ngữ</div>
+                                            </div>
+                                        </div>
+                                        <div className="set-checkbox">
+                                            {selectedSetIds.includes(set.setId) && <Check size={14} />}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
 
                     <div className="form-group slide-in" style={{ animationDelay: '0.2s' }}>

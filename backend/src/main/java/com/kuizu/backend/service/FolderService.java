@@ -3,19 +3,15 @@ package com.kuizu.backend.service;
 import com.kuizu.backend.dto.request.CreateFolderRequest;
 import com.kuizu.backend.dto.response.FolderDetailResponse;
 import com.kuizu.backend.dto.response.FolderResponse;
-import com.kuizu.backend.entity.Flashcard;
-import com.kuizu.backend.entity.Folder;
-import com.kuizu.backend.entity.FolderSet;
-import com.kuizu.backend.entity.User;
-import com.kuizu.backend.repository.FlashcardRepository;
-import com.kuizu.backend.repository.FolderRepository;
-import com.kuizu.backend.repository.FolderSetRepository;
-import com.kuizu.backend.repository.UserRepository;
+import com.kuizu.backend.entity.*;
+import com.kuizu.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +21,7 @@ public class FolderService {
     private final FolderRepository folderRepository;
     private final FolderSetRepository folderSetRepository;
     private final FlashcardRepository flashcardRepository;
+    private final FlashcardSetRepository flashcardSetRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -47,15 +44,135 @@ public class FolderService {
 
         Folder saved = folderRepository.save(folder);
 
+        long setCount = 0;
+        if (request.getSetIds() != null && !request.getSetIds().isEmpty()) {
+            for (Long setId : request.getSetIds()) {
+                FlashcardSet flashcardSet = flashcardSetRepository.findById(setId).orElse(null);
+                if (flashcardSet != null) {
+                    FolderSet.FolderSetId id = new FolderSet.FolderSetId(saved.getFolderId(), setId);
+                    FolderSet folderSet = FolderSet.builder()
+                            .id(id)
+                            .folder(saved)
+                            .flashcardSet(flashcardSet)
+                            .addedBy(user.getUserId().toString())
+                            .build();
+
+                    folderSetRepository.save(folderSet);
+                    setCount++;
+                }
+            }
+        }
+
         return FolderResponse.builder()
                 .folderId(saved.getFolderId())
                 .name(saved.getName())
                 .description(saved.getDescription())
                 .visibility(saved.getVisibility())
-                .setCount(0L)
+                .setCount(setCount)
                 .ownerDisplayName(user.getDisplayName())
                 .createdAt(saved.getCreatedAt())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getUserFlashcardSets(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<FlashcardSet> userSets = flashcardSetRepository.findByOwnerAndIsDeletedFalse(user);
+
+        return userSets.stream()
+                .map(s -> {
+                    long termCount = flashcardRepository.countByFlashcardSetAndIsDeletedFalse(s);
+                    return Map.<String, Object>of(
+                            "setId", s.getSetId(),
+                            "title", s.getTitle() != null ? s.getTitle() : "",
+                            "description", s.getDescription() != null ? s.getDescription() : "",
+                            "termCount", termCount,
+                            "createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : ""
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void addSetToFolder(Long folderId, Long setId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+        if (!folder.getOwner().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("You don't own this folder");
+        }
+
+        FlashcardSet flashcardSet = flashcardSetRepository.findById(setId)
+                .orElseThrow(() -> new RuntimeException("Flashcard set not found"));
+
+        FolderSet.FolderSetId id = new FolderSet.FolderSetId(folderId, setId);
+        if (folderSetRepository.existsById(id)) {
+            throw new RuntimeException("This set is already in the folder");
+        }
+
+        FolderSet folderSet = FolderSet.builder()
+                .id(id)
+                .folder(folder)
+                .flashcardSet(flashcardSet)
+                .addedBy(user.getUserId().toString())
+                .build();
+
+        folderSetRepository.save(folderSet);
+    }
+
+    @Transactional
+    public void removeSetFromFolder(Long folderId, Long setId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+        if (!folder.getOwner().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("You don't own this folder");
+        }
+
+        FolderSet.FolderSetId id = new FolderSet.FolderSetId(folderId, setId);
+        if (!folderSetRepository.existsById(id)) {
+            throw new RuntimeException("This set is not in the folder");
+        }
+
+        folderSetRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAvailableSets(Long folderId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new RuntimeException("Folder not found"));
+
+        List<FolderSet> existingSets = folderSetRepository.findByFolder(folder);
+        Set<Long> existingSetIds = existingSets.stream()
+                .map(fs -> fs.getFlashcardSet().getSetId())
+                .collect(Collectors.toSet());
+
+        List<FlashcardSet> userSets = flashcardSetRepository.findByOwnerAndIsDeletedFalse(user);
+
+        return userSets.stream()
+                .filter(s -> !existingSetIds.contains(s.getSetId()))
+                .map(s -> {
+                    long termCount = flashcardRepository.countByFlashcardSetAndIsDeletedFalse(s);
+                    return Map.<String, Object>of(
+                            "setId", s.getSetId(),
+                            "title", s.getTitle() != null ? s.getTitle() : "",
+                            "description", s.getDescription() != null ? s.getDescription() : "",
+                            "termCount", termCount,
+                            "createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : ""
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -141,4 +258,3 @@ public class FolderService {
                 .build();
     }
 }
-

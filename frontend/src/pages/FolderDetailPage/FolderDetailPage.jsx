@@ -1,36 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getFolderDetail } from '../../api/folder';
+import { getFolderDetail, removeSetFromFolder } from '../../api/folder';
 import { Loader } from '../../components/ui';
-import { ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import AddSetToFolderModal from '../../components/Folder/AddSetToFolderModal';
+import { ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import './FolderDetailPage.css';
 
 const FolderDetailPage = () => {
     const { folderId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const toast = useToast();
     const [folder, setFolder] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [expandedSets, setExpandedSets] = useState({});
+    const [isAddSetOpen, setIsAddSetOpen] = useState(false);
+    const [removingSetId, setRemovingSetId] = useState(null);
+
+    const fetchFolder = async () => {
+        try {
+            setIsLoading(true);
+            const data = await getFolderDetail(folderId);
+            setFolder(data);
+            if (data?.sets) {
+                const expanded = {};
+                data.sets.forEach(s => { expanded[s.setId] = true; });
+                setExpandedSets(expanded);
+            }
+        } catch (error) {
+            console.error("Failed to fetch folder detail:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchFolder = async () => {
-            try {
-                setIsLoading(true);
-                const data = await getFolderDetail(folderId);
-                setFolder(data);
-                // Mở rộng tất cả các set mặc định
-                if (data?.sets) {
-                    const expanded = {};
-                    data.sets.forEach(s => { expanded[s.setId] = true; });
-                    setExpandedSets(expanded);
-                }
-            } catch (error) {
-                console.error("Failed to fetch folder detail:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchFolder();
     }, [folderId]);
 
@@ -72,6 +78,23 @@ const FolderDetailPage = () => {
         setExpandedSets({});
     };
 
+    const handleRemoveSet = async (e, setId) => {
+        e.stopPropagation();
+        if (!confirm('Bạn có chắc muốn xóa học phần này khỏi thư mục?')) return;
+
+        try {
+            setRemovingSetId(setId);
+            await removeSetFromFolder(folderId, setId);
+            toast.success('Đã xóa học phần khỏi thư mục');
+            fetchFolder();
+        } catch (error) {
+            toast.error('Không thể xóa học phần');
+        } finally {
+            setRemovingSetId(null);
+        }
+    };
+
+    const isOwner = user && folder && folder.ownerUsername === user.username;
     const allExpanded = folder?.sets?.every(s => expandedSets[s.setId]);
 
     if (isLoading) {
@@ -88,7 +111,6 @@ const FolderDetailPage = () => {
 
     return (
         <div className="fd-container">
-            {/* Back button */}
             <button className="fd-back" onClick={() => navigate('/folders')}>
                 <ArrowLeft size={18} />
                 <span>Quay lại thư mục</span>
@@ -154,16 +176,27 @@ const FolderDetailPage = () => {
                 <div className="fd-terms-header">
                     <h2>Danh sách thuật ngữ trong thư mục</h2>
                     <div className="fd-terms-header-actions">
-                        <button
-                            className="fd-toggle-all-btn"
-                            onClick={allExpanded ? collapseAll : expandAll}
-                        >
-                            {allExpanded ? (
-                                <><ChevronUp size={14} /> Thu gọn tất cả</>
-                            ) : (
-                                <><ChevronDown size={14} /> Mở rộng tất cả</>
-                            )}
-                        </button>
+                        {isOwner && (
+                            <button
+                                className="fd-add-set-btn"
+                                onClick={() => setIsAddSetOpen(true)}
+                            >
+                                <Plus size={16} />
+                                Thêm học phần
+                            </button>
+                        )}
+                        {folder.sets && folder.sets.length > 0 && (
+                            <button
+                                className="fd-toggle-all-btn"
+                                onClick={allExpanded ? collapseAll : expandAll}
+                            >
+                                {allExpanded ? (
+                                    <><ChevronUp size={14} /> Thu gọn</>
+                                ) : (
+                                    <><ChevronDown size={14} /> Mở rộng</>
+                                )}
+                            </button>
+                        )}
                         <span className="fd-terms-badge">{getTotalTerms()} thuật ngữ</span>
                     </div>
                 </div>
@@ -174,7 +207,6 @@ const FolderDetailPage = () => {
                             const isExpanded = expandedSets[set.setId];
                             return (
                                 <div key={set.setId} className={`fd-set-group ${isExpanded ? 'expanded' : ''}`}>
-                                    {/* Set title bar — clickable to toggle */}
                                     <div
                                         className="fd-set-title-bar"
                                         onClick={() => toggleSetExpand(set.setId)}
@@ -191,13 +223,22 @@ const FolderDetailPage = () => {
                                                 </div>
                                                 <span>{set.ownerDisplayName}</span>
                                             </div>
+                                            {isOwner && (
+                                                <button
+                                                    className="fd-remove-set-btn"
+                                                    onClick={(e) => handleRemoveSet(e, set.setId)}
+                                                    disabled={removingSetId === set.setId}
+                                                    title="Xóa khỏi thư mục"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            )}
                                             <div className="fd-set-toggle">
                                                 {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Collapsible content */}
                                     {isExpanded && (
                                         <div className="fd-set-content">
                                             {set.description && (
@@ -230,9 +271,25 @@ const FolderDetailPage = () => {
                     <div className="fd-empty">
                         <BookOpen size={32} color="var(--text-light)" />
                         <p>Thư mục này chưa có học phần nào</p>
+                        {isOwner && (
+                            <button
+                                className="fd-add-set-btn primary"
+                                onClick={() => setIsAddSetOpen(true)}
+                            >
+                                <Plus size={16} />
+                                Thêm học phần đầu tiên
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
+
+            <AddSetToFolderModal
+                isOpen={isAddSetOpen}
+                onClose={() => setIsAddSetOpen(false)}
+                folderId={folderId}
+                onSetAdded={fetchFolder}
+            />
         </div>
     );
 };
