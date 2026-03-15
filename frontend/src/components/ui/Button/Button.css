@@ -12,6 +12,12 @@
     outline: none;
 }
 
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .btn:active {
     transform: scale(0.98);
 }

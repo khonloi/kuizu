@@ -10,7 +10,7 @@ import {
     approveClass,
     rejectClass
 } from '../../api/moderation';
-import { Button, Card, Loader, Badge, Modal, Tabs, EmptyState } from '../../components/ui';
+import { Button, Card, Loader, Badge, Modal, Tabs, EmptyState, Table, Pagination } from '../../components/ui';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -36,47 +36,6 @@ import {
 } from 'lucide-react';
 import './AdminDashboard.css';
 
-const AdminTable = ({ columns, isLoading, data, emptyIcon, emptyTitle, emptyDescription, renderRow }) => {
-    if (isLoading) {
-        return <Loader size="lg" className="m-auto py-10" />;
-    }
-
-    if (!data || data.length === 0) {
-        return (
-            <div className="py-10">
-                <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyDescription} />
-            </div>
-        );
-    }
-
-    return (
-        <div className="table-responsive">
-            <table className="admin-table">
-                <thead>
-                    <tr>
-                        {columns.map((col, index) => (
-                            <th key={index}>{col}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((item, index) => renderRow(item, index))}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
-const AdminPagination = ({ currentPage, totalPages, onPageChange }) => {
-    if (totalPages <= 1) return null;
-    return (
-        <div className="pagination">
-            <Button disabled={currentPage === 0} onClick={() => onPageChange(currentPage - 1)} variant="outline" size="sm">Previous</Button>
-            <span className="page-info">Page {currentPage + 1} of {totalPages}</span>
-            <Button disabled={currentPage === totalPages - 1} onClick={() => onPageChange(currentPage + 1)} variant="outline" size="sm">Next</Button>
-        </div>
-    );
-};
 
 const AdminDashboard = () => {
     const location = useLocation();
@@ -258,6 +217,7 @@ const AdminDashboard = () => {
                     <Users size={16} /> User Management
                 </div>
             ),
+            title: 'User Management',
             content: (
                 <div className="admin-tab-content">
                     <Card className="user-list-card">
@@ -265,7 +225,7 @@ const AdminDashboard = () => {
                             <h2>Platform Users</h2>
                             <Button variant="ghost" size="sm" onClick={fetchUsers}>Refresh</Button>
                         </div>
-                        <AdminTable
+                        <Table
                             columns={['User', 'Role', 'Status', 'Joined', 'Actions']}
                             isLoading={isUsersLoading}
                             data={users}
@@ -314,7 +274,7 @@ const AdminDashboard = () => {
                                 </tr>
                             )}
                         />
-                        <AdminPagination
+                        <Pagination
                             currentPage={userPage}
                             totalPages={userTotalPages}
                             onPageChange={setUserPage}
@@ -329,6 +289,7 @@ const AdminDashboard = () => {
                     <BookOpen size={16} /> Flashcard Submissions
                 </div>
             ),
+            title: 'Flashcard Submissions',
             content: (
                 <div className="admin-tab-content">
                     <Card className="user-list-card">
@@ -336,7 +297,7 @@ const AdminDashboard = () => {
                             <h2>Flashcard Set Submissions</h2>
                             <Button variant="ghost" size="sm" onClick={fetchPendingSets}>Refresh</Button>
                         </div>
-                        <AdminTable
+                        <Table
                             columns={['Set Title', 'Owner', 'Visibility', 'Submitted At', 'Details']}
                             isLoading={isSetsLoading}
                             data={pendingSets}
@@ -372,6 +333,7 @@ const AdminDashboard = () => {
                     <GraduationCap size={16} /> Class Submissions
                 </div>
             ),
+            title: 'Class Submissions',
             content: (
                 <div className="admin-tab-content">
                     <Card className="user-list-card">
@@ -379,7 +341,7 @@ const AdminDashboard = () => {
                             <h2>Class Submissions</h2>
                             <Button variant="ghost" size="sm" onClick={fetchPendingClasses}>Refresh</Button>
                         </div>
-                        <AdminTable
+                        <Table
                             columns={['Class Name', 'Owner', 'Join Code', 'Submitted At', 'Details']}
                             isLoading={isClassesLoading}
                             data={pendingClasses}
@@ -415,6 +377,7 @@ const AdminDashboard = () => {
                     <HistoryIcon size={16} /> Moderation History
                 </div>
             ),
+            title: 'Moderation History',
             content: (
                 <div className="admin-tab-content">
                     <Card className="user-list-card">
@@ -422,7 +385,7 @@ const AdminDashboard = () => {
                             <h2>Recent Actions</h2>
                             <Button variant="ghost" size="sm" onClick={fetchHistory}>Refresh</Button>
                         </div>
-                        <AdminTable
+                        <Table
                             columns={['Moderator', 'Action', 'Entity', 'Time', 'Notes']}
                             isLoading={isHistoryLoading}
                             data={modHistory}
@@ -466,6 +429,7 @@ const AdminDashboard = () => {
                     <BarChart3 size={16} /> Flashcard Statistics
                 </div>
             ),
+            title: 'Flashcard Statistics',
             content: (
                 <div className="admin-tab-content">
                     <Card className="user-list-card">
@@ -489,6 +453,7 @@ const AdminDashboard = () => {
                     <Activity size={16} /> System Statistics
                 </div>
             ),
+            title: 'System Statistics',
             content: (
                 <div className="admin-tab-content">
                     <Card className="user-list-card">
@@ -512,7 +477,7 @@ const AdminDashboard = () => {
         <div className="admin-container">
             <header className="admin-header">
                 <div className="admin-header-main">
-                    <h1>Admin Dashboard</h1>
+                    <h1>{adminTabs[activeTab]?.title || 'Admin Dashboard'}</h1>
                     <p className="admin-subtitle">Monitoring and moderation tools</p>
                 </div>
                 <div className="admin-stats">
@@ -588,44 +553,69 @@ const AdminDashboard = () => {
             </Modal>
 
             {/* Flashcard Set Review Modal */}
-            <Modal isOpen={isSetModalOpen} onClose={() => setIsSetModalOpen(false)} title="Flashcard Set Review" size="lg">
+            <Modal isOpen={isSetModalOpen} onClose={() => setIsSetModalOpen(false)} title="Review Submission" size="lg">
                 {selectedSet && (
                     <div className="moderation-modal-content">
                         <div className="moderation-modal-header">
-                            <h3>{selectedSet.title}</h3>
-                            <div className="meta-row">
-                                <Badge variant="outline">{selectedSet.visibility}</Badge>
-                                <span className="meta-text">By {selectedSet.ownerDisplayName} (@{selectedSet.ownerUsername})</span>
-                                <span className="meta-text text-sm"><Clock size={12} /> {formatDate(selectedSet.submittedAt)}</span>
+                            <div className="header-title-row">
+                                <BookOpen className="header-icon" size={24} />
+                                <div>
+                                    <h3 className="modal-main-title">{selectedSet.title}</h3>
+                                    <div className="meta-row">
+                                        <Badge variant="primary">{selectedSet.visibility}</Badge>
+                                        <span className="meta-text"><Clock size={14} /> Submitted {formatDate(selectedSet.submittedAt)}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="moderation-details-section">
-                            <label className="section-label">Description</label>
-                            <p className="description-text">{selectedSet.description || 'No description provided.'}</p>
-                        </div>
-
-                        <div className="moderation-content-section">
-                            <label className="section-label">Flashcards ({selectedSet.flashcards?.length || 0})</label>
-                            <div className="flashcard-preview-list">
-                                {selectedSet.flashcards && selectedSet.flashcards.length > 0 ? (
-                                    selectedSet.flashcards.map((card, idx) => (
-                                        <div key={card.cardId || idx} className="flashcard-preview-item">
-                                            <div className="card-term"><strong>Term:</strong> {card.term}</div>
-                                            <div className="card-definition"><strong>Definition:</strong> {card.definition}</div>
+                        <div className="moderation-grid">
+                            <div className="moderation-info-column">
+                                <div className="info-card">
+                                    <label className="section-label">Author Information</label>
+                                    <div className="author-info">
+                                        <div className="user-avatar-mini">
+                                            {selectedSet.ownerDisplayName?.charAt(0)}
                                         </div>
-                                    ))
-                                ) : (
-                                    <p className="text-slate-400 italic">This set has no cards.</p>
-                                )}
+                                        <div>
+                                            <div className="font-bold text-slate-800">{selectedSet.ownerDisplayName}</div>
+                                            <div className="text-xs text-slate-500">@{selectedSet.ownerUsername}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="info-card mt-4">
+                                    <label className="section-label">Description</label>
+                                    <p className="description-text">{selectedSet.description || 'No description provided.'}</p>
+                                </div>
+                            </div>
+
+                            <div className="moderation-content-column">
+                                <label className="section-label">Flashcards ({selectedSet.flashcards?.length || 0})</label>
+                                <div className="flashcard-preview-list">
+                                    {selectedSet.flashcards && selectedSet.flashcards.length > 0 ? (
+                                        selectedSet.flashcards.map((card, idx) => (
+                                            <div key={card.cardId || idx} className="flashcard-preview-item">
+                                                <div className="card-term">Term</div>
+                                                <div className="card-value">{card.term}</div>
+                                                <div className="card-divider"></div>
+                                                <div className="card-term">Definition</div>
+                                                <div className="card-value">{card.definition}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="empty-preview">This set has no cards.</div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="moderation-actions-section">
+                        <div className="moderation-footer">
                             <div className="notes-field">
-                                <label><MessageSquare size={14} /> Moderation Notes (Optional)</label>
+                                <label><MessageSquare size={14} /> Moderation Feedback</label>
                                 <textarea
-                                    placeholder="Reason for approval or rejection..."
+                                    className="moderation-textarea"
+                                    placeholder="Provide a reason for approval or rejection (optional)..."
                                     value={moderationNotes}
                                     onChange={(e) => setModerationNotes(e.target.value)}
                                 />
@@ -633,51 +623,66 @@ const AdminDashboard = () => {
                             <div className="actions-flex">
                                 <Button
                                     variant="success"
-                                    className="flex-1"
+                                    className="flex-1 py-6"
                                     onClick={() => handleModeration('SET', selectedSet.setId, 'APPROVE')}
                                     disabled={isProcessingModeration}
                                 >
-                                    {isProcessingModeration ? <Loader size="xs" /> : <><CheckCircle size={18} /> Approve</>}
+                                    {isProcessingModeration ? <Loader size="xs" /> : <><CheckCircle size={20} /> Approve Set</>}
                                 </Button>
                                 <Button
                                     variant="error"
-                                    className="flex-1"
+                                    className="flex-1 py-6"
                                     onClick={() => handleModeration('SET', selectedSet.setId, 'REJECT')}
                                     disabled={isProcessingModeration}
                                 >
-                                    {isProcessingModeration ? <Loader size="xs" /> : <><XCircle size={18} /> Reject</>}
+                                    {isProcessingModeration ? <Loader size="xs" /> : <><XCircle size={20} /> Reject Set</>}
                                 </Button>
                             </div>
-                            <Button variant="outline" className="w-full mt-2" onClick={() => setIsSetModalOpen(false)}>Cancel</Button>
                         </div>
                     </div>
                 )}
             </Modal>
 
             {/* Class Review Modal */}
-            <Modal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)} title="Class Review" size="md">
+            <Modal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)} title="Review Submission" size="md">
                 {selectedClass && (
                     <div className="moderation-modal-content">
                         <div className="moderation-modal-header">
-                            <h3>{selectedClass.className}</h3>
-                            <div className="meta-row">
-                                <Badge variant="outline">{selectedClass.visibility}</Badge>
-                                <span className="meta-text">By {selectedClass.ownerDisplayName} (@{selectedClass.ownerUsername})</span>
+                            <div className="header-title-row">
+                                <GraduationCap className="header-icon" size={24} />
+                                <div>
+                                    <h3 className="modal-main-title">{selectedClass.className}</h3>
+                                    <div className="meta-row">
+                                        <Badge variant="primary">{selectedClass.visibility}</Badge>
+                                        <span className="meta-text"><Clock size={14} /> Submitted {formatDate(selectedClass.submittedAt)}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="moderation-details-section">
-                            <div className="detail-item"><label>Join Code</label><code>{selectedClass.joinCode}</code></div>
-                            <div className="detail-item"><label>Submitted</label><span>{formatDate(selectedClass.submittedAt)}</span></div>
-                            <label className="section-label mt-4">Description</label>
-                            <p className="description-text">{selectedClass.description || 'No description provided.'}</p>
+                        <div className="info-card">
+                            <div className="moderation-details-grid">
+                                <div className="detail-item">
+                                    <label><Shield size={14} /> Join Code</label>
+                                    <code className="join-code-display">{selectedClass.joinCode}</code>
+                                </div>
+                                <div className="detail-item">
+                                    <label><Users size={14} /> Owner</label>
+                                    <span className="font-bold">{selectedClass.ownerDisplayName || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <label className="section-label">Description</label>
+                                <p className="description-text">{selectedClass.description || 'No description provided.'}</p>
+                            </div>
                         </div>
 
-                        <div className="moderation-actions-section">
+                        <div className="moderation-footer">
                             <div className="notes-field">
-                                <label><MessageSquare size={14} /> Moderation Notes (Optional)</label>
+                                <label><MessageSquare size={14} /> Moderation Feedback</label>
                                 <textarea
-                                    placeholder="Reason for approval or rejection..."
+                                    className="moderation-textarea"
+                                    placeholder="Provide a reason for approval or rejection (optional)..."
                                     value={moderationNotes}
                                     onChange={(e) => setModerationNotes(e.target.value)}
                                 />
@@ -685,22 +690,21 @@ const AdminDashboard = () => {
                             <div className="actions-flex">
                                 <Button
                                     variant="success"
-                                    className="flex-1"
+                                    className="flex-1 py-6"
                                     onClick={() => handleModeration('CLASS', selectedClass.classId, 'APPROVE')}
                                     disabled={isProcessingModeration}
                                 >
-                                    {isProcessingModeration ? <Loader size="xs" /> : <><CheckCircle size={18} /> Approve</>}
+                                    {isProcessingModeration ? <Loader size="xs" /> : <><CheckCircle size={20} /> Approve Class</>}
                                 </Button>
                                 <Button
                                     variant="error"
-                                    className="flex-1"
+                                    className="flex-1 py-6"
                                     onClick={() => handleModeration('CLASS', selectedClass.classId, 'REJECT')}
                                     disabled={isProcessingModeration}
                                 >
-                                    {isProcessingModeration ? <Loader size="xs" /> : <><XCircle size={18} /> Reject</>}
+                                    {isProcessingModeration ? <Loader size="xs" /> : <><XCircle size={20} /> Reject Class</>}
                                 </Button>
                             </div>
-                            <Button variant="outline" className="w-full mt-2" onClick={() => setIsClassModalOpen(false)}>Cancel</Button>
                         </div>
                     </div>
                 )}

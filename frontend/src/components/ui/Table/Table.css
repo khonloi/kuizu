@@ -1,0 +1,35 @@
+.ui-table-responsive {
+    overflow-x: auto;
+}
+
+.ui-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ui-table th {
+    text-align: left;
+    padding: 16px 30px;
+    background: var(--input-bg);
+    color: var(--text-light);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ui-table td {
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.ui-table tr:hover {
+    background-color: rgba(66, 85, 255, 0.03);
+}
+
+.ui-table tr:last-child td {
+    border-bottom: none;
+}

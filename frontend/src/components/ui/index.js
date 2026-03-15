@@ -14,3 +14,5 @@ export { default as Badge } from "./Badge/Badge";
 export { default as Dropdown } from "./Dropdown/Dropdown";
 export { default as EmptyState } from "./EmptyState/EmptyState";
 export { default as SearchBar } from "./SearchBar/SearchBar";
+export { default as Table } from "./Table/Table";
+export { default as Pagination } from "./Pagination/Pagination";
