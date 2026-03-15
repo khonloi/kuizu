@@ -112,7 +112,7 @@ const DashboardPage = () => {
                                 <div className="card-footer-custom">
                                     <span className="owner-text">by {folder.ownerDisplayName}</span>
                                     <span className={`visibility-tag ${folder.visibility?.toLowerCase()}`}>
-                                        {folder.visibility === 'PUBLIC' ? '🌐 Công khai' : '🔒 Riêng tư'}
+                                        {folder.visibility === 'PUBLIC' ? '🌐 Public' : '🔒 Private'}
                                     </span>
                                 </div>
                             </Card>
@@ -132,7 +132,7 @@ const DashboardPage = () => {
                     <div className="dashboard-section-header">
                         <h2>
                             <Globe size={20} style={{ marginRight: 8, verticalAlign: 'middle', color: '#10b981' }} />
-                            Thư mục đề xuất
+                            Suggested Folders
                         </h2>
                         <div className="section-actions">
                             <Button variant="ghost" size="sm" onClick={() => navigate('/folders')}>View all</Button>
@@ -158,7 +158,7 @@ const DashboardPage = () => {
                                 </div>
                                 <div className="card-footer-custom">
                                     <span className="owner-text">by {folder.ownerDisplayName}</span>
-                                    <span className="visibility-tag public">🌐 Công khai</span>
+                                    <span className="visibility-tag public">🌐 Public</span>
                                 </div>
                             </Card>
                         ))}
