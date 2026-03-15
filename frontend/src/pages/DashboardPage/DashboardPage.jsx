@@ -7,6 +7,7 @@ import CreateFolderModal from '../../components/Folder/CreateFolderModal';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card, Loader, ComingSoonModal } from '../../components/ui';
 import { FolderOpen, Globe } from 'lucide-react';
+import { Button, Card, Loader, EmptyState, ItemCard } from '../../components/ui';
 import './DashboardPage.css';
 
 const DashboardPage = () => {
@@ -19,6 +20,7 @@ const DashboardPage = () => {
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
     const [currentFeature, setCurrentFeature] = useState('');
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const isTeacherOrAdmin = user?.role === 'ROLE_TEACHER' || user?.role === 'ROLE_ADMIN';
@@ -59,13 +61,9 @@ const DashboardPage = () => {
         setIsCreateFolderOpen(false);
     };
 
-    const toggleComingSoon = (feature = '') => {
-        if (typeof feature === 'string') {
-            setCurrentFeature(feature);
-        } else {
-            setCurrentFeature('');
-        }
-        setIsComingSoonOpen(!isComingSoonOpen);
+    const triggerComingSoon = (feature = '') => {
+        const query = feature ? `?feature=${encodeURIComponent(feature)}` : '';
+        navigate(`/coming-soon${query}`);
     };
 
     if (isLoading) {
@@ -80,16 +78,11 @@ const DashboardPage = () => {
             <section className="dashboard-section">
                 <div className="dashboard-section-header">
                     <h2>Recent Flashcard Sets</h2>
-                    <div className="section-actions">
-                        <Button variant="outline" size="sm" onClick={() => toggleComingSoon('Flashcard creation')}>Create Set</Button>
-                        <Button variant="ghost" size="sm" onClick={() => toggleComingSoon('Sets Library')}>View all</Button>
-                    </div>
                 </div>
-
-                <div className="empty-state">
-                    <p>No flashcard sets yet. Start creating your first set!</p>
-                    <Button variant="primary" onClick={() => toggleComingSoon('Flashcard creation')}>Create Flashcard Set</Button>
-                </div>
+                <EmptyState
+                    description="No flashcard sets yet. Start creating your first set!"
+                    action={<Button variant="primary" onClick={() => triggerComingSoon('Flashcard creation')}>Create Flashcard Set</Button>}
+                />
             </section>
 
             {/* Folders Section */}
@@ -185,36 +178,28 @@ const DashboardPage = () => {
                         {isTeacherOrAdmin && (
                             <Button variant="outline" size="sm" onClick={() => setIsCreateClassOpen(true)}>Create Class</Button>
                         )}
-                        <Button variant="ghost" size="sm" onClick={() => toggleComingSoon('Classes Library')}>View all</Button>
+                        <Button variant="ghost" size="sm" onClick={() => triggerComingSoon('Classes Library')}>View all</Button>
                     </div>
                 </div>
 
                 {classes.length > 0 ? (
                     <div className="dashboard-grid">
                         {classes.map(cls => (
-                            <Card
+                            <ItemCard
                                 key={cls.classId}
-                                className="dashboard-item-card"
                                 onClick={() => handleClassClick(cls.classId)}
-                            >
-                                <div className="card-header-custom">
-                                    <h3 className="card-title-custom">{cls.className}</h3>
-                                    <span className="badge-custom">Class</span>
-                                </div>
-                                <div className="card-body-custom">
-                                    <p className="card-description-custom">{cls.description || 'No description provided.'}</p>
-                                </div>
-                                <div className="card-footer-custom">
-                                    <span className="owner-text">by {cls.ownerDisplayName}</span>
-                                </div>
-                            </Card>
+                                title={cls.className}
+                                badge="Class"
+                                description={cls.description || 'No description provided.'}
+                                footerText={`by ${cls.ownerDisplayName}`}
+                            />
                         ))}
                     </div>
                 ) : (
-                    <div className="empty-state">
-                        <p>You haven't joined any classes yet.</p>
-                        <Button variant="primary" onClick={() => toggleComingSoon('Explore Classes')}>Explore Classes</Button>
-                    </div>
+                    <EmptyState
+                        description="You haven't joined any classes yet."
+                        action={<Button variant="primary" onClick={() => triggerComingSoon('Explore Classes')}>Explore Classes</Button>}
+                    />
                 )}
             </section>
 

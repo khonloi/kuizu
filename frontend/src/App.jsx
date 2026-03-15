@@ -64,6 +64,8 @@ function App() {
             </ProtectedRoute>
           </MainLayout>
         } />
+        {/* Catch-all route for missing pages */}
+        <Route path="*" element={<ComingSoonPage />} />
       </Routes>
     </Router>
   );

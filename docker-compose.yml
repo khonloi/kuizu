@@ -1,41 +1,72 @@
 services:
-  backend:
-    image: eclipse-temurin:17-jdk
-    container_name: spring-backend
-    working_dir: /app
+  db:
+    image: postgres:alpine
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spring-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8080:8080"
-
+    develop:
+      watch:
+        - path: ./backend/src
+          action: sync
+          target: /app/src
+        - path: ./backend/pom.xml
+          action: rebuild
     volumes:
-      - ./backend:/app
       - maven-cache:/root/.m2
-
-    command: ./mvnw spring-boot:run
-
-    environment:
-      SPRING_PROFILES_ACTIVE: dev
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
-    image: node:20-alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: react-frontend
-    working_dir: /app
-
     ports:
       - "5173:5173"
-
-    volumes:
-      - ./frontend:/app
-      - node-modules:/app/node_modules
-
-    command: sh -c "npm install && npm run dev"
-
-    environment:
-      CHOKIDAR_USEPOLLING: "true"
-
+    develop:
+      watch:
+        - path: ./frontend/src
+          action: sync
+          target: /app/src
+          ignore:
+            - node_modules/
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/vite.config.js
+          action: rebuild
     depends_on:
       - backend
 
 volumes:
   maven-cache:
-  node-modules:
