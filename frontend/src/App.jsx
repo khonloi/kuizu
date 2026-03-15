@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage/HomePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import AdminSetPreviewPage from './pages/Admin/AdminSetPreviewPage';
 import ClassDetailPage from './pages/ClassDetailPage/ClassDetailPage';
 import SearchPage from './pages/SearchPage/SearchPage';
 import ComingSoonPage from './pages/ComingSoonPage';
@@ -47,6 +48,12 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           </MainLayout>
+        } />
+
+        <Route path="/admin/submissions/flashcards/:setId" element={
+          <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+            <AdminSetPreviewPage />
+          </ProtectedRoute>
         } />
 
         <Route path="/admin/submissions/classes" element={

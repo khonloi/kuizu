@@ -306,7 +306,14 @@ const AdminDashboard = () => {
                             emptyDescription="There are no pending flashcard sets to review at this time."
                             renderRow={(set) => (
                                 <tr key={set.setId}>
-                                    <td className="font-semibold">{set.title}</td>
+                                    <td>
+                                        <span
+                                            className="font-semibold cursor-pointer hover:underline text-primary"
+                                            onClick={() => navigate(`/admin/submissions/flashcards/${set.setId}`, { state: { selectedSet: set } })}
+                                        >
+                                            {set.title}
+                                        </span>
+                                    </td>
                                     <td>{set.ownerDisplayName} (@{set.ownerUsername})</td>
                                     <td><Badge variant="outline">{set.visibility}</Badge></td>
                                     <td>{formatDate(set.submittedAt)}</td>
@@ -560,7 +567,13 @@ const AdminDashboard = () => {
                             <div className="header-title-row">
                                 <BookOpen className="header-icon" size={24} />
                                 <div>
-                                    <h3 className="modal-main-title">{selectedSet.title}</h3>
+                                    <h3
+                                        className="modal-main-title cursor-pointer hover:underline text-primary"
+                                        onClick={() => navigate(`/admin/submissions/flashcards/${selectedSet.setId}`, { state: { selectedSet: selectedSet } })}
+                                        title="View full set"
+                                    >
+                                        {selectedSet.title}
+                                    </h3>
                                     <div className="meta-row">
                                         <Badge variant="primary">{selectedSet.visibility}</Badge>
                                         <span className="meta-text"><Clock size={14} /> Submitted {formatDate(selectedSet.submittedAt)}</span>
@@ -569,7 +582,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="moderation-grid">
+                        <div className="moderation-grid-single">
                             <div className="moderation-info-column">
                                 <div className="info-card">
                                     <label className="section-label">Author Information</label>
@@ -587,25 +600,6 @@ const AdminDashboard = () => {
                                 <div className="info-card mt-4">
                                     <label className="section-label">Description</label>
                                     <p className="description-text">{selectedSet.description || 'No description provided.'}</p>
-                                </div>
-                            </div>
-
-                            <div className="moderation-content-column">
-                                <label className="section-label">Flashcards ({selectedSet.flashcards?.length || 0})</label>
-                                <div className="flashcard-preview-list">
-                                    {selectedSet.flashcards && selectedSet.flashcards.length > 0 ? (
-                                        selectedSet.flashcards.map((card, idx) => (
-                                            <div key={card.cardId || idx} className="flashcard-preview-item">
-                                                <div className="card-term">Term</div>
-                                                <div className="card-value">{card.term}</div>
-                                                <div className="card-divider"></div>
-                                                <div className="card-term">Definition</div>
-                                                <div className="card-value">{card.definition}</div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="empty-preview">This set has no cards.</div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -661,11 +655,7 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="info-card">
-                            <div className="moderation-details-grid">
-                                <div className="detail-item">
-                                    <label><Shield size={14} /> Join Code</label>
-                                    <code className="join-code-display">{selectedClass.joinCode}</code>
-                                </div>
+                            <div className="moderation-details-grid-single">
                                 <div className="detail-item">
                                     <label><Users size={14} /> Owner</label>
                                     <span className="font-bold">{selectedClass.ownerDisplayName || 'N/A'}</span>
