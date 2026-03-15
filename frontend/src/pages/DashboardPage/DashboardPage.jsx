@@ -5,9 +5,8 @@ import { getMyFolders, getPublicFolders } from '../../api/folder';
 import CreateClassModal from '../../components/Class/CreateClassModal';
 import CreateFolderModal from '../../components/Folder/CreateFolderModal';
 import { useAuth } from '../../context/AuthContext';
-import { Button, Card, Loader, ComingSoonModal } from '../../components/ui';
 import { FolderOpen, Globe } from 'lucide-react';
-import { Button, Card, Loader, EmptyState, ItemCard } from '../../components/ui';
+import { Button, Card, Loader, EmptyState, ItemCard, ComingSoonModal } from '../../components/ui';
 import './DashboardPage.css';
 
 const DashboardPage = () => {

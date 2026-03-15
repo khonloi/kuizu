@@ -6,6 +6,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import ClassDetailPage from './pages/ClassDetailPage/ClassDetailPage';
 import SearchPage from './pages/SearchPage/SearchPage';
+import ComingSoonPage from './pages/ComingSoonPage';
 import FoldersPage from './pages/FoldersPage/FoldersPage';
 import FolderDetailPage from './pages/FolderDetailPage/FolderDetailPage';
 
@@ -32,7 +33,7 @@ function App() {
             </ProtectedRoute>
           </MainLayout>
         } />
-        
+
         <Route path="/classes/:classId" element={
           <MainLayout>
             <ProtectedRoute>
