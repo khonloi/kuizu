@@ -216,8 +216,8 @@ public class DataInitializer {
                                         .owner(teacher)
                                         .title("Demo Test Set")
                                         .description("A demo flashcard set for testing.")
-                                        .visibility("PUBLIC")
-                                        .status("APPROVED")
+                                        .visibility(Visibility.PUBLIC)
+                                        .status(ModerationStatus.APPROVED)
                                         .isDeleted(false)
                                         .version(1)
                                         .build();
