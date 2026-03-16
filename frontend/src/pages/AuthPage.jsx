@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -14,9 +14,23 @@ const AuthPage = () => {
     const toast = useToast();
     const location = useLocation();
     const [isLogin, setIsLogin] = useState(true);
+    const [hasCheckedReason, setHasCheckedReason] = useState(false);
+
+    useEffect(() => {
+        if (!hasCheckedReason) {
+            const reason = sessionStorage.getItem('logout_reason');
+            if (reason) {
+                toast.error(reason);
+                sessionStorage.removeItem('logout_reason');
+            }
+            setHasCheckedReason(true);
+        }
+    }, [hasCheckedReason, toast]);
 
     if (user) {
-
+        if (user.role === 'ROLE_ADMIN') {
+            return <Navigate to="/admin/users" replace />;
+        }
         return <Navigate to="/dashboard" replace />;
     }
 

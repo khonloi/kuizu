@@ -26,6 +26,26 @@ export const AuthProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
+
+        // Heartbeat: Check auth status every 5 seconds to detect suspension/expiry
+        const heartbeat = setInterval(() => {
+            if (localStorage.getItem('token')) {
+                checkAuth();
+            }
+        }, 5000);
+
+        const handleForceLogout = () => {
+            logout();
+            // Optional: store a flag to show a message on the login page
+            sessionStorage.setItem('logout_reason', 'Your session has expired or your account has been suspended.');
+        };
+
+        window.addEventListener('force-logout', handleForceLogout);
+
+        return () => {
+            clearInterval(heartbeat);
+            window.removeEventListener('force-logout', handleForceLogout);
+        };
     }, []);
 
     const checkAuth = async () => {
@@ -58,6 +78,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        // Using replace: true in navigation is better but we use window.location for clean state
         window.location.href = '/auth';
     };
 

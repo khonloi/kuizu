@@ -3,6 +3,7 @@ package com.kuizu.backend.controller;
 import com.kuizu.backend.dto.request.ChangePasswordRequest;
 import com.kuizu.backend.dto.request.UpdateProfileRequest;
 import com.kuizu.backend.dto.response.UserResponse;
+import com.kuizu.backend.entity.User;
 import com.kuizu.backend.service.UserService;
 import jakarta.validation.Valid;
 import java.security.Principal;
@@ -58,5 +59,21 @@ public class UserController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Password changed successfully");
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{userId}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateUserStatus(
+            @PathVariable String userId,
+            @RequestParam User.UserStatus status) {
+        return ResponseEntity.ok(userService.updateUserStatus(userId, status));
+    }
+
+    @PatchMapping("/{userId}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> updateUserRole(
+            @PathVariable String userId,
+            @RequestParam User.UserRole role) {
+        return ResponseEntity.ok(userService.updateUserRole(userId, role));
     }
 }

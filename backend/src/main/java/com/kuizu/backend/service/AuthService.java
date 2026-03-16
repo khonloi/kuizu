@@ -158,11 +158,6 @@ public class AuthService {
                     "Your account is locked due to multiple failed login attempts. Please contact support.");
         }
 
-        if (user.getStatus() == User.UserStatus.INACTIVE) {
-            throw new ApiException(
-                    "Your account is not verified. Please check your email and verify your account first.");
-        }
-
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword()));

@@ -20,11 +20,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SessionService sessionService;
+    private final ModerationService moderationService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SessionService sessionService, ModerationService moderationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sessionService = sessionService;
+        this.moderationService = moderationService;
     }
 
     public Page<UserResponse> getAllUsers(Pageable pageable) {
@@ -77,6 +81,32 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         user.setPasswordUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    @Transactional
+    public UserResponse updateUserStatus(String userId, User.UserStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found"));
+        user.setStatus(status);
+        userRepository.save(user);
+
+        if (status == User.UserStatus.SUSPENDED || status == User.UserStatus.LOCKED) {
+            sessionService.revokeAllUserSessions(user);
+        }
+
+        moderationService.logUserModeration(userId, "STATUS_UPDATE", "Status changed to " + status);
+
+        return mapToUserResponse(user);
+    }
+
+    @Transactional
+    public UserResponse updateUserRole(String userId, User.UserRole role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException("User not found"));
+        user.setRole(role);
+        userRepository.save(user);
+        moderationService.logUserModeration(userId, "ROLE_UPDATE", "Role changed to " + role);
+        return mapToUserResponse(user);
     }
 
     private UserResponse mapToUserResponse(User user) {
