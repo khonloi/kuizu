@@ -162,7 +162,17 @@ public class DataInitializer {
                                         .version(1)
                                         .build();
 
-                        flashcardSetRepository.saveAll(List.of(javaBasics, calculusSum, englishVocab));
+                        FlashcardSet demoSet = FlashcardSet.builder()
+                                        .owner(teacher)
+                                        .title("Demo Test Set")
+                                        .description("A demo flashcard set for testing.")
+                                        .visibility("PUBLIC")
+                                        .status("APPROVED")
+                                        .isDeleted(false)
+                                        .version(1)
+                                        .build();
+
+                        flashcardSetRepository.saveAll(List.of(javaBasics, calculusSum, englishVocab, demoSet));
 
                         // --- Flashcards ---
                         flashcardRepository.saveAll(List.of(
@@ -192,6 +202,11 @@ public class DataInitializer {
                                         Flashcard.builder().flashcardSet(calculusSum).term("d/dx (e^x)")
                                                         .definition("e^x").orderIndex(2)
                                                         .isDeleted(false).build()));
+
+                        flashcardRepository.save(
+                                        Flashcard.builder().flashcardSet(demoSet).term("Hello")
+                                                        .definition("Xin chào")
+                                                        .orderIndex(0).isDeleted(false).build());
 
                         // --- Folders ---
                         Folder teacherFolder = Folder.builder()
