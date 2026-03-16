@@ -64,8 +64,8 @@ public class JPD123Initializer {
                 .owner(owner)
                 .title(title)
                 .description("Japanese vocabulary for JPD123 course.")
-                .visibility("PUBLIC")
-                .status("APPROVED")
+                .visibility(com.kuizu.backend.entity.enumeration.Visibility.PUBLIC)
+                .status(com.kuizu.backend.entity.enumeration.ModerationStatus.APPROVED)
                 .isDeleted(false)
                 .version(1)
                 .build();

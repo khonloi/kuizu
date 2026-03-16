@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, RotateCcw, CheckCircle2, XCircle, Trophy, Keyboard, Shuffle } from 'lucide-react';
+import { ChevronLeft, RotateCcw, CheckCircle2, XCircle, Trophy, Keyboard, Shuffle, Star } from 'lucide-react';
 import { getFlashcardsBySetId } from '../api/flashcards';
 import { updateStudyProgress } from '../api/study';
 import { useToast } from '../context/ToastContext';
@@ -14,12 +14,14 @@ const StudyPage = () => {
     const location = useLocation();
     const toast = useToast();
 
+    const [allCards, setAllCards] = useState(location.state?.cards || []);
     const [cards, setCards] = useState(location.state?.cards || []);
     const [loading, setLoading] = useState(!location.state?.cards);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [hasTriggeredFinish, setHasTriggeredFinish] = useState(false);
+    const [starredCardIds, setStarredCardIds] = useState(new Set());
 
     const progress = cards.length > 0 ? ((currentIndex + 1) / cards.length) * 100 : 0;
 
@@ -49,6 +51,7 @@ const StudyPage = () => {
         try {
             setLoading(true);
             const data = await getFlashcardsBySetId(setId);
+            setAllCards(data);
             setCards(shuffleArray(data));
         } catch (err) {
             console.error('Failed to load cards:', err);
@@ -117,6 +120,7 @@ const StudyPage = () => {
     );
 
     if (isFinished) {
+        const starredCards = allCards.filter(c => starredCardIds.has(c.cardId));
         return (
             <MainLayout>
                 <div className="study-finished-container">
@@ -125,10 +129,10 @@ const StudyPage = () => {
                         <h2>Congratulations!</h2>
                         <p>You've completed this study session. All {cards.length} cards reviewed!</p>
 
-                        <div className="finish-actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
+                        <div className="finish-actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem', flexWrap: 'wrap' }}>
                             <Button
                                 onClick={() => {
-                                    setCards(shuffleArray(cards));
+                                    setCards(shuffleArray(allCards));
                                     setCurrentIndex(0);
                                     setIsFlipped(false);
                                     setIsFinished(false);
@@ -136,8 +140,24 @@ const StudyPage = () => {
                                 }}
                             >
                                 <RotateCcw size={18} />
-                                Study Again
+                                Study All Again
                             </Button>
+                            {starredCards.length > 0 && (
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => {
+                                        setCards(shuffleArray(starredCards));
+                                        setCurrentIndex(0);
+                                        setIsFlipped(false);
+                                        setIsFinished(false);
+                                        setHasTriggeredFinish(false);
+                                    }}
+                                    style={{ backgroundColor: '#f59e0b', color: 'white', borderColor: '#f59e0b' }}
+                                >
+                                    <Star size={18} fill="currentColor" />
+                                    Study Starred ({starredCards.length})
+                                </Button>
+                            )}
                             <Button variant="outline" onClick={() => navigate(`/flashcard-sets/${setId}`)}>
                                 Return to Set
                             </Button>
@@ -150,6 +170,20 @@ const StudyPage = () => {
 
     const currentCard = cards[currentIndex];
     if (!currentCard) return null; // Safety check
+
+    const toggleStar = (e) => {
+        e.stopPropagation();
+        const currentCardId = currentCard.cardId;
+        setStarredCardIds(prev => {
+            const next = new Set(prev);
+            if (next.has(currentCardId)) {
+                next.delete(currentCardId);
+            } else {
+                next.add(currentCardId);
+            }
+            return next;
+        });
+    };
 
     return (
         <MainLayout>
@@ -188,6 +222,13 @@ const StudyPage = () => {
                     >
                         {/* Front Face */}
                         <div className="flashcard-face flashcard-front">
+                            <button
+                                className={`star-btn ${starredCardIds.has(currentCard.cardId) ? 'starred' : ''}`}
+                                onClick={toggleStar}
+                                title={starredCardIds.has(currentCard.cardId) ? "Unstar" : "Star"}
+                            >
+                                <Star size={24} fill={starredCardIds.has(currentCard.cardId) ? "currentColor" : "none"} />
+                            </button>
                             <span className="face-label">Term</span>
                             <div className="card-text">{currentCard.term}</div>
                             <span className="card-hint">Click or press Space to flip</span>
@@ -195,6 +236,13 @@ const StudyPage = () => {
 
                         {/* Back Face */}
                         <div className="flashcard-face flashcard-back">
+                            <button
+                                className={`star-btn ${starredCardIds.has(currentCard.cardId) ? 'starred' : ''}`}
+                                onClick={toggleStar}
+                                title={starredCardIds.has(currentCard.cardId) ? "Unstar" : "Star"}
+                            >
+                                <Star size={24} fill={starredCardIds.has(currentCard.cardId) ? "currentColor" : "none"} />
+                            </button>
                             <span className="face-label">Definition</span>
                             <div className="card-text">{currentCard.definition}</div>
                             <span className="card-hint">Click or press Space to flip back</span>

@@ -39,8 +39,8 @@ public class KanjiLesson7Initializer {
                     .owner(owner)
                     .title("Kanji bài 7")
                     .description("Bộ từ vựng Kanji bài 7.")
-                    .visibility("PUBLIC")
-                    .status("ACTIVE")
+                    .visibility(com.kuizu.backend.entity.enumeration.Visibility.PUBLIC)
+                    .status(com.kuizu.backend.entity.enumeration.ModerationStatus.ACTIVE)
                     .isDeleted(false)
                     .version(1)
                     .build();

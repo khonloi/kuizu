@@ -40,8 +40,8 @@ public class KanjiLesson4Initializer {
                     .owner(owner)
                     .title("Kanji bài 4")
                     .description("Bộ từ vựng Kanji bài 4.")
-                    .visibility("PUBLIC")
-                    .status("ACTIVE")
+                    .visibility(com.kuizu.backend.entity.enumeration.Visibility.PUBLIC)
+                    .status(com.kuizu.backend.entity.enumeration.ModerationStatus.ACTIVE)
                     .isDeleted(false)
                     .version(1)
                     .build();

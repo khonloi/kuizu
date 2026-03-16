@@ -74,10 +74,14 @@ const DashboardPage = () => {
             <section className="dashboard-section">
                 <div className="dashboard-section-header">
                     <h2>Recent Flashcard Sets</h2>
+                    <div className="section-actions">
+                        <Button variant="outline" size="sm" onClick={() => navigate('/flashcard-sets/create')}>New Flashcard Set</Button>
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/flashcard-sets')}>View all</Button>
+                    </div>
                 </div>
                 <EmptyState
                     description="No flashcard sets yet. Start creating your first set!"
-                    action={<Button variant="primary" onClick={() => triggerComingSoon('Flashcard creation')}>Create Flashcard Set</Button>}
+                    action={<Button variant="primary" onClick={() => navigate('/flashcard-sets/create')}>Create Flashcard Set</Button>}
                 />
             </section>
 

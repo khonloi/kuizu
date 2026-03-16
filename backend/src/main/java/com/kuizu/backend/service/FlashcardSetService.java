@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kuizu.backend.entity.enumeration.Visibility;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,7 @@ public class FlashcardSetService {
     private UserRepository userRepository;
 
     public List<FlashcardSetResponse> getAllPublicSets() {
-        return flashcardSetRepository.findByVisibilityAndIsDeletedFalse("PUBLIC")
+        return flashcardSetRepository.findByVisibilityAndIsDeletedFalse(Visibility.PUBLIC)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -59,8 +60,8 @@ public class FlashcardSetService {
                 .owner(owner)
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .visibility(request.getVisibility() != null ? request.getVisibility() : "PUBLIC")
-                .status("ACTIVE")
+                .visibility(request.getVisibility() != null ? Visibility.valueOf(request.getVisibility().toUpperCase()) : Visibility.PUBLIC)
+                .status(com.kuizu.backend.entity.enumeration.ModerationStatus.ACTIVE)
                 .isDeleted(false)
                 .version(1)
                 .build();
@@ -81,7 +82,7 @@ public class FlashcardSetService {
 
         if (request.getTitle() != null) set.setTitle(request.getTitle());
         if (request.getDescription() != null) set.setDescription(request.getDescription());
-        if (request.getVisibility() != null) set.setVisibility(request.getVisibility());
+        if (request.getVisibility() != null) set.setVisibility(Visibility.valueOf(request.getVisibility().toUpperCase()));
 
         set = flashcardSetRepository.save(set);
         return mapToResponse(set);
@@ -109,8 +110,8 @@ public class FlashcardSetService {
                 .ownerDisplayName(set.getOwner().getDisplayName())
                 .title(set.getTitle())
                 .description(set.getDescription())
-                .visibility(set.getVisibility())
-                .status(set.getStatus())
+                .visibility(set.getVisibility() != null ? set.getVisibility().name() : null)
+                .status(set.getStatus() != null ? set.getStatus().name() : null)
                 .cardCount((int) count)
                 .createdAt(set.getCreatedAt())
                 .updatedAt(set.getUpdatedAt())

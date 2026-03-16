@@ -40,8 +40,8 @@ public class KanjiHiraganaLesson5Initializer {
                     .owner(owner)
                     .title("Kanji-Higarana bài 5")
                     .description("Luyện đọc Kanji bài 5 bằng Hiragana.")
-                    .visibility("PUBLIC")
-                    .status("ACTIVE")
+                    .visibility(com.kuizu.backend.entity.enumeration.Visibility.PUBLIC)
+                    .status(com.kuizu.backend.entity.enumeration.ModerationStatus.ACTIVE)
                     .isDeleted(false)
                     .version(1)
                     .build();

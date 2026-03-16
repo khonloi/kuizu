@@ -39,8 +39,8 @@ public class KanjiLesson6Initializer {
                     .owner(owner)
                     .title("Kanji bài 6")
                     .description("Bộ từ vựng Kanji bài 6.")
-                    .visibility("PUBLIC")
-                    .status("ACTIVE")
+                    .visibility(com.kuizu.backend.entity.enumeration.Visibility.PUBLIC)
+                    .status(com.kuizu.backend.entity.enumeration.ModerationStatus.ACTIVE)
                     .isDeleted(false)
                     .version(1)
                     .build();
