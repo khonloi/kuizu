@@ -40,4 +40,9 @@ export const resetPassword = async (email, otpCode, newPassword) => {
   return response.data;
 };
 
+export const resendRegistrationOtp = async (email) => {
+  const response = await api.post('/auth/resend-registration-otp', { email });
+  return response.data;
+};
+
 export default api;

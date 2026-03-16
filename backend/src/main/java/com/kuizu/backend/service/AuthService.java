@@ -240,4 +240,31 @@ public class AuthService {
         otpToken.setUsedAt(LocalDateTime.now());
         otpTokenRepository.save(otpToken);
     }
+
+    @Transactional
+    public void resendRegistrationOtp(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException("User not found with this email"));
+
+        if (user.getStatus() != User.UserStatus.INACTIVE) {
+            throw new ApiException("User is already active or cannot resend code");
+        }
+
+        // Invalidate previous registration tokens
+        otpTokenRepository.findByEmailAndActionAndUsedAtIsNull(email, "REGISTER").forEach(token -> {
+            token.setUsedAt(LocalDateTime.now());
+            otpTokenRepository.save(token);
+        });
+
+        String otp = String.format("%06d", random.nextInt(1000000));
+        OtpToken otpToken = OtpToken.builder()
+                .email(email)
+                .otpCode(otp)
+                .action("REGISTER")
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+        otpTokenRepository.save(otpToken);
+
+        emailService.sendOtpEmail(email, user.getUsername(), otp, "Registration");
+    }
 }

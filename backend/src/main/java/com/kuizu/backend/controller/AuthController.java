@@ -42,6 +42,14 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request, httpRequest));
     }
 
+    @PostMapping("/resend-registration-otp")
+    public ResponseEntity<Map<String, String>> resendRegistrationOtp(@RequestBody Map<String, String> request) {
+        authService.resendRegistrationOtp(request.get("email"));
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Registration code resent successfully");
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);

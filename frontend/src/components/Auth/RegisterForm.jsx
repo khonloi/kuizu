@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, FileText, Info } from 'lucide-react';
+import { User, Mail, Lock, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { register as registerApi, verifyRegistration as verifyApi } from '../../api/auth';
+import { register as registerApi } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Input, Button } from '../ui';
@@ -17,8 +17,6 @@ const RegisterForm = ({ onToggle }) => {
         bio: '',
         role: 'ROLE_STUDENT'
     });
-    const [otpCode, setOtpCode] = useState('');
-    const [isOtpStep, setIsOtpStep] = useState(false);
     
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -43,8 +41,8 @@ const RegisterForm = ({ onToggle }) => {
         try {
             const data = await registerApi(formData);
             if (data.requireOtp) {
-                setIsOtpStep(true);
-                toast.success('Registration successful. Please check your email for the OTP code.');
+                toast.success('Registration successful. Please verify your email.');
+                navigate(`/forgot-password?email=${encodeURIComponent(formData.email)}&action=register`);
             } else {
                 await login(data, data.token);
                 toast.success('Account created successfully!');
@@ -58,57 +56,6 @@ const RegisterForm = ({ onToggle }) => {
             setLoading(false);
         }
     };
-
-    const handleVerifyOtp = async (e) => {
-        e.preventDefault();
-        
-        if (otpCode.length !== 6) {
-            setError('OTP code must be 6 digits.');
-            return;
-        }
-        
-        setLoading(true);
-        setError('');
-        
-        try {
-            const data = await verifyApi(formData.email, otpCode);
-            await login(data, data.token);
-            toast.success('Account verified successfully!');
-            navigate('/dashboard');
-        } catch (err) {
-            const msg = err.response?.data?.message || 'Invalid OTP. Please try again.';
-            setError(msg);
-            toast.error(msg);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (isOtpStep) {
-        return (
-            <form className="auth-form" onSubmit={handleVerifyOtp}>
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <Mail size={40} style={{ margin: '0 auto', color: 'var(--primary-color)' }} />
-                    <h3 style={{ marginTop: '10px' }}>Verify Your Email</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>We sent a 6-digit OTP code to <br /><strong>{formData.email}</strong></p>
-                </div>
-                
-                <Input
-                    label="OTP Code"
-                    placeholder="Enter 6-digit code"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
-                    required
-                />
-                
-                {error && <p style={{ color: 'var(--danger-color)', fontSize: '0.9rem', marginTop: '-10px', marginBottom: '10px' }}>{error}</p>}
-                
-                <Button type="submit" isLoading={loading} className="w-full mt-4">
-                    {loading ? 'Verifying...' : 'Verify Email'}
-                </Button>
-            </form>
-        );
-    }
 
     return (
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -187,4 +134,6 @@ const RegisterForm = ({ onToggle }) => {
 };
 
 export default RegisterForm;
+
+
 
