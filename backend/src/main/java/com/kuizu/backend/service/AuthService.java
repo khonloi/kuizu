@@ -6,11 +6,9 @@ import com.kuizu.backend.dto.request.RegisterRequest;
 import com.kuizu.backend.dto.request.ResetPasswordRequest;
 import com.kuizu.backend.dto.request.VerifyOtpRequest;
 import com.kuizu.backend.dto.response.AuthResponse;
-import com.kuizu.backend.entity.OtpToken;
 import com.kuizu.backend.entity.User;
 import com.kuizu.backend.entity.UserSession;
 import com.kuizu.backend.exception.ApiException;
-import com.kuizu.backend.repository.OtpTokenRepository;
 import com.kuizu.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,7 @@ public class AuthService {
     private RateLimiterService rateLimiterService;
 
     @Autowired
-    private OtpTokenRepository otpTokenRepository;
+    private OtpService otpService;
 
     @Autowired
     private EmailService emailService;
@@ -85,13 +83,7 @@ public class AuthService {
         checkOtpRateLimit(user.getEmail());
 
         String otp = String.format("%06d", random.nextInt(1000000));
-        OtpToken otpToken = OtpToken.builder()
-                .email(user.getEmail())
-                .otpCode(otp)
-                .action("REGISTER")
-                .expiresAt(LocalDateTime.now().plusMinutes(10))
-                .build();
-        otpTokenRepository.save(otpToken);
+        otpService.storeOtp(user.getEmail(), otp, "REGISTER");
 
         rateLimiterService.registerOtpRequest(user.getEmail());
         emailService.sendOtpEmail(user.getEmail(), user.getUsername(), otp, "Registration");
@@ -103,11 +95,8 @@ public class AuthService {
 
     @Transactional
     public AuthResponse verifyRegistrationOtp(VerifyOtpRequest request, HttpServletRequest httpServletRequest) {
-        OtpToken otpToken = otpTokenRepository
-                .findByEmailAndOtpCodeAndAction(request.getEmail(), request.getOtpCode(), "REGISTER")
-                .orElseThrow(() -> new ApiException("Invalid OTP code"));
-
-        if (otpToken.getUsedAt() != null || otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+        boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtpCode(), "REGISTER");
+        if (!isValid) {
             throw new ApiException("Invalid or expired OTP code");
         }
 
@@ -120,9 +109,6 @@ public class AuthService {
 
         user.setStatus(User.UserStatus.ACTIVE);
         userRepository.save(user);
-
-        otpToken.setUsedAt(LocalDateTime.now());
-        otpTokenRepository.save(otpToken);
 
         UserSession session = sessionService.createSession(user, httpServletRequest);
 
@@ -153,9 +139,8 @@ public class AuthService {
                             return new ApiException("Invalid username or email");
                         }));
 
-        if (user.getStatus() == User.UserStatus.LOCKED) {
-            throw new ApiException(
-                    "Your account is locked due to multiple failed login attempts. Please contact support.");
+        if (user.getStatus() == User.UserStatus.SUSPENDED) {
+            throw new ApiException("Your account is suspended. Please contact support.");
         }
 
         try {
@@ -167,9 +152,6 @@ public class AuthService {
             rateLimiterService.registerLoginFailedAttempt(rateLimitKey);
             int attempts = (user.getFailedLoginAttempts() == null ? 0 : user.getFailedLoginAttempts()) + 1;
             user.setFailedLoginAttempts(attempts);
-            if (attempts >= 5) {
-                user.setStatus(User.UserStatus.LOCKED);
-            }
             userRepository.save(user);
             throw new ApiException("Invalid password");
         }
@@ -202,22 +184,12 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ApiException("User not found with this email"));
 
-        // Invalidate previous ones
-        otpTokenRepository.findByEmailAndActionAndUsedAtIsNull(request.getEmail(), "PASSWORD_RESET").forEach(reset -> {
-            reset.setUsedAt(LocalDateTime.now());
-            otpTokenRepository.save(reset);
-        });
+        otpService.invalidateOtp(request.getEmail(), "PASSWORD_RESET");
 
         checkOtpRateLimit(request.getEmail());
 
         String otp = String.format("%06d", random.nextInt(1000000));
-        OtpToken otpToken = OtpToken.builder()
-                .email(user.getEmail())
-                .otpCode(otp)
-                .action("PASSWORD_RESET")
-                .expiresAt(LocalDateTime.now().plusMinutes(10))
-                .build();
-        otpTokenRepository.save(otpToken);
+        otpService.storeOtp(user.getEmail(), otp, "PASSWORD_RESET");
 
         rateLimiterService.registerForgotPasswordAttempt(request.getEmail());
         rateLimiterService.registerOtpRequest(request.getEmail());
@@ -227,11 +199,8 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
-        OtpToken otpToken = otpTokenRepository
-                .findByEmailAndOtpCodeAndAction(request.getEmail(), request.getOtpCode(), "PASSWORD_RESET")
-                .orElseThrow(() -> new ApiException("Invalid OTP code"));
-
-        if (otpToken.getUsedAt() != null || otpToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+        boolean isValid = otpService.verifyOtp(request.getEmail(), request.getOtpCode(), "PASSWORD_RESET");
+        if (!isValid) {
             throw new ApiException("Invalid or expired OTP code");
         }
 
@@ -241,9 +210,6 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         user.setPasswordUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
-
-        otpToken.setUsedAt(LocalDateTime.now());
-        otpTokenRepository.save(otpToken);
     }
 
     @Transactional
@@ -255,22 +221,12 @@ public class AuthService {
             throw new ApiException("User is already active or cannot resend code");
         }
 
-        // Invalidate previous registration tokens
-        otpTokenRepository.findByEmailAndActionAndUsedAtIsNull(email, "REGISTER").forEach(token -> {
-            token.setUsedAt(LocalDateTime.now());
-            otpTokenRepository.save(token);
-        });
+        otpService.invalidateOtp(email, "REGISTER");
 
         checkOtpRateLimit(email);
 
         String otp = String.format("%06d", random.nextInt(1000000));
-        OtpToken otpToken = OtpToken.builder()
-                .email(email)
-                .otpCode(otp)
-                .action("REGISTER")
-                .expiresAt(LocalDateTime.now().plusMinutes(10))
-                .build();
-        otpTokenRepository.save(otpToken);
+        otpService.storeOtp(email, otp, "REGISTER");
 
         rateLimiterService.registerOtpRequest(email);
         emailService.sendOtpEmail(email, user.getUsername(), otp, "Registration");
