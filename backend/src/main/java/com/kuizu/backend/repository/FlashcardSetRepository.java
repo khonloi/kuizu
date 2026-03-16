@@ -16,4 +16,6 @@ public interface FlashcardSetRepository extends JpaRepository<FlashcardSet, Long
     List<FlashcardSet> findByVisibilityAndIsDeletedFalse(Visibility visibility);
 
     List<FlashcardSet> findByStatusAndIsDeletedFalse(ModerationStatus status);
+    java.util.Optional<FlashcardSet> findByTitle(String title);
+    List<FlashcardSet> findByStatus(String status);
 }

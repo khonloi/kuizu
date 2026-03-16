@@ -71,9 +71,13 @@
     min-width: 240px;
 }
 
-.play-btn {
+.study-btn {
     background-color: var(--primary);
     color: white;
+    font-weight: 700;
+}
+
+.play-btn {
     font-weight: 700;
 }
 

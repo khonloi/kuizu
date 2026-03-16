@@ -19,6 +19,9 @@ import FlashcardSetForm from './pages/FlashcardSetForm';
 import FlashcardForm from './pages/FlashcardForm';
 import QuizPage from './pages/QuizPage';
 import QuizResultPage from './pages/QuizResultPage';
+import StudyPage from './pages/StudyPage';
+import AdminModerationPage from './pages/AdminModerationPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 import MainLayout from './components/layout';
 
@@ -48,8 +51,16 @@ function App() {
         <Route path="/flashcards/edit/:cardId" element={<FlashcardForm />} />
 
         {/* Study and Quiz Routes */}
+        <Route path="/study/:setId" element={<StudyPage />} />
         <Route path="/quiz/:setId" element={<QuizPage />} />
         <Route path="/quiz/results/:resultId" element={<QuizResultPage />} />
+
+        {/* Admin Routes */}
+        <Route path="/admin/moderation" element={
+          <ProtectedRoute roles={['ROLE_ADMIN']}>
+            <AdminModerationPage />
+          </ProtectedRoute>
+        } />
 
         <Route path="/dashboard" element={
           <MainLayout>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Home,
     Library,
@@ -17,13 +17,17 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { Button, ComingSoonModal } from '../../ui';
+import { useAuth } from '../../../context/AuthContext';
+import { getPendingCount } from '../../../api/moderation';
 import './Sidebar.css';
 
 const Sidebar = ({ isCollapsed, onToggle, activePath = '/dashboard' }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
     const [currentFeature, setCurrentFeature] = useState('');
+    const [pendingCount, setPendingCount] = useState(0);
 
     const implementedRoutes = [
         '/dashboard',
@@ -62,6 +66,10 @@ const Sidebar = ({ isCollapsed, onToggle, activePath = '/dashboard' }) => {
         { icon: <Folder size={22} />, label: 'Folders', path: '/folders' },
         { icon: <BookOpen size={22} />, label: 'Flashcards', path: '/flashcard-sets' },
         { icon: <GraduationCap size={22} />, label: 'Classes', path: '/create/class' },
+    ];
+
+    const adminLinks = [
+        { icon: <ShieldAlert size={22} />, label: 'Moderation', path: '/admin/moderation' },
     ];
 
     return (

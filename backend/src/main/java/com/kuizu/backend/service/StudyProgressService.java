@@ -36,6 +36,16 @@ public class StudyProgressService {
         }
     }
 
+    @Transactional
+    public void updateSingleCardProgress(String username, Long cardId, boolean isCorrect) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Flashcard card = flashcardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Card not found: " + cardId));
+        
+        updateCardProgress(user, card, isCorrect);
+    }
+
     private void updateCardProgress(User user, Flashcard card, boolean isCorrect) {
         StudyProgress progress = studyProgressRepository.findByUserAndFlashcard(user, card)
                 .orElse(StudyProgress.builder()

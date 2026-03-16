@@ -16,6 +16,12 @@
     width: 200px;
 }
 
+.quiz-header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .quiz-progress span {
     font-size: 0.9rem;
     color: var(--text-secondary);

@@ -4,13 +4,21 @@ import './Toast.css';
 
 const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
     const [isExiting, setIsExiting] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(Math.ceil(duration / 1000));
 
     useEffect(() => {
         const timer = setTimeout(() => {
             handleClose();
         }, duration);
 
-        return () => clearTimeout(timer);
+        const countdown = setInterval(() => {
+            setTimeLeft(prev => Math.max(0, prev - 1));
+        }, 1000);
+
+        return () => {
+            clearTimeout(timer);
+            clearInterval(countdown);
+        };
     }, [duration]);
 
     const handleClose = () => {
@@ -40,9 +48,16 @@ const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
             <div className="toast-content">
                 {message}
             </div>
-            <button className="toast-close" onClick={handleClose}>
-                <X size={16} />
-            </button>
+            <div className="toast-meta">
+                <span className="toast-countdown">{timeLeft}s</span>
+                <button className="toast-close" onClick={handleClose}>
+                    <X size={16} />
+                </button>
+            </div>
+            <div
+                className="toast-progress"
+                style={{ animationDuration: `${duration}ms` }}
+            ></div>
         </div>
     );
 };

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { getFlashcardsBySetId } from '../api/flashcards';
 import { submitQuiz } from '../api/study';
-import { Button, Card, Loader } from '../components/ui';
+import { Button, Card, Loader, Modal } from '../components/ui';
 import MainLayout from '../components/layout';
 import './QuizPage.css';
 
@@ -21,6 +21,7 @@ const QuizPage = () => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [isFinished, setIsFinished] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showFinishModal, setShowFinishModal] = useState(false);
 
     useEffect(() => {
         if (cards.length > 0) {
@@ -181,14 +182,23 @@ const QuizPage = () => {
                         <ChevronLeft size={20} />
                         Exit Quiz
                     </button>
-                    <div className="quiz-progress">
-                        <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-                        <div className="progress-bar-bg">
-                            <div
-                                className="progress-bar-fill"
-                                style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-                            ></div>
+                    <div className="quiz-header-right">
+                        <div className="quiz-progress">
+                            <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
+                            <div className="progress-bar-bg">
+                                <div
+                                    className="progress-bar-fill"
+                                    style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+                                ></div>
+                            </div>
                         </div>
+                        <Button 
+                            variant="secondary" 
+                            size="sm"
+                            onClick={() => setShowFinishModal(true)}
+                        >
+                            Finish
+                        </Button>
                     </div>
                 </div>
 
@@ -223,6 +233,35 @@ const QuizPage = () => {
                     </div>
                 </div>
             </div>
+
+            <Modal
+                isOpen={showFinishModal}
+                onClose={() => setShowFinishModal(false)}
+                title="Finish Quiz Early?"
+                footer={
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                        <Button 
+                            variant="secondary" 
+                            onClick={() => setShowFinishModal(false)}
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="primary" 
+                            onClick={() => {
+                                setShowFinishModal(false);
+                                handleSubmitQuiz();
+                            }}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Submitting...' : 'Confirm Finish'}
+                        </Button>
+                    </div>
+                }
+            >
+                <p>Are you sure you want to finish this quiz early? Your progress so far will be saved and calculated.</p>
+            </Modal>
         </MainLayout>
     );
 };

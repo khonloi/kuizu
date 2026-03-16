@@ -25,7 +25,7 @@ const Navbar = ({ isSidebarCollapsed, onToggleSidebar }) => {
 
     const handleLogout = () => {
         logout();
-        toast.info('Logged out successfully');
+        toast.info('Logged out successfully', 6000);
         navigate('/auth');
     };
 

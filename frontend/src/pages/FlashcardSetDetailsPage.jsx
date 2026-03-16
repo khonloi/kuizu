@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Play, Plus, Pencil, Trash2, User, Layers } from 'lucide-react';
+import { ChevronLeft, Play, Plus, Pencil, Trash2, User, Layers, BookOpen } from 'lucide-react';
 import './FlashcardSetDetailsPage.css';
 import { getFlashcardSetById, getFlashcardsBySetId, deleteFlashcard } from '../api/flashcards';
 import { getStudyProgress, resetStudyProgress } from '../api/study';
-import { Button, Card, Loader } from '../components/ui';
+import { Button, Card, Loader, ConfirmationModal, CelebrationModal } from '../components/ui';
 import MainLayout from '../components/layout';
 
 const FlashcardSetDetailsPage = () => {
@@ -15,6 +15,11 @@ const FlashcardSetDetailsPage = () => {
     const [progress, setProgress] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [cardToDelete, setCardToDelete] = useState(null);
+    const [isResetting, setIsResetting] = useState(false);
+    const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -39,27 +44,44 @@ const FlashcardSetDetailsPage = () => {
         }
     };
 
-    const handleDeleteCard = async (cardId) => {
-        if (window.confirm('Are you sure you want to delete this flashcard?')) {
-            try {
-                await deleteFlashcard(cardId);
-                setCards(cards.filter(c => c.cardId !== cardId));
-            } catch (err) {
-                alert('Failed to delete card');
-            }
+    const handleDeleteCard = async () => {
+        if (!cardToDelete) return;
+        try {
+            setIsDeleting(true);
+            await deleteFlashcard(cardToDelete);
+            setCards(cards.filter(c => c.cardId !== cardToDelete));
+            setCardToDelete(null);
+        } catch (err) {
+            alert('Failed to delete card');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
-    const handleResetProgress = async () => {
-        if (window.confirm('Are you sure you want to reset your study progress for this set?')) {
-            try {
-                await resetStudyProgress(setId);
-                const progressData = await getStudyProgress(setId);
-                setProgress(progressData);
-                alert('Progress reset successfully');
-            } catch (err) {
-                alert('Failed to reset progress');
+    useEffect(() => {
+        if (progress?.progressPercentage === 100 && !loading) {
+            // Only show if reached 100% and not triggered yet in this session
+            const hasSeenCelebration = sessionStorage.getItem(`celebration_${setId}`);
+            if (!hasSeenCelebration) {
+                setIsCelebrationOpen(true);
+                sessionStorage.setItem(`celebration_${setId}`, 'true');
             }
+        }
+    }, [progress?.progressPercentage, loading, setId]);
+
+    const handleResetProgress = async () => {
+        try {
+            setIsResetting(true);
+            await resetStudyProgress(setId);
+            const progressData = await getStudyProgress(setId);
+            setProgress(progressData);
+            // Clear the celebration flag so it can show again when 100% is reached
+            sessionStorage.removeItem(`celebration_${setId}`);
+            setIsResetModalOpen(false);
+        } catch (err) {
+            alert('Failed to reset progress');
+        } finally {
+            setIsResetting(false);
         }
     };
 
@@ -93,20 +115,30 @@ const FlashcardSetDetailsPage = () => {
 
                     <div className="set-actions">
                         <Button
+                            className="study-btn"
+                            size="lg"
+                            variant="primary"
+                            onClick={() => navigate(`/study/${setId}`, { state: { cards } })}
+                            leftIcon={<BookOpen size={20} />}
+                        >
+                            Study
+                        </Button>
+                        <Button
                             className="play-btn"
                             size="lg"
+                            variant="outline"
                             onClick={() => navigate(`/quiz/${setId}`, { state: { cards } })}
                             disabled={cards.length < 2}
+                            leftIcon={<Play size={20} fill="currentColor" />}
                         >
-                            <Play size={20} fill="currentColor" />
                             Take Quiz
                         </Button>
                         <Button
                             variant="outline"
                             size="lg"
                             onClick={() => navigate(`/flashcard-sets/edit/${set.setId}`)}
+                            leftIcon={<Pencil size={20} />}
                         >
-                            <Pencil size={20} />
                             Edit Set
                         </Button>
                     </div>
@@ -125,7 +157,7 @@ const FlashcardSetDetailsPage = () => {
                                     </div>
                                 </div>
                                 <div className="progress-action">
-                                    <Button variant="ghost" size="sm" onClick={handleResetProgress}>
+                                    <Button variant="ghost" size="sm" onClick={() => setIsResetModalOpen(true)}>
                                         <Trash2 size={16} />
                                         Reset Progress
                                     </Button>
@@ -149,8 +181,8 @@ const FlashcardSetDetailsPage = () => {
                             variant="ghost"
                             className="add-card-btn"
                             onClick={() => navigate(`/flashcards/create?setId=${setId}`)}
+                            leftIcon={<Plus size={20} />}
                         >
-                            <Plus size={20} />
                             Add Card
                         </Button>
                     </div>
@@ -183,7 +215,7 @@ const FlashcardSetDetailsPage = () => {
                                             variant="ghost"
                                             size="sm"
                                             className="delete-btn"
-                                            onClick={() => handleDeleteCard(card.cardId)}
+                                            onClick={() => setCardToDelete(card.cardId)}
                                         >
                                             <Trash2 size={18} />
                                         </Button>
@@ -200,6 +232,36 @@ const FlashcardSetDetailsPage = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Reset Progress Confirmation */}
+                <ConfirmationModal
+                    isOpen={isResetModalOpen}
+                    onClose={() => setIsResetModalOpen(false)}
+                    onConfirm={handleResetProgress}
+                    title="Reset Study Progress"
+                    message="Are you sure you want to reset your progress for this set? This will set all cards back to 'New' status."
+                    confirmText="Reset Progress"
+                    type="danger"
+                    isLoading={isResetting}
+                />
+
+                {/* Delete Card Confirmation */}
+                <ConfirmationModal
+                    isOpen={!!cardToDelete}
+                    onClose={() => setCardToDelete(null)}
+                    onConfirm={handleDeleteCard}
+                    title="Delete Flashcard"
+                    message="Are you sure you want to delete this card? This action cannot be undone."
+                    confirmText="Delete"
+                    type="danger"
+                    isLoading={isDeleting}
+                />
+
+                <CelebrationModal
+                    isOpen={isCelebrationOpen}
+                    onClose={() => setIsCelebrationOpen(false)}
+                    setTitle={set?.title}
+                />
             </div>
         </MainLayout>
     );

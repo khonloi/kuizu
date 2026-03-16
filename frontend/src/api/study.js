@@ -18,3 +18,8 @@ export const getStudyProgress = async (setId) => {
 export const resetStudyProgress = async (setId) => {
     await api.post(`/study/progress/reset/${setId}`);
 };
+
+export const updateStudyProgress = async (cardId, isCorrect) => {
+    const response = await api.post('/study/study/update', { cardId, isCorrect });
+    return response.data;
+};

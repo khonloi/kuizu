@@ -1,6 +1,7 @@
 package com.kuizu.backend.controller;
 
 import com.kuizu.backend.dto.request.QuizSubmitRequest;
+import com.kuizu.backend.dto.request.StudySessionRequest;
 import com.kuizu.backend.dto.response.StudyProgressResponse;
 import com.kuizu.backend.service.StudyProgressService;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +32,11 @@ public class StudyProgressController {
     public ResponseEntity<Void> resetProgress(Principal principal, @PathVariable Long setId) {
         studyProgressService.resetProgress(principal.getName(), setId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/study/update")
+    public ResponseEntity<Void> updateStudySession(Principal principal, @RequestBody StudySessionRequest request) {
+        studyProgressService.updateSingleCardProgress(principal.getName(), request.getCardId(), request.getIsCorrect());
+        return ResponseEntity.ok().build();
     }
 }
