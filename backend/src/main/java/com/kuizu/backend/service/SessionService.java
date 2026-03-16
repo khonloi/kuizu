@@ -45,4 +45,11 @@ public class SessionService {
             userSessionRepository.save(session);
         });
     }
+
+    public void revokeAllUserSessions(User user) {
+        userSessionRepository.findByUserAndRevokedAtIsNull(user).forEach(session -> {
+            session.setRevokedAt(LocalDateTime.now());
+            userSessionRepository.save(session);
+        });
+    }
 }
