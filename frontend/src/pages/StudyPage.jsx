@@ -158,7 +158,7 @@ const StudyPage = () => {
                                     Study Starred ({starredCards.length})
                                 </Button>
                             )}
-                            <Button variant="outline" onClick={() => navigate(`/flashcard-sets/${setId}`)}>
+                            <Button variant="outline" onClick={() => navigate(`/flashcard-sets/${setId}`)} className="return-btn">
                                 Return to Set
                             </Button>
                         </div>
@@ -189,29 +189,37 @@ const StudyPage = () => {
         <MainLayout>
             <div className="study-page-container">
                 <div className="study-header">
-                    <button className="back-link" onClick={() => navigate(`/flashcard-sets/${setId}`)}>
-                        <ChevronLeft size={20} />
-                        Exit Study
-                    </button>
-
-                    <div className="study-progress-container">
-                        <div className="progress-info">
-                            <span>Card {currentIndex + 1} of {cards.length}</span>
-                            <span>{Math.round(progress)}% progress</span>
-                        </div>
-                        <div className="progress-bar-bg">
-                            <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
-                        </div>
+                    <div className="study-header-left">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/flashcard-sets/${setId}`)}
+                            leftIcon={<ChevronLeft size={20} />}
+                            className="back-set-btn"
+                        >
+                            Back to Set
+                        </Button>
                     </div>
 
-                    <div className="study-actions">
-                        <button
-                            className="shuffle-btn"
-                            onClick={handleShuffle}
-                            title="Shuffle cards"
-                        >
-                            <Shuffle size={20} />
-                        </button>
+                    <div className="study-header-right">
+                        <div className="progress-text">
+                            Card <span className="current">{currentIndex + 1}</span> of <span className="total">{cards.length}</span>
+                        </div>
+                        <div className="header-actions">
+                            <button
+                                className="shuffle-btn"
+                                onClick={handleShuffle}
+                                title="Shuffle cards"
+                            >
+                                <Shuffle size={18} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="study-progress-bar">
+                    <div className="progress-bar-bg">
+                        <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
                     </div>
                 </div>
 

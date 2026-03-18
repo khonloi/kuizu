@@ -178,27 +178,36 @@ const QuizPage = () => {
         <MainLayout>
             <div className="quiz-container">
                 <div className="quiz-header">
-                    <button className="back-link" onClick={() => navigate(-1)}>
-                        <ChevronLeft size={20} />
-                        Exit Quiz
-                    </button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/flashcard-sets/${setId}`)}
+                        leftIcon={<ChevronLeft size={20} />}
+                        className="back-set-btn"
+                    >
+                        Back to Set
+                    </Button>
                     <div className="quiz-header-right">
-                        <div className="quiz-progress">
-                            <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-                            <div className="progress-bar-bg">
-                                <div
-                                    className="progress-bar-fill"
-                                    style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-                                ></div>
-                            </div>
+                        <div className="quiz-progress-text">
+                            Question <span className="current">{currentQuestionIndex + 1}</span> of <span className="total">{questions.length}</span>
                         </div>
                         <Button 
-                            variant="secondary" 
+                            variant="primary" 
                             size="sm"
+                            className="finish-quiz-btn"
                             onClick={() => setShowFinishModal(true)}
                         >
                             Finish
                         </Button>
+                    </div>
+                </div>
+
+                <div className="quiz-progress-bar">
+                    <div className="progress-bar-bg">
+                        <div
+                            className="progress-bar-fill"
+                            style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
+                        ></div>
                     </div>
                 </div>
 
