@@ -123,6 +123,8 @@ public class ClassService {
                 clazz.getClassName(),
                 clazz.getDescription(),
                 clazz.getVisibility(),
+                clazz.getStatus(),
+                clazz.getModerationNotes(),
                 classMaterialResponseList,
                 isMember,
                 isOwner,
@@ -145,7 +147,9 @@ public class ClassService {
                 c.getOwner().getDisplayName(),
                 c.getClassName(),
                 c.getDescription(),
-                c.getVisibility()
+                c.getVisibility(),
+                c.getStatus(),
+                c.getModerationNotes()
         );
     }
 
@@ -182,14 +186,12 @@ public class ClassService {
                 .className(request.getClassName())
                 .description(request.getDescription())
                 .visibility(request.getVisibility() != null ? request.getVisibility() : Visibility.PUBLIC)
-                .status(request.getVisibility() == Visibility.PUBLIC ? ModerationStatus.PENDING : ModerationStatus.ACTIVE)
+                .status(ModerationStatus.PENDING)
                 .joinCode(joinCode)
                 .submittedBy(user.getUserId())
                 .build();
 
-        if (newClass.getStatus() == ModerationStatus.PENDING) {
-            newClass.setSubmittedAt(java.time.LocalDateTime.now());
-        }
+        newClass.setSubmittedAt(java.time.LocalDateTime.now());
 
         newClass = classRepository.save(newClass);
 
@@ -197,6 +199,15 @@ public class ClassService {
         notificationService.notifyAdmins(
             "New Class Pending Review",
             "A new class '" + newClass.getClassName() + "' was created by " + user.getDisplayName() + " (@" + user.getUsername() + ") and needs moderation.",
+            newClass.getClassId().toString()
+        );
+
+        // Notify user
+        notificationService.sendNotification(
+            user,
+            "Class Under Review",
+            "Your newly created class '" + newClass.getClassName() + "' is currently pending moderation and awaiting review by the admins.",
+            "SYSTEM",
             newClass.getClassId().toString()
         );
 
