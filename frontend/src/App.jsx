@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
+import { BookOpen, Plus } from 'lucide-react';
 import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage/HomePage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
@@ -12,6 +13,15 @@ import ComingSoonPage from './pages/ComingSoonPage';
 import FoldersPage from './pages/FoldersPage/FoldersPage';
 import FolderDetailPage from './pages/FolderDetailPage/FolderDetailPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage';
+import FlashcardSetsPage from './pages/FlashcardSetsPage';
+import FlashcardSetDetailsPage from './pages/FlashcardSetDetailsPage';
+import FlashcardSetForm from './pages/FlashcardSetForm';
+import FlashcardForm from './pages/FlashcardForm';
+import QuizPage from './pages/QuizPage';
+import QuizResultPage from './pages/QuizResultPage';
+import StudyPage from './pages/StudyPage';
+import AdminModerationPage from './pages/AdminModerationPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 import MainLayout from './components/layout';
 
@@ -27,6 +37,28 @@ function App() {
         <Route path="/profile" element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        } />
+
+        {/* Flashcard Set Routes */}
+        <Route path="/flashcard-sets" element={<FlashcardSetsPage />} />
+        <Route path="/flashcard-sets/create" element={<FlashcardSetForm />} />
+        <Route path="/flashcard-sets/edit/:setId" element={<FlashcardSetForm />} />
+        <Route path="/flashcard-sets/:setId" element={<FlashcardSetDetailsPage />} />
+
+        {/* Individual Flashcard Routes */}
+        <Route path="/flashcards/create" element={<FlashcardForm />} />
+        <Route path="/flashcards/edit/:cardId" element={<FlashcardForm />} />
+
+        {/* Study and Quiz Routes */}
+        <Route path="/study/:setId" element={<StudyPage />} />
+        <Route path="/quiz/:setId" element={<QuizPage />} />
+        <Route path="/quiz/results/:resultId" element={<QuizResultPage />} />
+
+        {/* Admin Routes */}
+        <Route path="/admin/moderation" element={
+          <ProtectedRoute roles={['ROLE_ADMIN']}>
+            <AdminModerationPage />
           </ProtectedRoute>
         } />
 

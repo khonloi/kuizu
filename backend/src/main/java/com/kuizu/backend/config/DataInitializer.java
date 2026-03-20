@@ -41,6 +41,7 @@ public class DataInitializer {
         private final PasswordEncoder passwordEncoder;
 
         @Bean
+        @org.springframework.core.annotation.Order(1)
         @Profile("!test")
         public CommandLineRunner initData() {
                 return args -> {

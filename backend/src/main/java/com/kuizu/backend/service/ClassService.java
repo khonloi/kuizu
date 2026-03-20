@@ -32,12 +32,16 @@ public class ClassService {
     private final UserRepository userRepository;
     private final ClassMemberRepository classMemberRepository;
     private final ClassJoinRequestRepository classJoinRequestRepository;
+    private final NotificationService notificationService;
 
-    public ClassService(ClassRepository classRepository, UserRepository userRepository, ClassMemberRepository classMemberRepository, ClassJoinRequestRepository classJoinRequestRepository) {
+    public ClassService(ClassRepository classRepository, UserRepository userRepository, 
+                        ClassMemberRepository classMemberRepository, ClassJoinRequestRepository classJoinRequestRepository,
+                        NotificationService notificationService) {
         this.classRepository = classRepository;
         this.userRepository = userRepository;
         this.classMemberRepository = classMemberRepository;
         this.classJoinRequestRepository = classJoinRequestRepository;
+        this.notificationService = notificationService;
     }
 
     public ClassInfoResponse findClassById(Long classId, String username) {
@@ -173,6 +177,13 @@ public class ClassService {
         }
 
         newClass = classRepository.save(newClass);
+
+        // Notify admins
+        notificationService.notifyAdmins(
+            "New Class Pending Review",
+            "A new class '" + newClass.getClassName() + "' was created by " + user.getDisplayName() + " (@" + user.getUsername() + ") and needs moderation.",
+            newClass.getClassId().toString()
+        );
 
         return convertToClassInfoResponse(newClass, username);
     }

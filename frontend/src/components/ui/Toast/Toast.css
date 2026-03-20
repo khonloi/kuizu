@@ -108,6 +108,46 @@
     }
 }
 
+.toast-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 12px;
+}
+
+.toast-countdown {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-light);
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 999px;
+    min-width: 32px;
+    text-align: center;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: currentColor;
+    opacity: 0.3;
+    width: 100%;
+    transform-origin: left;
+    animation: toast-progress-shrink linear forwards;
+}
+
+@keyframes toast-progress-shrink {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
 @media (max-width: 480px) {
     .toast-container {
         bottom: 16px;

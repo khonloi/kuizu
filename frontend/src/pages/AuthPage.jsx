@@ -30,6 +30,20 @@ const AuthPage = () => {
         }
     }, [hasCheckedReason, toast]);
 
+    const hasShownToast = React.useRef(false);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const reason = queryParams.get('reason');
+
+        if (reason === 'suspended' && !hasShownToast.current) {
+            hasShownToast.current = true;
+            toast.error('Your account has been suspended by an administrator. Please contact support.', 10000);
+            // Clear the query parameter so it doesn't show again on refresh
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [location, toast]);
+
     if (user) {
         return <Navigate to="/dashboard" replace />;
     }
