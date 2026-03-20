@@ -1,0 +1,91 @@
+.join-class-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.join-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.join-option-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.join-option-card:hover {
+    border-color: var(--border-hover);
+    background-color: var(--background);
+}
+
+.join-option-card.active {
+    border-color: var(--primary);
+    background-color: rgba(66, 85, 255, 0.05);
+}
+
+.option-radio {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+}
+
+.join-option-card.active .option-radio {
+    border-color: var(--primary);
+}
+
+.radio-inner {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    transform: scale(0);
+    transition: transform 0.2s ease;
+}
+
+.join-option-card.active .radio-inner {
+    transform: scale(1);
+}
+
+.option-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.option-info p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.4;
+}
+
+.join-form-area {
+    background-color: var(--background);
+    padding: 20px;
+    border-radius: 12px;
+    min-height: 120px;
+}
+
+
+
+.join-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    width: 100%;
+}
