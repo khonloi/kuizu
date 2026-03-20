@@ -19,21 +19,20 @@ import java.util.stream.Collectors;
 @Service
 public class FlashcardSetService {
 
-    private final FlashcardSetRepository flashcardSetRepository;
-    private final FlashcardRepository flashcardRepository;
-    private final UserRepository userRepository;
-    private final StatisticService statisticService;
+    @Autowired
+    private FlashcardSetRepository flashcardSetRepository;
 
-    public FlashcardSetService(FlashcardSetRepository flashcardSetRepository, FlashcardRepository flashcardRepository,
-            UserRepository userRepository, StatisticService statisticService) {
-        this.flashcardSetRepository = flashcardSetRepository;
-        this.flashcardRepository = flashcardRepository;
-        this.userRepository = userRepository;
-        this.statisticService = statisticService;
-    }
+    @Autowired
+    private FlashcardRepository flashcardRepository;
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private StatisticService statisticService;
 
     public List<FlashcardSetResponse> getAllPublicSets() {
         return flashcardSetRepository.findByVisibilityAndIsDeletedFalse(Visibility.PUBLIC)
@@ -94,6 +93,7 @@ public class FlashcardSetService {
                         + "' is currently pending moderation and awaiting review by the admins.",
                 "SYSTEM",
                 set.getSetId().toString());
+
         return mapToResponse(set);
     }
 
@@ -113,7 +113,6 @@ public class FlashcardSetService {
             set.setDescription(request.getDescription());
         if (request.getVisibility() != null)
             set.setVisibility(Visibility.valueOf(request.getVisibility().toUpperCase()));
-
 
         set = flashcardSetRepository.save(set);
         return mapToResponse(set);
@@ -161,7 +160,8 @@ public class FlashcardSetService {
         // Notify admins
         notificationService.notifyAdmins(
                 "Flashcard Set Re-submission",
-                "Flashcard set '" + set.getTitle() + "' was re-submitted for review by " + set.getOwner().getDisplayName()
+                "Flashcard set '" + set.getTitle() + "' was re-submitted for review by "
+                        + set.getOwner().getDisplayName()
                         + " (@" + set.getOwner().getUsername() + ").",
                 set.getSetId().toString());
 
@@ -193,5 +193,3 @@ public class FlashcardSetService {
                 .build();
     }
 }
-
-                        

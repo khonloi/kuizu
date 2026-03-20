@@ -359,7 +359,7 @@ public class ClassService {
     public ClassInfoResponse reRequestReview(Long classId, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApiException("User not found: " + username));
-        
+
         Class clazz = classRepository.findByClassId(classId)
                 .orElseThrow(() -> new ApiException("Class not found: " + classId));
 
@@ -377,10 +377,10 @@ public class ClassService {
 
         // Notify admins
         notificationService.notifyAdmins(
-            "Class Re-requested for Review",
-            "Class '" + clazz.getClassName() + "' was re-requested for review by " + user.getDisplayName() + " (@" + user.getUsername() + ").",
-            clazz.getClassId().toString()
-        );
+                "Class Re-requested for Review",
+                "Class '" + clazz.getClassName() + "' was re-requested for review by " + user.getDisplayName() + " (@"
+                        + user.getUsername() + ").",
+                clazz.getClassId().toString());
 
         return convertToClassInfoResponse(clazz, username);
     }
