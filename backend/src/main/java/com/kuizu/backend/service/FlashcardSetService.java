@@ -28,6 +28,9 @@ public class FlashcardSetService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public List<FlashcardSetResponse> getAllPublicSets() {
         return flashcardSetRepository.findByVisibilityAndIsDeletedFalse(Visibility.PUBLIC)
                 .stream()
@@ -61,12 +64,31 @@ public class FlashcardSetService {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .visibility(request.getVisibility() != null ? Visibility.valueOf(request.getVisibility().toUpperCase()) : Visibility.PUBLIC)
-                .status(com.kuizu.backend.entity.enumeration.ModerationStatus.ACTIVE)
+                .status(com.kuizu.backend.entity.enumeration.ModerationStatus.PENDING)
                 .isDeleted(false)
                 .version(1)
+                .submittedBy(owner.getUserId())
+                .submittedAt(java.time.LocalDateTime.now())
                 .build();
 
         set = flashcardSetRepository.save(set);
+
+        // Notify admins
+        notificationService.notifyAdmins(
+            "New Flashcard Set Pending Review",
+            "A new flashcard set '" + set.getTitle() + "' was created by " + owner.getDisplayName() + " (@" + owner.getUsername() + ") and needs moderation.",
+            set.getSetId().toString()
+        );
+
+        // Notify user
+        notificationService.sendNotification(
+            owner,
+            "Flashcard Set Under Review",
+            "Your newly created flashcard set '" + set.getTitle() + "' is currently pending moderation and awaiting review by the admins.",
+            "SYSTEM",
+            set.getSetId().toString()
+        );
+
         return mapToResponse(set);
     }
 
@@ -112,6 +134,7 @@ public class FlashcardSetService {
                 .description(set.getDescription())
                 .visibility(set.getVisibility() != null ? set.getVisibility().name() : null)
                 .status(set.getStatus() != null ? set.getStatus().name() : null)
+                .moderationNotes(set.getModerationNotes())
                 .cardCount((int) count)
                 .createdAt(set.getCreatedAt())
                 .updatedAt(set.getUpdatedAt())

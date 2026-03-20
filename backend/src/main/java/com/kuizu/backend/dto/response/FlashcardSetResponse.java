@@ -21,6 +21,7 @@ public class FlashcardSetResponse {
     private String description;
     private String visibility;
     private String status;
+    private String moderationNotes;
     private Integer cardCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

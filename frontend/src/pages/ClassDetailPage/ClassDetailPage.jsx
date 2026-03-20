@@ -219,9 +219,23 @@ const ClassDetailPage = () => {
             <header className="class-header-section">
                 <div className="class-header-content">
                     <div className="class-badges">
-                        <span className="badge badge-primary">Class</span>
+                        {classData.status === 'PENDING' && (
+                            <span className="badge" style={{ backgroundColor: '#eab308', color: 'black', marginLeft: '8px' }}>Pending Review</span>
+                        )}
+                        {classData.status === 'REJECTED' && (
+                            <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: '8px' }}>Rejected</span>
+                        )}
+                        {classData.status === 'ACTIVE' && classData.isOwner && (
+                            <span className="badge" style={{ backgroundColor: '#22c55e', color: 'white', marginLeft: '8px' }}>Approved</span>
+                        )}
                     </div>
                     <h1 className="class-title">{classData.className}</h1>
+                    {classData.status === 'REJECTED' && classData.moderationNotes && (
+                        <div style={{ backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', maxWidth: '600px' }}>
+                            <h4 style={{ color: '#991b1b', margin: '0 0 4px 0', fontSize: '0.9rem', fontWeight: 700 }}>Moderator Feedback:</h4>
+                            <p style={{ color: '#b91c1c', margin: 0, fontSize: '0.9rem' }}>{classData.moderationNotes}</p>
+                        </div>
+                    )}
                     <p className="class-owner">Created by <strong>{classData.ownerDisplayName}</strong></p>
 
                     <div className="class-actions">

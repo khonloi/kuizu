@@ -21,6 +21,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kuizu.backend.service.NotificationService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,18 +35,21 @@ public class ModerationService {
     private final ModerationHistoryRepository moderationHistoryRepository;
     private final UserRepository userRepository;
     private final FlashcardRepository flashcardRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public ModerationService(FlashcardSetRepository flashcardSetRepository,
             ClassRepository classRepository,
             ModerationHistoryRepository moderationHistoryRepository,
             UserRepository userRepository,
-            FlashcardRepository flashcardRepository) {
+            FlashcardRepository flashcardRepository,
+            NotificationService notificationService) {
         this.flashcardSetRepository = flashcardSetRepository;
         this.classRepository = classRepository;
         this.moderationHistoryRepository = moderationHistoryRepository;
         this.userRepository = userRepository;
         this.flashcardRepository = flashcardRepository;
+        this.notificationService = notificationService;
     }
 
     public List<FlashcardSetSubmissionResponse> getPendingFlashcardSets() {
@@ -83,8 +88,18 @@ public class ModerationService {
         set.setModeratedBy(moderator.getUserId());
         set.setModeratedAt(LocalDateTime.now());
         set.setModerationNotes(request.getNotes());
-        flashcardSetRepository.save(set);
+        set = flashcardSetRepository.save(set);
         logModerationAction(moderator, "SET", String.valueOf(setId), "APPROVE", request.getNotes());
+
+        // Notify owner
+        notificationService.sendNotification(
+            set.getOwner(),
+            "Flashcard Set Approved",
+            "Your flashcard set '" + set.getTitle() + "' has been approved by the moderator." + 
+            (request.getNotes() != null && !request.getNotes().isEmpty() ? "\nFeedback: " + request.getNotes() : ""),
+            "MODERATION",
+            set.getSetId().toString()
+        );
     }
 
     @Transactional
@@ -96,8 +111,18 @@ public class ModerationService {
         set.setModeratedBy(moderator.getUserId());
         set.setModeratedAt(LocalDateTime.now());
         set.setModerationNotes(request.getNotes());
-        flashcardSetRepository.save(set);
+        set = flashcardSetRepository.save(set);
         logModerationAction(moderator, "SET", String.valueOf(setId), "REJECT", request.getNotes());
+
+        // Notify owner
+        notificationService.sendNotification(
+            set.getOwner(),
+            "Flashcard Set Rejected",
+            "Your flashcard set '" + set.getTitle() + "' has been rejected by the moderator." + 
+            (request.getNotes() != null && !request.getNotes().isEmpty() ? "\n\nFeedback: " + request.getNotes() : ""),
+            "MODERATION",
+            set.getSetId().toString()
+        );
     }
 
     @Transactional
@@ -109,8 +134,17 @@ public class ModerationService {
         cls.setModeratedBy(moderator.getUserId());
         cls.setModeratedAt(LocalDateTime.now());
         cls.setModerationNotes(request.getNotes());
-        classRepository.save(cls);
+        cls = classRepository.save(cls);
         logModerationAction(moderator, "CLASS", String.valueOf(classId), "APPROVE", request.getNotes());
+
+        // Notify owner
+        notificationService.sendNotification(
+            cls.getOwner(),
+            "Class Approved",
+            "Your class '" + cls.getClassName() + "' has been approved by the moderator.",
+            "MODERATION",
+            cls.getClassId().toString()
+        );
     }
 
     @Transactional
@@ -122,8 +156,18 @@ public class ModerationService {
         cls.setModeratedBy(moderator.getUserId());
         cls.setModeratedAt(LocalDateTime.now());
         cls.setModerationNotes(request.getNotes());
-        classRepository.save(cls);
+        cls = classRepository.save(cls);
         logModerationAction(moderator, "CLASS", String.valueOf(classId), "REJECT", request.getNotes());
+
+        // Notify owner
+        notificationService.sendNotification(
+            cls.getOwner(),
+            "Class Rejected",
+            "Your class '" + cls.getClassName() + "' has been rejected by the moderator." + 
+            (request.getNotes() != null && !request.getNotes().isEmpty() ? "\n\nFeedback: " + request.getNotes() : ""),
+            "MODERATION",
+            cls.getClassId().toString()
+        );
     }
 
     private User getCurrentUser() {
