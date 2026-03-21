@@ -54,6 +54,9 @@ public class AuthService {
     @Autowired
     private SocialAuthService socialAuthService;
 
+    @Autowired
+    private StatisticService statisticService;
+
     private static final Random random = new Random();
 
     @Transactional
@@ -120,6 +123,7 @@ public class AuthService {
         userRepository.save(user);
 
         UserSession session = sessionService.createSession(user, httpServletRequest);
+        statisticService.updateUserActivity(user);
 
         return AuthResponse.builder()
                 .token(session.getSessionToken())
@@ -169,6 +173,7 @@ public class AuthService {
         userRepository.save(user);
 
         UserSession session = sessionService.createSession(user, httpServletRequest);
+        statisticService.updateUserActivity(user);
 
         return AuthResponse.builder()
                 .token(session.getSessionToken())
@@ -233,6 +238,7 @@ public class AuthService {
         userRepository.save(user);
 
         UserSession session = sessionService.createSession(user, httpServletRequest);
+        statisticService.updateUserActivity(user);
 
         return AuthResponse.builder()
                 .token(session.getSessionToken())

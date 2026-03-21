@@ -21,18 +21,40 @@ public class StudyProgressService {
     private final FlashcardRepository flashcardRepository;
     private final FlashcardSetRepository flashcardSetRepository;
     private final UserRepository userRepository;
+    private final StatisticService statisticService;
 
     @Transactional
     public void recordQuizSubmission(String username, QuizSubmitRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (request.getAnswers() == null || request.getAnswers().isEmpty()) {
+            return;
+        }
+
+        long correctAnswers = 0;
+        FlashcardSet set = null;
+
         for (QuizSubmitRequest.AnswerItem answer : request.getAnswers()) {
             Flashcard card = flashcardRepository.findById(answer.getCardId())
                     .orElseThrow(() -> new RuntimeException("Card not found: " + answer.getCardId()));
 
+            if (set == null) {
+                set = card.getFlashcardSet();
+            }
+
+            if (answer.getIsCorrect()) {
+                correctAnswers++;
+            }
+
             // Chỉ cập nhật tiến độ học tập trong bảng study_progress
             updateCardProgress(user, card, answer.getIsCorrect());
+        }
+
+        if (set != null) {
+            java.math.BigDecimal score = java.math.BigDecimal.valueOf((double) correctAnswers / request.getAnswers().size() * 100);
+            statisticService.updateUserQuizStats(user, score);
+            statisticService.updateSetQuizStats(set, score);
         }
     }
 
