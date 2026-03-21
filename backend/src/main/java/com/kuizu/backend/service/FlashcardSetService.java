@@ -19,17 +19,20 @@ import java.util.stream.Collectors;
 @Service
 public class FlashcardSetService {
 
-    @Autowired
-    private FlashcardSetRepository flashcardSetRepository;
+    private final FlashcardSetRepository flashcardSetRepository;
+    private final FlashcardRepository flashcardRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    @Autowired
-    private FlashcardRepository flashcardRepository;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private UserRepository userRepository;
+    public FlashcardSetService(FlashcardSetRepository flashcardSetRepository,
+            FlashcardRepository flashcardRepository,
+            UserRepository userRepository,
+            NotificationService notificationService) {
+        this.flashcardSetRepository = flashcardSetRepository;
+        this.flashcardRepository = flashcardRepository;
+        this.userRepository = userRepository;
+        this.notificationService = notificationService;
+    }
 
     @Autowired
     private StatisticService statisticService;
