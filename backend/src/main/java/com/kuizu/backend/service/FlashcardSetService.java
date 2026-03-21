@@ -23,14 +23,12 @@ public class FlashcardSetService {
     private final FlashcardRepository flashcardRepository;
     private final UserRepository userRepository;
 
-    public FlashcardSetService(FlashcardSetRepository flashcardSetRepository, FlashcardRepository flashcardRepository, UserRepository userRepository) {
+    public FlashcardSetService(FlashcardSetRepository flashcardSetRepository, FlashcardRepository flashcardRepository,
+            UserRepository userRepository) {
         this.flashcardSetRepository = flashcardSetRepository;
         this.flashcardRepository = flashcardRepository;
         this.userRepository = userRepository;
     }
-
-    @Autowired
-    private NotificationService notificationService;
 
     @Autowired
     private NotificationService notificationService;
@@ -67,7 +65,8 @@ public class FlashcardSetService {
                 .owner(owner)
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .visibility(request.getVisibility() != null ? Visibility.valueOf(request.getVisibility().toUpperCase()) : Visibility.PUBLIC)
+                .visibility(request.getVisibility() != null ? Visibility.valueOf(request.getVisibility().toUpperCase())
+                        : Visibility.PUBLIC)
                 .status(com.kuizu.backend.entity.enumeration.ModerationStatus.PENDING)
                 .isDeleted(false)
                 .version(1)
@@ -79,19 +78,19 @@ public class FlashcardSetService {
 
         // Notify admins
         notificationService.notifyAdmins(
-            "New Flashcard Set Pending Review",
-            "A new flashcard set '" + set.getTitle() + "' was created by " + owner.getDisplayName() + " (@" + owner.getUsername() + ") and needs moderation.",
-            set.getSetId().toString()
-        );
+                "New Flashcard Set Pending Review",
+                "A new flashcard set '" + set.getTitle() + "' was created by " + owner.getDisplayName() + " (@"
+                        + owner.getUsername() + ") and needs moderation.",
+                set.getSetId().toString());
 
         // Notify user
         notificationService.sendNotification(
-            owner,
-            "Flashcard Set Under Review",
-            "Your newly created flashcard set '" + set.getTitle() + "' is currently pending moderation and awaiting review by the admins.",
-            "SYSTEM",
-            set.getSetId().toString()
-        );
+                owner,
+                "Flashcard Set Under Review",
+                "Your newly created flashcard set '" + set.getTitle()
+                        + "' is currently pending moderation and awaiting review by the admins.",
+                "SYSTEM",
+                set.getSetId().toString());
 
         return mapToResponse(set);
     }
@@ -106,9 +105,12 @@ public class FlashcardSetService {
             throw new ApiException("You do not have permission to update this set");
         }
 
-        if (request.getTitle() != null) set.setTitle(request.getTitle());
-        if (request.getDescription() != null) set.setDescription(request.getDescription());
-        if (request.getVisibility() != null) set.setVisibility(Visibility.valueOf(request.getVisibility().toUpperCase()));
+        if (request.getTitle() != null)
+            set.setTitle(request.getTitle());
+        if (request.getDescription() != null)
+            set.setDescription(request.getDescription());
+        if (request.getVisibility() != null)
+            set.setVisibility(Visibility.valueOf(request.getVisibility().toUpperCase()));
 
         set = flashcardSetRepository.save(set);
         return mapToResponse(set);
