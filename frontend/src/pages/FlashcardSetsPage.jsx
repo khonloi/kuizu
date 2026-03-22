@@ -3,10 +3,12 @@ import { Search, Plus, User, Pencil, Trash2 } from 'lucide-react';
 import './FlashcardSetsPage.css';
 import { getPublicFlashcardSets, getMyFlashcardSets, deleteFlashcardSet } from '../api/flashcards';
 import { Button, Card, Loader, ConfirmationModal } from '../components/ui';
+import { useModal } from '../context/ModalContext';
 import MainLayout from '../components/layout';
 import { useNavigate } from 'react-router-dom';
 
 const FlashcardSetsPage = () => {
+    const { openSetModal } = useModal();
     const [sets, setSets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -34,6 +36,24 @@ const FlashcardSetsPage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSetSuccess = (updatedSet) => {
+        const existing = sets.find(s => s.setId === updatedSet.setId);
+        if (existing) {
+            setSets(sets.map(s => s.setId === updatedSet.setId ? updatedSet : s));
+        } else {
+            setSets([updatedSet, ...sets]);
+        }
+    };
+
+    const handleCreateClick = () => {
+        openSetModal(null, handleSetSuccess);
+    };
+
+    const handleEditClick = (e, setId) => {
+        e.stopPropagation();
+        openSetModal(setId, handleSetSuccess);
     };
 
     const handleDelete = (e, setId) => {
@@ -71,7 +91,7 @@ const FlashcardSetsPage = () => {
                         <h1 className="sets-title">Flashcard Sets</h1>
                         <Button
                             className="create-btn"
-                            onClick={() => navigate('/flashcard-sets/create')}
+                            onClick={handleCreateClick}
                         >
                             <Plus size={20} />
                             Create Set
@@ -143,10 +163,7 @@ const FlashcardSetsPage = () => {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/flashcard-sets/edit/${set.setId}`);
-                                                    }}
+                                                    onClick={(e) => handleEditClick(e, set.setId)}
                                                 >
                                                     <Pencil size={16} />
                                                 </Button>

@@ -5,16 +5,19 @@ import './FlashcardSetDetailsPage.css';
 import { getFlashcardSetById, getFlashcardsBySetId, deleteFlashcard } from '../api/flashcards';
 import { getStudyProgress, resetStudyProgress } from '../api/study';
 import { Button, Card, Loader, ConfirmationModal, CelebrationModal } from '../components/ui';
+import { useModal } from '../context/ModalContext';
 import MainLayout from '../components/layout';
 
 const FlashcardSetDetailsPage = () => {
     const { setId } = useParams();
     const navigate = useNavigate();
+    const { openSetModal, openCardModal } = useModal();
     const [set, setSet] = useState(null);
     const [cards, setCards] = useState([]);
     const [progress, setProgress] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [cardToDelete, setCardToDelete] = useState(null);
@@ -23,7 +26,21 @@ const FlashcardSetDetailsPage = () => {
 
     useEffect(() => {
         fetchData();
+        trackVisit(setId);
     }, [setId]);
+
+    const trackVisit = (id) => {
+        try {
+            const recent = JSON.parse(localStorage.getItem('recent_sets') || '[]');
+            // Convert to string to ensure comparison works if setId is string/number
+            const stringId = String(id);
+            const filtered = recent.filter(existingId => String(existingId) !== stringId);
+            const updated = [stringId, ...filtered].slice(0, 8);
+            localStorage.setItem('recent_sets', JSON.stringify(updated));
+        } catch (e) {
+            console.error('Failed to track visit:', e);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -44,6 +61,32 @@ const FlashcardSetDetailsPage = () => {
         }
     };
 
+    const handleSetUpdateSuccess = (updatedSet) => {
+        setSet(updatedSet);
+    };
+
+    const handleCardSuccess = async () => {
+        // Refresh cards and progress
+        try {
+            const [cardsData, progressData] = await Promise.all([
+                getFlashcardsBySetId(setId),
+                getStudyProgress(setId)
+            ]);
+            setCards(cardsData);
+            setProgress(progressData);
+        } catch (err) {
+            console.error('Error refreshing cards:', err);
+        }
+    };
+
+    const handleAddCardClick = () => {
+        openCardModal(setId, null, handleCardSuccess);
+    };
+
+    const handleEditCardClick = (cardId) => {
+        openCardModal(setId, cardId, handleCardSuccess);
+    };
+
     const handleDeleteCard = async () => {
         if (!cardToDelete) return;
         try {
@@ -51,6 +94,9 @@ const FlashcardSetDetailsPage = () => {
             await deleteFlashcard(cardToDelete);
             setCards(cards.filter(c => c.cardId !== cardToDelete));
             setCardToDelete(null);
+            // Update progress if needed
+            const progressData = await getStudyProgress(setId);
+            setProgress(progressData);
         } catch (err) {
             alert('Failed to delete card');
         } finally {
@@ -117,7 +163,7 @@ const FlashcardSetDetailsPage = () => {
                         <Button
                             className="study-btn"
                             size="lg"
-                            variant="primary"
+                            variant="outline"
                             onClick={() => navigate(`/study/${setId}`, { state: { cards } })}
                             leftIcon={<BookOpen size={20} />}
                         >
@@ -136,7 +182,7 @@ const FlashcardSetDetailsPage = () => {
                         <Button
                             variant="outline"
                             size="lg"
-                            onClick={() => navigate(`/flashcard-sets/edit/${set.setId}`)}
+                            onClick={() => openSetModal(setId, handleSetUpdateSuccess)}
                             leftIcon={<Pencil size={20} />}
                         >
                             Edit Set
@@ -182,7 +228,7 @@ const FlashcardSetDetailsPage = () => {
                         <Button
                             variant="ghost"
                             className="add-card-btn"
-                            onClick={() => navigate(`/flashcards/create?setId=${setId}`)}
+                            onClick={handleAddCardClick}
                             leftIcon={<Plus size={20} />}
                         >
                             Add Card
@@ -210,7 +256,7 @@ const FlashcardSetDetailsPage = () => {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => navigate(`/flashcards/edit/${card.cardId}`)}
+                                                onClick={() => handleEditCardClick(card.cardId)}
                                             >
                                                 <Pencil size={18} />
                                             </Button>
@@ -229,7 +275,7 @@ const FlashcardSetDetailsPage = () => {
                         ) : (
                             <div className="empty-cards">
                                 <p>No flashcards in this set yet.</p>
-                                <Button onClick={() => navigate(`/flashcards/create?setId=${setId}`)}>
+                                <Button onClick={handleAddCardClick}>
                                     Create first flashcard
                                 </Button>
                             </div>
