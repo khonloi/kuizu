@@ -9,6 +9,7 @@ import EditClassModal from '../../components/Class/EditClassModal';
 import DeleteClassModal from '../../components/Class/DeleteClassModal';
 import RemoveMemberModal from '../../components/Class/RemoveMemberModal';
 import AddClassMaterialModal from '../../components/Class/AddClassMaterialModal';
+import RemoveMaterialModal from '../../components/Class/RemoveMaterialModal';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
@@ -23,11 +24,14 @@ const ClassDetailPage = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
     const [isAddMaterialModalOpen, setIsAddMaterialModalOpen] = useState(false);
+    const [isRemoveMaterialModalOpen, setIsRemoveMaterialModalOpen] = useState(false);
     const [localIsMember, setLocalIsMember] = useState(false);
     const [isLeaving, setIsLeaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isRemoving, setIsRemoving] = useState(false);
+    const [isRemovingMaterial, setIsRemovingMaterial] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [joinCode, setJoinCode] = useState(null);
     const [isLoadingCode, setIsLoadingCode] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -154,16 +158,28 @@ const ClassDetailPage = () => {
         }
     };
 
-    const handleRemoveMaterial = async (materialId) => {
+    const handleRemoveMaterialClick = (material) => {
+        setSelectedMaterial(material);
+        setIsRemoveMaterialModalOpen(true);
+    };
+
+    const handleRemoveMaterialConfirm = async () => {
+        if (!selectedMaterial) return;
+        
         try {
-            await removeClassMaterial(classId, materialId);
+            setIsRemovingMaterial(true);
+            await removeClassMaterial(classId, selectedMaterial.materialId);
             setClassData(prev => ({
                 ...prev,
-                classMaterials: prev.classMaterials.filter(m => m.materialId !== materialId)
+                classMaterials: prev.classMaterials.filter(m => m.materialId !== selectedMaterial.materialId)
             }));
+            setIsRemoveMaterialModalOpen(false);
+            setSelectedMaterial(null);
         } catch (err) {
             console.error("Failed to remove material:", err);
             alert("Failed to remove material from class. Please try again.");
+        } finally {
+            setIsRemovingMaterial(false);
         }
     };
 
@@ -220,6 +236,11 @@ const ClassDetailPage = () => {
                 <div className="class-header-content">
                     <div className="class-badges">
                         <span className="badge badge-primary">Class</span>
+                        {classData?.isOwner && classData?.status && (
+                            <span className={`badge ${classData.status === 'ACTIVE' ? 'badge-success' : classData.status === 'PENDING' ? 'badge-warning' : 'badge-danger'}`} style={{ marginLeft: '8px' }}>
+                                {classData.status === 'ACTIVE' ? 'Approved' : classData.status.charAt(0) + classData.status.slice(1).toLowerCase()}
+                            </span>
+                        )}
                     </div>
                     <h1 className="class-title">{classData.className}</h1>
                     <p className="class-owner">Created by <strong>{classData.ownerDisplayName}</strong></p>
@@ -356,9 +377,9 @@ const ClassDetailPage = () => {
                                                     <p className="material-ref">{isFolder ? 'Folder' : 'Flashcard Set'}</p>
                                                 </div>
                                                 <div className="material-actions" style={{ display: 'flex', gap: '8px' }}>
-                                                    <Button variant="outline" size="sm" onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/sets/${material.materialRefId}`)}>View</Button>
+                                                    <Button variant="outline" size="sm" onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/flashcard-sets/${material.materialRefId}`)}>View</Button>
                                                     {classData?.isOwner && (
-                                                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveMaterial(material.materialId)}>Remove</Button>
+                                                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveMaterialClick(material)}>Remove</Button>
                                                     )}
                                                 </div>
                                             </div>
@@ -490,6 +511,14 @@ const ClassDetailPage = () => {
                 onClose={() => setIsAddMaterialModalOpen(false)}
                 classId={classId}
                 onMaterialAdded={handleMaterialAdded}
+            />
+
+            <RemoveMaterialModal
+                isOpen={isRemoveMaterialModalOpen}
+                onClose={() => setIsRemoveMaterialModalOpen(false)}
+                onConfirm={handleRemoveMaterialConfirm}
+                isRemoving={isRemovingMaterial}
+                materialName={selectedMaterial?.materialName || selectedMaterial?.materialType}
             />
         </div>
     );

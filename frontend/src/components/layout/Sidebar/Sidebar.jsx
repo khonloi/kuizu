@@ -34,7 +34,7 @@ const Sidebar = ({ isCollapsed, onToggle, activePath = '/dashboard' }) => {
         '/admin/submissions/classes',
         '/admin/history',
         '/admin/stats/flashcards',
-        '/admin/stats/system',
+        '/admin/stats/users',
         '/profile',
         '/search',
         '/auth',
@@ -56,8 +56,7 @@ const Sidebar = ({ isCollapsed, onToggle, activePath = '/dashboard' }) => {
         { icon: <BookOpen size={22} />, label: 'Flashcard Submissions', path: '/admin/submissions/flashcards' },
         { icon: <GraduationCap size={22} />, label: 'Class Submissions', path: '/admin/submissions/classes' },
         { icon: <HistoryIcon size={22} />, label: 'Moderation History', path: '/admin/history' },
-        { icon: <BarChart3 size={22} />, label: 'Flashcard Statistics', path: '/admin/stats/flashcards' },
-        { icon: <Activity size={22} />, label: 'System Statistics', path: '/admin/stats/system' },
+        { icon: <BarChart3 size={22} />, label: 'Statistics', path: '/admin/stats/users' },
     ];
 
     const quickStartLinks = [

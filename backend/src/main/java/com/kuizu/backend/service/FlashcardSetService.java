@@ -19,14 +19,18 @@ import java.util.stream.Collectors;
 @Service
 public class FlashcardSetService {
 
-    @Autowired
-    private FlashcardSetRepository flashcardSetRepository;
+    private final FlashcardSetRepository flashcardSetRepository;
+    private final FlashcardRepository flashcardRepository;
+    private final UserRepository userRepository;
+
+    public FlashcardSetService(FlashcardSetRepository flashcardSetRepository, FlashcardRepository flashcardRepository, UserRepository userRepository) {
+        this.flashcardSetRepository = flashcardSetRepository;
+        this.flashcardRepository = flashcardRepository;
+        this.userRepository = userRepository;
+    }
 
     @Autowired
-    private FlashcardRepository flashcardRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private StatisticService statisticService;
 
     public List<FlashcardSetResponse> getAllPublicSets() {
         return flashcardSetRepository.findByVisibilityAndIsDeletedFalse(Visibility.PUBLIC)
@@ -48,6 +52,7 @@ public class FlashcardSetService {
         FlashcardSet set = flashcardSetRepository.findById(setId)
                 .filter(s -> s.getIsDeleted() == null || !s.getIsDeleted())
                 .orElseThrow(() -> new ApiException("Flashcard set not found"));
+        statisticService.incrementSetViewCount(set);
         return mapToResponse(set);
     }
 
@@ -67,6 +72,8 @@ public class FlashcardSetService {
                 .build();
 
         set = flashcardSetRepository.save(set);
+        statisticService.incrementUserTotalSets(owner);
+        statisticService.getOrCreateFlashcardSetStatistic(set);
         return mapToResponse(set);
     }
 
