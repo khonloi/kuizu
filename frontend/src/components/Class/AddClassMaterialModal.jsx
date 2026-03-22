@@ -4,7 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import { getMyFolders } from '../../api/folder';
 import { getMyFlashcardSets } from '../../api/flashcards';
 import { addClassMaterial } from '../../api/class';
-import { Folder, Layers, CheckCircle } from 'lucide-react';
+import { Folder, Layers, Plus, Loader2 } from 'lucide-react';
 import './AddClassMaterialModal.css';
 
 const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) => {
@@ -12,13 +12,11 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
     const [materialType, setMaterialType] = useState('FOLDER'); // 'FOLDER' or 'FLASHCARD_SET'
     const [materials, setMaterials] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedMaterialId, setSelectedMaterialId] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [addingMaterialId, setAddingMaterialId] = useState(null);
 
     useEffect(() => {
         if (isOpen) {
             fetchMaterials(materialType);
-            setSelectedMaterialId(null);
         }
     }, [isOpen, materialType]);
 
@@ -40,49 +38,32 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
         }
     };
 
-    const handleSubmit = async () => {
-        if (!selectedMaterialId) return;
-
-        setIsSubmitting(true);
+    const handleAddMaterial = async (id) => {
+        setAddingMaterialId(id);
         try {
             const requestData = {
                 materialType,
-                materialRefId: selectedMaterialId
+                materialRefId: id
             };
             
             const newMaterial = await addClassMaterial(classId, requestData);
             toast.success('Material added successfully!');
             
+            setMaterials(prev => prev.filter(m => (materialType === 'FOLDER' ? m.folderId : m.setId) !== id));
+            
             if (onMaterialAdded) {
                 // To display optimistic names, we can pass the title we have
-                const sel = materials.find(m => (m.folderId || m.setId) === selectedMaterialId);
+                const sel = materials.find(m => (m.folderId || m.setId) === id);
                 const materialName = materialType === 'FOLDER' ? sel?.name : sel?.title;
                 onMaterialAdded({ ...newMaterial, materialName });
             }
-            onClose();
         } catch (error) {
             console.error('Failed to add material:', error);
             toast.error(error.response?.data?.message || 'Failed to add material to class');
         } finally {
-            setIsSubmitting(false);
+            setAddingMaterialId(null);
         }
     };
-
-    const footer = (
-        <div className="join-modal-actions">
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-                Cancel
-            </Button>
-            <Button
-                variant="primary"
-                onClick={handleSubmit}
-                disabled={isSubmitting || !selectedMaterialId}
-                isLoading={isSubmitting}
-            >
-                Add Material
-            </Button>
-        </div>
-    );
 
     return (
         <Modal
@@ -90,7 +71,6 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
             onClose={onClose}
             title="Add Material to Class"
             size="md"
-            footer={footer}
         >
             <div className="add-material-content">
                 <div className="material-type-selector">
@@ -123,8 +103,7 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
                             return (
                                 <div 
                                     key={id} 
-                                    className={`material-list-item ${isSelected ? 'selected' : ''}`}
-                                    onClick={() => setSelectedMaterialId(id)}
+                                    className="material-list-item"
                                 >
                                     <div className="material-item-info">
                                         <div className="material-item-icon">
@@ -135,11 +114,16 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
                                             <p>{desc}</p>
                                         </div>
                                     </div>
-                                    {isSelected && (
-                                        <div className="text-primary-600">
-                                            <CheckCircle size={20} className="text-blue-500"/>
-                                        </div>
-                                    )}
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={() => handleAddMaterial(id)}
+                                        disabled={addingMaterialId === id}
+                                        isLoading={addingMaterialId === id}
+                                    >
+                                        <Plus size={14} style={{ marginRight: 4 }} />
+                                        Add
+                                    </Button>
                                 </div>
                             );
                         })}

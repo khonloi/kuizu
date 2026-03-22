@@ -193,6 +193,12 @@ public class ClassService {
 
         newClass = classRepository.save(newClass);
 
+        if (request.getMaterials() != null && !request.getMaterials().isEmpty()) {
+            for (AddClassMaterialRequest materialRequest : request.getMaterials()) {
+                addMaterial(newClass.getClassId(), materialRequest, username);
+            }
+            newClass = classRepository.findByClassId(newClass.getClassId()).orElse(newClass);
+        }
         // Notify admins
         notificationService.notifyAdmins(
             "New Class Pending Review",
