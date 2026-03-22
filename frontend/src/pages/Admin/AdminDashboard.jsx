@@ -48,8 +48,6 @@ const AdminDashboard = () => {
         if (path.includes('/admin/submissions/flashcards')) return 1;
         if (path.includes('/admin/submissions/classes')) return 2;
         if (path.includes('/admin/history')) return 3;
-        if (path.includes('/admin/stats/flashcards')) return 4;
-        if (path.includes('/admin/stats/system')) return 5;
         return 0; // Default to users
     };
 
@@ -87,7 +85,6 @@ const AdminDashboard = () => {
         else if (activeTab === 1) fetchPendingSets();
         else if (activeTab === 2) fetchPendingClasses();
         else if (activeTab === 3) fetchHistory();
-        // Stats tabs 4 and 5 are placeholders for now
     }, [activeTab, userPage]);
 
     const fetchUsers = async () => {
@@ -203,9 +200,7 @@ const AdminDashboard = () => {
             '/admin/users',
             '/admin/submissions/flashcards',
             '/admin/submissions/classes',
-            '/admin/history',
-            '/admin/stats/flashcards',
-            '/admin/stats/system'
+            '/admin/history'
         ];
         navigate(paths[index]);
     };
@@ -426,54 +421,6 @@ const AdminDashboard = () => {
                                 </tr>
                             )}
                         />
-                    </Card>
-                </div>
-            )
-        },
-        {
-            label: (
-                <div className="tab-label-inner">
-                    <BarChart3 size={16} /> Flashcard Statistics
-                </div>
-            ),
-            title: 'Flashcard Statistics',
-            content: (
-                <div className="admin-tab-content">
-                    <Card className="user-list-card">
-                        <div className="card-header-flex">
-                            <h2>Flashcard Set Statistics</h2>
-                        </div>
-                        <div className="py-20">
-                            <EmptyState
-                                icon={BarChart3}
-                                title="Statistics Coming Soon"
-                                description="Detailed analytics for flashcard sets are currently being developed."
-                            />
-                        </div>
-                    </Card>
-                </div>
-            )
-        },
-        {
-            label: (
-                <div className="tab-label-inner">
-                    <Activity size={16} /> System Statistics
-                </div>
-            ),
-            title: 'System Statistics',
-            content: (
-                <div className="admin-tab-content">
-                    <Card className="user-list-card">
-                        <div className="card-header-flex">
-                            <h2>System Activity & Statistics</h2>
-                        </div>
-                        <div className="py-20">
-                            <EmptyState
-                                icon={Activity}
-                                title="Health Monitor Coming Soon"
-                                description="Real-time system health and usage metrics will be available here."
-                            />
-                        </div>
                     </Card>
                 </div>
             )

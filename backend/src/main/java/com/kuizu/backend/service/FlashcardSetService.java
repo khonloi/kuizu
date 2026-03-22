@@ -29,6 +29,9 @@ public class FlashcardSetService {
         this.userRepository = userRepository;
     }
 
+    @Autowired
+    private StatisticService statisticService;
+
     public List<FlashcardSetResponse> getAllPublicSets() {
         return flashcardSetRepository.findByVisibilityAndIsDeletedFalse(Visibility.PUBLIC)
                 .stream()
@@ -49,6 +52,7 @@ public class FlashcardSetService {
         FlashcardSet set = flashcardSetRepository.findById(setId)
                 .filter(s -> s.getIsDeleted() == null || !s.getIsDeleted())
                 .orElseThrow(() -> new ApiException("Flashcard set not found"));
+        statisticService.incrementSetViewCount(set);
         return mapToResponse(set);
     }
 
@@ -68,6 +72,8 @@ public class FlashcardSetService {
                 .build();
 
         set = flashcardSetRepository.save(set);
+        statisticService.incrementUserTotalSets(owner);
+        statisticService.getOrCreateFlashcardSetStatistic(set);
         return mapToResponse(set);
     }
 

@@ -25,6 +25,9 @@ public class FlashcardService {
         this.flashcardSetRepository = flashcardSetRepository;
     }
 
+    @Autowired
+    private StatisticService statisticService;
+
     public List<FlashcardResponse> getFlashcardsBySetId(Long setId) {
         FlashcardSet set = flashcardSetRepository.findById(setId)
                 .filter(s -> s.getIsDeleted() == null || !s.getIsDeleted())
@@ -63,6 +66,7 @@ public class FlashcardService {
                 .build();
 
         card = flashcardRepository.save(card);
+        statisticService.incrementUserTotalCards(set.getOwner(), 1);
         return mapToResponse(card);
     }
 
