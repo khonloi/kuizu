@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClassDetails, leaveClass, getClassJoinCode, deleteClass, removeMember, processJoinRequest, removeClassMaterial } from '../../api/class';
+import { getClassDetails, leaveClass, getClassJoinCode, deleteClass, removeMember, processJoinRequest, removeClassMaterial, reRequestClassReview } from '../../api/class';
 import { Button } from '../../components/ui';
 import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2, Folder, Layers } from 'lucide-react';
 import JoinClassModal from '../../components/Class/JoinClassModal';
@@ -9,11 +9,14 @@ import EditClassModal from '../../components/Class/EditClassModal';
 import DeleteClassModal from '../../components/Class/DeleteClassModal';
 import RemoveMemberModal from '../../components/Class/RemoveMemberModal';
 import AddClassMaterialModal from '../../components/Class/AddClassMaterialModal';
+import RemoveMaterialModal from '../../components/Class/RemoveMaterialModal';
+import { useToast } from '../../context/ToastContext';
 import './ClassDetailPage.css';
 
 const ClassDetailPage = () => {
     const { classId } = useParams();
     const navigate = useNavigate();
+    const { addToast } = useToast();
     const [classData, setClassData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -23,11 +26,15 @@ const ClassDetailPage = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
     const [isAddMaterialModalOpen, setIsAddMaterialModalOpen] = useState(false);
+    const [isRemoveMaterialModalOpen, setIsRemoveMaterialModalOpen] = useState(false);
     const [localIsMember, setLocalIsMember] = useState(false);
     const [isLeaving, setIsLeaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isRemoving, setIsRemoving] = useState(false);
+    const [isRemovingMaterial, setIsRemovingMaterial] = useState(false);
+    const [isReRequesting, setIsReRequesting] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
+    const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [joinCode, setJoinCode] = useState(null);
     const [isLoadingCode, setIsLoadingCode] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -92,6 +99,22 @@ const ClassDetailPage = () => {
         }
     };
 
+    const handleReRequestReview = async () => {
+        try {
+            setIsReRequesting(true);
+            await reRequestClassReview(classId);
+            addToast('Review requested successfully!', 'success');
+
+            // Re-fetch class details
+            const data = await getClassDetails(classId);
+            setClassData(data);
+        } catch (err) {
+            addToast(err.response?.data?.message || 'Failed to request review', 'error');
+        } finally {
+            setIsReRequesting(false);
+        }
+    };
+
     const handleRemoveMemberClick = (member) => {
         setSelectedMember(member);
         setIsRemoveModalOpen(true);
@@ -103,13 +126,13 @@ const ClassDetailPage = () => {
         try {
             setIsRemoving(true);
             await removeMember(classId, selectedMember.userId);
-            
+
             // Update local state
             setClassData(prev => ({
                 ...prev,
                 members: prev.members.filter(m => m.userId !== selectedMember.userId)
             }));
-            
+
             setIsRemoveModalOpen(false);
             setSelectedMember(null);
         } catch (err) {
@@ -123,15 +146,15 @@ const ClassDetailPage = () => {
     const handleProcessJoinRequest = async (requestId, status) => {
         try {
             await processJoinRequest(classId, requestId, status);
-            
+
             // Find the request to get user info if accepted
             const request = classData.joinRequests.find(r => r.requestId === requestId);
-            
+
             // Update local state
             setClassData(prev => {
                 const updatedRequests = prev.joinRequests.filter(r => r.requestId !== requestId);
                 let updatedMembers = prev.members;
-                
+
                 if (status === 'ACCEPTED' && request) {
                     const newMember = {
                         userId: request.userId,
@@ -141,7 +164,7 @@ const ClassDetailPage = () => {
                     };
                     updatedMembers = [...prev.members, newMember];
                 }
-                
+
                 return {
                     ...prev,
                     joinRequests: updatedRequests,
@@ -154,16 +177,28 @@ const ClassDetailPage = () => {
         }
     };
 
-    const handleRemoveMaterial = async (materialId) => {
+    const handleRemoveMaterialClick = (material) => {
+        setSelectedMaterial(material);
+        setIsRemoveMaterialModalOpen(true);
+    };
+
+    const handleRemoveMaterialConfirm = async () => {
+        if (!selectedMaterial) return;
+
         try {
-            await removeClassMaterial(classId, materialId);
+            setIsRemovingMaterial(true);
+            await removeClassMaterial(classId, selectedMaterial.materialId);
             setClassData(prev => ({
                 ...prev,
-                classMaterials: prev.classMaterials.filter(m => m.materialId !== materialId)
+                classMaterials: prev.classMaterials.filter(m => m.materialId !== selectedMaterial.materialId)
             }));
+            setIsRemoveMaterialModalOpen(false);
+            setSelectedMaterial(null);
         } catch (err) {
             console.error("Failed to remove material:", err);
             alert("Failed to remove material from class. Please try again.");
+        } finally {
+            setIsRemovingMaterial(false);
         }
     };
 
@@ -219,12 +254,36 @@ const ClassDetailPage = () => {
             <header className="class-header-section">
                 <div className="class-header-content">
                     <div className="class-badges">
-                        <span className="badge badge-primary">Class</span>
+                        {classData.status === 'PENDING' && (
+                            <span className="badge" style={{ backgroundColor: '#eab308', color: 'black', marginLeft: '8px' }}>Pending Review</span>
+                        )}
+                        {classData.status === 'REJECTED' && (
+                            <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: '8px' }}>Rejected</span>
+                        )}
+                        {classData.status === 'ACTIVE' && classData.isOwner && (
+                            <span className="badge" style={{ backgroundColor: '#22c55e', color: 'white', marginLeft: '8px' }}>Approved</span>
+                        )}
                     </div>
                     <h1 className="class-title">{classData.className}</h1>
+                    {classData.status === 'REJECTED' && classData.moderationNotes && (
+                        <div style={{ backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', maxWidth: '600px' }}>
+                            <h4 style={{ color: '#991b1b', margin: '0 0 4px 0', fontSize: '0.9rem', fontWeight: 700 }}>Moderator Feedback:</h4>
+                            <p style={{ color: '#b91c1c', margin: 0, fontSize: '0.9rem' }}>{classData.moderationNotes}</p>
+                        </div>
+                    )}
                     <p className="class-owner">Created by <strong>{classData.ownerDisplayName}</strong></p>
 
                     <div className="class-actions">
+                        {classData?.isOwner && classData?.status === 'REJECTED' && (
+                            <Button
+                                variant="outline"
+                                className="action-btn text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                onClick={handleReRequestReview}
+                                isLoading={isReRequesting}
+                            >
+                                <span>Request Review Again</span>
+                            </Button>
+                        )}
                         {(classData?.isOwner || classData?.isMember || localIsMember) && (
                             <Button
                                 variant="outline"
@@ -266,9 +325,9 @@ const ClassDetailPage = () => {
                                     <Share2 size={18} />
                                     <span>Edit Class</span>
                                 </Button>
-                                <Button 
-                                    variant="outline" 
-                                    className="action-btn text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200" 
+                                <Button
+                                    variant="outline"
+                                    className="action-btn text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
                                     onClick={() => setIsDeleteModalOpen(true)}
                                 >
                                     <Trash2 size={18} />
@@ -305,14 +364,14 @@ const ClassDetailPage = () => {
                 <div className="class-content-area">
                     {classData?.isOwner && (
                         <div className="class-tabs">
-                            <button 
+                            <button
                                 className={`tab-btn ${activeTab === 'materials' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('materials')}
                             >
                                 <File size={18} />
                                 <span>Materials</span>
                             </button>
-                            <button 
+                            <button
                                 className={`tab-btn ${activeTab === 'members' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('members')}
                             >
@@ -320,7 +379,7 @@ const ClassDetailPage = () => {
                                 <span>Members</span>
                                 <span className="tab-count">{classData.members?.length || 0}</span>
                             </button>
-                            <button 
+                            <button
                                 className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('requests')}
                             >
@@ -356,9 +415,9 @@ const ClassDetailPage = () => {
                                                     <p className="material-ref">{isFolder ? 'Folder' : 'Flashcard Set'}</p>
                                                 </div>
                                                 <div className="material-actions" style={{ display: 'flex', gap: '8px' }}>
-                                                    <Button variant="outline" size="sm" onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/sets/${material.materialRefId}`)}>View</Button>
+                                                    <Button variant="outline" size="sm" onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/flashcard-sets/${material.materialRefId}`)}>View</Button>
                                                     {classData?.isOwner && (
-                                                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveMaterial(material.materialId)}>Remove</Button>
+                                                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveMaterialClick(material)}>Remove</Button>
                                                     )}
                                                 </div>
                                             </div>
@@ -391,9 +450,9 @@ const ClassDetailPage = () => {
                                             <span className={`member-role ${member.role.toLowerCase()}`}>{member.role}</span>
                                         </div>
                                         {member.userId !== classData.ownerUserId && (
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 className="text-red-500"
                                                 onClick={() => handleRemoveMemberClick(member)}
                                             >
@@ -490,6 +549,14 @@ const ClassDetailPage = () => {
                 onClose={() => setIsAddMaterialModalOpen(false)}
                 classId={classId}
                 onMaterialAdded={handleMaterialAdded}
+            />
+
+            <RemoveMaterialModal
+                isOpen={isRemoveMaterialModalOpen}
+                onClose={() => setIsRemoveMaterialModalOpen(false)}
+                onConfirm={handleRemoveMaterialConfirm}
+                isRemoving={isRemovingMaterial}
+                materialName={selectedMaterial?.materialName || selectedMaterial?.materialType}
             />
         </div>
     );
