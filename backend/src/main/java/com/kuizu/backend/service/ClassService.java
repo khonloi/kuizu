@@ -123,6 +123,7 @@ public class ClassService {
                 clazz.getClassName(),
                 clazz.getDescription(),
                 clazz.getVisibility(),
+                clazz.getStatus(),
                 classMaterialResponseList,
                 isMember,
                 isOwner,
@@ -132,7 +133,7 @@ public class ClassService {
     }
 
     public List<ClassResponse> findClassesByName(String name) {
-        return classRepository.findByClassNameContainingIgnoreCase(name)
+        return classRepository.findByClassNameContainingIgnoreCaseAndVisibilityAndStatus(name, Visibility.PUBLIC, ModerationStatus.ACTIVE)
                 .stream()
                 .map(this::convertToClassResponse)
                 .toList();
@@ -145,7 +146,8 @@ public class ClassService {
                 c.getOwner().getDisplayName(),
                 c.getClassName(),
                 c.getDescription(),
-                c.getVisibility()
+                c.getVisibility(),
+                c.getStatus()
         );
     }
 
@@ -193,6 +195,12 @@ public class ClassService {
 
         newClass = classRepository.save(newClass);
 
+        if (request.getMaterials() != null && !request.getMaterials().isEmpty()) {
+            for (AddClassMaterialRequest materialRequest : request.getMaterials()) {
+                addMaterial(newClass.getClassId(), materialRequest, username);
+            }
+            newClass = classRepository.findByClassId(newClass.getClassId()).orElse(newClass);
+        }
         // Notify admins
         notificationService.notifyAdmins(
             "New Class Pending Review",
