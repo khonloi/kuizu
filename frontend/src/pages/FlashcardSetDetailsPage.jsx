@@ -13,6 +13,8 @@ import { useToast } from '../context/ToastContext';
 const FlashcardSetDetailsPage = () => {
     const { setId } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { success: toastSuccess, error: toastError } = useToast();
     const { openSetModal, openCardModal } = useModal();
     const [set, setSet] = useState(null);
     const [cards, setCards] = useState([]);
@@ -100,8 +102,9 @@ const FlashcardSetDetailsPage = () => {
             // Update progress if needed
             const progressData = await getStudyProgress(setId);
             setProgress(progressData);
+            toastSuccess('Flashcard deleted successfully.');
         } catch (err) {
-            alert('Failed to delete card');
+            toastError('Failed to delete card.');
         } finally {
             setIsDeleting(false);
         }
@@ -127,10 +130,26 @@ const FlashcardSetDetailsPage = () => {
             // Clear the celebration flag so it can show again when 100% is reached
             sessionStorage.removeItem(`celebration_${setId}`);
             setIsResetModalOpen(false);
+            toastSuccess('Study progress has been reset.');
         } catch (err) {
-            alert('Failed to reset progress');
+            toastError('Failed to reset progress.');
         } finally {
             setIsResetting(false);
+        }
+    };
+
+    const handleReRequestReview = async () => {
+        if (isReRequesting) return;
+        try {
+            setIsReRequesting(true);
+            await reRequestFlashcardSetReview(setId);
+            const setData = await getFlashcardSetById(setId);
+            setSet(setData);
+            toastSuccess('Review requested successfully.');
+        } catch (err) {
+            toastError('Failed to re-request review.');
+        } finally {
+            setIsReRequesting(false);
         }
     };
 
