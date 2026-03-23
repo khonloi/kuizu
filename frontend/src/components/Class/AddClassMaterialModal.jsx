@@ -45,12 +45,12 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
                 materialType,
                 materialRefId: id
             };
-            
+
             const newMaterial = await addClassMaterial(classId, requestData);
             toast.success('Material added successfully!');
-            
+
             setMaterials(prev => prev.filter(m => (materialType === 'FOLDER' ? m.folderId : m.setId) !== id));
-            
+
             if (onMaterialAdded) {
                 // To display optimistic names, we can pass the title we have
                 const sel = materials.find(m => (m.folderId || m.setId) === id);
@@ -74,13 +74,13 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
         >
             <div className="add-material-content">
                 <div className="material-type-selector">
-                    <button 
+                    <button
                         className={`type-btn ${materialType === 'FOLDER' ? 'active' : ''}`}
                         onClick={() => setMaterialType('FOLDER')}
                     >
                         Folders
                     </button>
-                    <button 
+                    <button
                         className={`type-btn ${materialType === 'FLASHCARD_SET' ? 'active' : ''}`}
                         onClick={() => setMaterialType('FLASHCARD_SET')}
                     >
@@ -98,11 +98,10 @@ const AddClassMaterialModal = ({ isOpen, onClose, classId, onMaterialAdded }) =>
                             const id = materialType === 'FOLDER' ? item.folderId : item.setId;
                             const title = materialType === 'FOLDER' ? item.name : item.title;
                             const desc = item.description || 'No description';
-                            const isSelected = selectedMaterialId === id;
 
                             return (
-                                <div 
-                                    key={id} 
+                                <div
+                                    key={id}
                                     className="material-list-item"
                                 >
                                     <div className="material-item-info">
