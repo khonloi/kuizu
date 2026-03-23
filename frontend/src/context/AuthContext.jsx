@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
             if (localStorage.getItem('token')) {
                 checkAuth();
             }
-        }, 5000);
+        }, 30000);
 
         const handleForceLogout = () => {
             logout();
@@ -51,8 +51,13 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
         try {
             const userData = await getCurrentUser();
-            setUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
+            const storedUserStr = localStorage.getItem('user');
+            
+            // Only update state if data has changed to prevent unnecessary re-renders
+            if (storedUserStr !== JSON.stringify(userData)) {
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+            }
         } catch (err) {
             console.error("Auth check failed", err);
             // If checking auth fails (e.g. expired token), logout
