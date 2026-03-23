@@ -112,6 +112,17 @@
 
 .field-info p {
     margin: 0;
+    color: var(--text-muted);
+}
+
+.profile-input,
+.profile-textarea {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.profile-textarea {
+    min-height: 100px;
 }
 
 .bio-text {
@@ -167,6 +178,20 @@
 .password-input-group {
     display: flex;
     flex-direction: column;
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 24px 32px;
+    background: var(--card-bg-subtle, rgba(0, 0, 0, 0.02));
+    border-top: 1px solid var(--border-color);
+    margin-top: 0;
+}
+
+.dark .profile-actions {
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .label-row {

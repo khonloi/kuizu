@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck, Palette, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './ProfilePage.css';
@@ -15,9 +15,30 @@ const ProfilePage = () => {
 
     const [error, setError] = useState(null);
     const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'Light');
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingField, setEditingField] = useState('');
-    const [editValue, setEditValue] = useState('');
+    const [formData, setFormData] = useState({
+        displayName: '',
+        bio: '',
+        locale: '',
+        timezone: ''
+    });
+
+    const hasChanges = user && (
+        formData.displayName !== (user.displayName || '') ||
+        formData.bio !== (user.bio || '') ||
+        formData.locale !== (user.locale || '') ||
+        formData.timezone !== (user.timezone || 'UTC')
+    );
+
+    useEffect(() => {
+        if (user && !hasChanges) {
+            setFormData({
+                displayName: user.displayName || '',
+                bio: user.bio || '',
+                locale: user.locale || '',
+                timezone: user.timezone || 'UTC'
+            });
+        }
+    }, [user, hasChanges]);
 
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [passwordData, setPasswordData] = useState({
@@ -46,17 +67,19 @@ const ProfilePage = () => {
         }
     };
 
-    const handleEditField = (field) => {
-        setEditingField(field);
-        setEditValue(user[field] || '');
-        setIsEditModalOpen(true);
+    const handleSaveProfile = async () => {
+        if (hasChanges) {
+            await performUpdate(formData);
+        }
     };
 
-    const handleEditSubmit = async () => {
-        if (editValue !== user[editingField]) {
-            await performUpdate({ [editingField]: editValue });
-        }
-        setIsEditModalOpen(false);
+    const handleCancelEdit = () => {
+        setFormData({
+            displayName: user.displayName || '',
+            bio: user.bio || '',
+            locale: user.locale || '',
+            timezone: user.timezone || 'UTC'
+        });
     };
 
     const performUpdate = async (data) => {
@@ -205,9 +228,13 @@ const ProfilePage = () => {
                                 <div className="field-row">
                                     <div className="field-info">
                                         <h4>Display Name</h4>
-                                        <p>{user?.displayName || 'Set your display name'}</p>
+                                        <Input
+                                            value={formData.displayName}
+                                            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                                            placeholder="Set your display name"
+                                            className="profile-input"
+                                        />
                                     </div>
-                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('displayName')}>Edit</Button>
                                 </div>
                             </div>
 
@@ -216,9 +243,14 @@ const ProfilePage = () => {
                                 <div className="field-row">
                                     <div className="field-info">
                                         <h4>Bio</h4>
-                                        <p className="bio-text">{user?.bio || 'Add a bio to your profile'}</p>
+                                        <Textarea
+                                            value={formData.bio}
+                                            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                                            placeholder="Add a bio to your profile"
+                                            className="profile-textarea"
+                                            rows={3}
+                                        />
                                     </div>
-                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('bio')}>Edit</Button>
                                 </div>
                             </div>
 
@@ -249,9 +281,13 @@ const ProfilePage = () => {
                                 <div className="field-row">
                                     <div className="field-info">
                                         <h4>Location</h4>
-                                        <p>{user?.locale || 'Set your location'}</p>
+                                        <Input
+                                            value={formData.locale}
+                                            onChange={(e) => setFormData({ ...formData, locale: e.target.value })}
+                                            placeholder="Set your location"
+                                            className="profile-input"
+                                        />
                                     </div>
-                                    <Button variant="ghost" size="sm" onClick={() => handleEditField('locale')}>Edit</Button>
                                 </div>
                             </div>
 
@@ -264,9 +300,9 @@ const ProfilePage = () => {
                                     </div>
                                     <Dropdown
                                         variant="select"
-                                        label={timezoneOptions.find(opt => opt.value === (user?.timezone || 'UTC'))?.label || 'UTC (GMT+0)'}
+                                        label={timezoneOptions.find(opt => opt.value === (formData.timezone || 'UTC'))?.label || 'UTC (GMT+0)'}
                                         items={timezoneOptions}
-                                        onItemClick={(item) => performUpdate({ timezone: item.value })}
+                                        onItemClick={(item) => setFormData({ ...formData, timezone: item.value })}
                                         className="timezone-dropdown"
                                     />
                                 </div>
@@ -325,6 +361,20 @@ const ProfilePage = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Save/Cancel Buttons */}
+                            <div className="profile-actions">
+                                {hasChanges && (
+                                    <>
+                                        <Button variant="ghost" onClick={handleCancelEdit} disabled={isSubmitting}>
+                                            Cancel
+                                        </Button>
+                                        <Button variant="primary" onClick={handleSaveProfile} isLoading={isSubmitting}>
+                                            Save Changes
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                         </Card>
                     </div>
 
@@ -349,36 +399,7 @@ const ProfilePage = () => {
                         </Card>
                     </div>
 
-                    {/* Edit Modal */}
-                    <Modal
-                        isOpen={isEditModalOpen}
-                        onClose={() => setIsEditModalOpen(false)}
-                        title={`Edit ${fieldLabels[editingField]}`}
-                        footer={
-                            <>
-                                <Button variant="ghost" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>Cancel</Button>
-                                <Button variant="primary" onClick={handleEditSubmit} isLoading={isSubmitting}>Save Changes</Button>
-                            </>
-                        }
-                    >
-                        <div className="edit-modal-content">
-                            {editingField === 'bio' ? (
-                                <Textarea
-                                    value={editValue}
-                                    onChange={(e) => setEditValue(e.target.value)}
-                                    placeholder={`Enter your ${fieldLabels[editingField]}`}
-                                    rows={4}
-                                />
-                            ) : (
-                                <Input
-                                    value={editValue}
-                                    onChange={(e) => setEditValue(e.target.value)}
-                                    placeholder={`Enter your ${fieldLabels[editingField]}`}
-                                    autoFocus
-                                />
-                            )}
-                        </div>
-                    </Modal>
+
 
                     {/* Change Password Modal */}
                     <Modal
