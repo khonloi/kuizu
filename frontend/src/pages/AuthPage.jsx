@@ -121,7 +121,7 @@ const AuthPage = () => {
                             onError={handleGoogleError}
                             theme="outline"
                             size="large"
-                            width="100%"
+                            width="350"
                             text={isLogin ? 'signin_with' : 'signup_with'}
                             shape="rectangular"
                         />
