@@ -15,6 +15,7 @@ const AuthPage = () => {
     const { user, login } = useAuth();
     const toast = useToast();
     const location = useLocation();
+    const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [isSocialLoading, setIsSocialLoading] = useState(false);
     const [hasCheckedReason, setHasCheckedReason] = useState(false);
@@ -51,6 +52,8 @@ const AuthPage = () => {
 
     const handleGoogleSuccess = async (credentialResponse) => {
         setIsSocialLoading(true);
+        // Clear any old logout reasons so they don't appear as error toasts on success
+        sessionStorage.removeItem('logout_reason');
         try {
             const { credential } = credentialResponse;
             const data = await googleLogin(credential);
@@ -121,7 +124,7 @@ const AuthPage = () => {
                             onError={handleGoogleError}
                             theme="outline"
                             size="large"
-                            width="100%"
+                            width="350"
                             text={isLogin ? 'signin_with' : 'signup_with'}
                             shape="rectangular"
                         />
