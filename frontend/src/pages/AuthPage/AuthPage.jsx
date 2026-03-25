@@ -55,8 +55,6 @@ const AuthPage = () => {
         // Clear any old logout reasons so they don't appear as error toasts on success
         sessionStorage.removeItem('logout_reason');
         try {
-            // Clear any old, potentially invalid tokens before starting a fresh social login
-            localStorage.removeItem('token');
             const { credential } = credentialResponse;
             const data = await googleLogin(credential);
 
