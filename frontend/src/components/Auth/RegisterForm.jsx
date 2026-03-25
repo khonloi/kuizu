@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { register as registerApi } from '../../api/auth';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { register as registerApi } from '@/api/auth';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { Input, Button } from '../ui';
 
 import './AuthForm.css';
@@ -17,8 +17,8 @@ const RegisterForm = ({ onToggle }) => {
         bio: '',
         role: 'ROLE_STUDENT'
     });
-    
-    
+
+
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const toast = useToast();

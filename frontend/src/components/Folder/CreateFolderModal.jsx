@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Input } from '../ui';
-import { createFolder, getMySets } from '../../api/folder';
-import { useToast } from '../../context/ToastContext';
+import { createFolder, getMySets } from '@/api/folder';
+import { useToast } from '@/context/ToastContext';
 import { BookOpen, Check } from 'lucide-react';
 import './CreateFolderModal.css';
 
@@ -11,7 +11,7 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
     const [description, setDescription] = useState('');
     const [visibility, setVisibility] = useState('PUBLIC');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     const [mySets, setMySets] = useState([]);
     const [selectedSetIds, setSelectedSetIds] = useState([]);
     const [isLoadingSets, setIsLoadingSets] = useState(false);
@@ -22,7 +22,7 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
             setDescription('');
             setVisibility('PUBLIC');
             setSelectedSetIds([]);
-            
+
             const fetchSets = async () => {
                 setIsLoadingSets(true);
                 try {
@@ -39,8 +39,8 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
     }, [isOpen]);
 
     const toggleSetSelection = (setId) => {
-        setSelectedSetIds(prev => 
-            prev.includes(setId) 
+        setSelectedSetIds(prev =>
+            prev.includes(setId)
                 ? prev.filter(id => id !== setId)
                 : [...prev, setId]
         );
@@ -138,8 +138,8 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
                                 <div className="empty-sets-msg">You don't have any sets yet.</div>
                             ) : (
                                 mySets.map(set => (
-                                    <div 
-                                        key={set.setId} 
+                                    <div
+                                        key={set.setId}
                                         className={`suggested-set-item ${selectedSetIds.includes(set.setId) ? 'selected' : ''}`}
                                         onClick={() => toggleSetSelection(set.setId)}
                                     >

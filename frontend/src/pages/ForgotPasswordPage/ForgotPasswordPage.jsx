@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Key, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { forgotPassword, resetPassword, verifyRegistration, resendRegistrationOtp } from '../../api/auth';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
-import { Input, Button, Card, OtpInput } from '../../components/ui';
+import { forgotPassword, resetPassword, verifyRegistration, resendRegistrationOtp } from '@/api/auth';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { Input, Button, Card, OtpInput } from '@/components/ui';
 
 import './ForgotPasswordPage.css';
 

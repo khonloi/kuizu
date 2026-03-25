@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { login as loginApi } from '../../api/auth';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { login as loginApi } from '@/api/auth';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { Input, Button } from '../ui';
 
 import './AuthForm.css';

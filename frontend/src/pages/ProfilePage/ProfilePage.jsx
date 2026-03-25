@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck, Palette, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './ProfilePage.css';
-import { updateProfile, changePassword, setPassword } from '../api/user';
-import { Button, Card, Input, Modal, Dropdown, Textarea } from '../components/ui';
-import MainLayout from '../components/layout';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { updateProfile, changePassword, setPassword } from '@/api/user';
+import { Button, Card, Input, Modal, Dropdown, Textarea } from '@/components/ui';
+import MainLayout from '@/components/layout';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 
 const ProfilePage = () => {
     const { user, checkAuth, loading: authLoading } = useAuth();

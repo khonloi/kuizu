@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { getFlashcardsBySetId } from '../api/flashcards';
-import { submitQuiz } from '../api/study';
-import { Button, Card, Loader, Modal } from '../components/ui';
-import MainLayout from '../components/layout';
+import { getFlashcardsBySetId } from '@/api/flashcards';
+import { submitQuiz } from '@/api/study';
+import { Button, Card, Loader, Modal } from '@/components/ui';
+import MainLayout from '@/components/layout';
 import './QuizPage.css';
 
 const QuizPage = () => {
@@ -191,8 +191,8 @@ const QuizPage = () => {
                         <div className="quiz-progress-text">
                             Question <span className="current">{currentQuestionIndex + 1}</span> of <span className="total">{questions.length}</span>
                         </div>
-                        <Button 
-                            variant="primary" 
+                        <Button
+                            variant="primary"
                             size="sm"
                             className="finish-quiz-btn"
                             onClick={() => setShowFinishModal(true)}
@@ -249,15 +249,15 @@ const QuizPage = () => {
                 title="Finish Quiz Early?"
                 footer={
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                        <Button 
-                            variant="secondary" 
+                        <Button
+                            variant="secondary"
                             onClick={() => setShowFinishModal(false)}
                             disabled={isSubmitting}
                         >
                             Cancel
                         </Button>
-                        <Button 
-                            variant="primary" 
+                        <Button
+                            variant="primary"
                             onClick={() => {
                                 setShowFinishModal(false);
                                 handleSubmitQuiz();
