@@ -267,9 +267,9 @@ public class FolderService {
                 .map(fs -> fs.getFlashcardSet().getSetId())
                 .collect(Collectors.toSet());
 
-        List<FlashcardSet> userSets = flashcardSetRepository.findByOwnerAndIsDeletedFalse(user);
+        List<FlashcardSet> availableSets = flashcardSetRepository.findAllAvailableForUser(user);
 
-        return userSets.stream()
+        return availableSets.stream()
                 .filter(s -> !existingSetIds.contains(s.getSetId()))
                 .map(s -> {
                     long termCount = flashcardRepository.countByFlashcardSetAndIsDeletedFalse(s);
@@ -278,6 +278,7 @@ public class FolderService {
                             "title", s.getTitle() != null ? s.getTitle() : "",
                             "description", s.getDescription() != null ? s.getDescription() : "",
                             "termCount", termCount,
+                            "ownerDisplayName", s.getOwner() != null ? s.getOwner().getDisplayName() : "",
                             "createdAt", s.getCreatedAt() != null ? s.getCreatedAt().toString() : ""
                     );
                 })

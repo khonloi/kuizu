@@ -159,7 +159,7 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
                                             <div className="set-info">
                                                 <div className="suggested-set-title">{set.title}</div>
                                                 <div className="suggested-set-subtitle">
-                                                    {set.termCount} terms {set.description && ` · ${set.description}`}
+                                                    {set.termCount} terms {set.ownerDisplayName && ` · by ${set.ownerDisplayName}`}
                                                 </div>
                                             </div>
                                         </div>
