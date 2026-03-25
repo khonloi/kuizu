@@ -27,7 +27,7 @@ const ForgotPasswordPage = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
     const [loading, setLoading] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
 
@@ -52,7 +52,7 @@ const ForgotPasswordPage = () => {
     const handleRequestOtp = async (e) => {
         e.preventDefault();
         setLoading(true);
-        
+
         try {
             await forgotPassword(email);
             toast.success('Password reset code sent to your email.');
@@ -68,7 +68,7 @@ const ForgotPasswordPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (action === 'reset') {
             await handleResetPassword();
         } else {
@@ -81,15 +81,15 @@ const ForgotPasswordPage = () => {
             toast.error('Passwords do not match.');
             return;
         }
-        
+
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$/;
         if (!passwordRegex.test(newPassword)) {
             toast.error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@#$%^&+=!) and be at least 8 chars long.');
             return;
         }
-        
+
         setLoading(true);
-        
+
         try {
             await resetPassword(email, otpCode, newPassword);
             toast.success('Password reset successfully! You can now log in.');
@@ -150,7 +150,7 @@ const ForgotPasswordPage = () => {
                         <ArrowLeft size={18} /> Back to login
                     </Link>
                 </div>
-                
+
                 {step === 1 ? (
                     <div className="fp-content">
                         <div className="fp-header">
@@ -160,7 +160,7 @@ const ForgotPasswordPage = () => {
                             <h2>Forgot Password?</h2>
                             <p>Enter your email address to receive a 6-digit reset code.</p>
                         </div>
-                        
+
                         <form onSubmit={handleRequestOtp} className="auth-form">
                             <Input
                                 label="Email Address"
@@ -171,7 +171,7 @@ const ForgotPasswordPage = () => {
                                 leftIcon={<Mail size={18} />}
                                 required
                             />
-                            
+
                             <Button type="submit" isLoading={loading} className="w-full mt-6">
                                 {loading ? 'Sending...' : 'Send Reset Code'}
                             </Button>
@@ -185,13 +185,13 @@ const ForgotPasswordPage = () => {
                             </div>
                             <h2>{action === 'reset' ? 'Reset Password' : 'Verify Your Email'}</h2>
                             <p>
-                                {action === 'reset' 
-                                    ? `We sent a 6-digit code to reset your password.` 
+                                {action === 'reset'
+                                    ? `We sent a 6-digit code to reset your password.`
                                     : `Please enter the 6-digit code we sent to verify your account.`}
                                 <br /><strong>{email}</strong>
                             </p>
                         </div>
-                        
+
                         <form onSubmit={handleSubmit} className="auth-form">
                             <label className="input-label" style={{ textAlign: 'center', display: 'block', marginBottom: '8px' }}>6-Digit OTP</label>
                             <OtpInput
@@ -199,7 +199,7 @@ const ForgotPasswordPage = () => {
                                 onChange={(val) => setOtpCode(val)}
                                 disabled={loading}
                             />
-                            
+
                             {action === 'reset' && (
                                 <>
                                     <Input
@@ -221,7 +221,7 @@ const ForgotPasswordPage = () => {
                                             </button>
                                         }
                                     />
-                                    
+
                                     <Input
                                         label="Confirm New Password"
                                         type={showConfirmPassword ? "text" : "password"}
@@ -243,20 +243,20 @@ const ForgotPasswordPage = () => {
                                     />
                                 </>
                             )}
-                            
+
                             <Button type="submit" isLoading={loading} className="w-full mt-6">
                                 {loading ? 'Processing...' : (action === 'reset' ? 'Reset Password' : 'Verify Account')}
                             </Button>
 
-                            <Button 
-                                variant="ghost" 
-                                type="button" 
-                                className="w-full mt-4" 
-                                onClick={handleResendOtp} 
+                            <Button
+                                variant="ghost"
+                                type="button"
+                                className="w-full mt-4"
+                                onClick={handleResendOtp}
                                 disabled={loading || resendCooldown > 0}
                             >
-                                {resendCooldown > 0 
-                                    ? `Resend in ${resendCooldown}s` 
+                                {resendCooldown > 0
+                                    ? `Resend in ${resendCooldown}s`
                                     : "Didn't get a code? Resend"}
                             </Button>
                         </form>

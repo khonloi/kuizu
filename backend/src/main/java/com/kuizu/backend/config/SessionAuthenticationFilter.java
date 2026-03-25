@@ -65,7 +65,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                
+
                 if (userDetails.isEnabled() && userDetails.isAccountNonLocked()) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -80,10 +80,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     logger.warn("User {} is disabled or locked. Revoking session.", username);
                     sessionService.revokeSession(sessionToken);
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Account is suspended or locked\"}");
-                    return;
+                    // Don't set authentication but let the filter chain continue for permitAll
+                    // requests.
                 }
             }
         } else {
