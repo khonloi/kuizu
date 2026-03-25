@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button } from '../ui';
-import { getAvailableSets, addSetToFolder } from '../../api/folder';
-import { useToast } from '../../context/ToastContext';
+import { getAvailableSets, addSetToFolder } from '@/api/folder';
+import { useToast } from '@/context/ToastContext';
 import { BookOpen, Plus, Loader2 } from 'lucide-react';
 import './AddSetToFolderModal.css';
 

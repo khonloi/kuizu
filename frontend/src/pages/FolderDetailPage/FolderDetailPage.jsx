@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getFolderDetail, removeSetFromFolder, deleteFolder } from '../../api/folder';
-import { Loader, Modal, Button } from '../../components/ui';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
-import AddSetToFolderModal from '../../components/Folder/AddSetToFolderModal';
-import EditFolderModal from '../../components/Folder/EditFolderModal';
+import { getFolderDetail, removeSetFromFolder, deleteFolder } from '@/api/folder';
+import { Loader, Modal, Button } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import AddSetToFolderModal from '@/components/Folder/AddSetToFolderModal';
+import EditFolderModal from '@/components/Folder/EditFolderModal';
 import { ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import './FolderDetailPage.css';
 

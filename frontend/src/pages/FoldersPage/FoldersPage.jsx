@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyFolders, getPublicFolders } from '../../api/folder';
-import { Loader, Button, Card } from '../../components/ui';
-import CreateFolderModal from '../../components/Folder/CreateFolderModal';
+import { getMyFolders, getPublicFolders } from '@/api/folder';
+import { Loader, Button, Card } from '@/components/ui';
+import CreateFolderModal from '@/components/Folder/CreateFolderModal';
 import { Folder, FolderOpen, Plus, Globe } from 'lucide-react';
 import './FoldersPage.css';
 
