@@ -41,6 +41,13 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String sessionToken;
+        String path = request.getRequestURI();
+
+        // Skip session check for auth related endpoints
+        if (path.startsWith("/api/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -73,13 +80,18 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     logger.warn("User {} is disabled or locked. Revoking session.", username);
                     sessionService.revokeSession(sessionToken);
-                    // Don't set authentication but let the filter chain continue for permitAll requests.
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Account is suspended or locked\"}");
+                    return;
                 }
             }
         } else {
-            logger.warn("No active session or invalidated session found for token: {}", sessionToken);
-            // Don't set authentication and let the filter chain continue.
-            // Spring Security will catch unauthorized requests to protected endpoints.
+            logger.warn("No active session found for token: '{}' at path: {}", sessionToken, path);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Session expired or invalid\"}");
+            return;
         }
         filterChain.doFilter(request, response);
     }
