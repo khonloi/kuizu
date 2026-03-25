@@ -17,7 +17,7 @@ public class FolderDetailResponse {
     private String ownerDisplayName;
     private String ownerUsername;
     private LocalDateTime createdAt;
-    private List<BranchSummary> branches;
+    private List<CategorySummary> categories;
     private List<FlashcardSetSummary> sets;
 
     @Getter
@@ -25,8 +25,7 @@ public class FolderDetailResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class BranchSummary {
-        private Long branchId;
+    public static class CategorySummary {
         private String name;
         private List<FlashcardSetSummary> sets;
     }
@@ -38,7 +37,7 @@ public class FolderDetailResponse {
     @Builder
     public static class FlashcardSetSummary {
         private Long setId;
-        private Long branchId;
+        private String category;
         private String title;
         private String description;
         private long termCount;

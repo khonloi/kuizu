@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getFolderDetail, removeSetFromFolder, deleteFolder, createSetInFolder, createBranch } from '../../api/folder';
-import { Loader, Modal, Button } from '../../components/ui';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 import AddSetToFolderModal from '../../components/Folder/AddSetToFolderModal';
 import EditFolderModal from '../../components/Folder/EditFolderModal';
 import CreateSetInFolderModal from '../../components/Folder/CreateSetInFolderModal';
-import CreateBranchModal from '../../components/Folder/CreateBranchModal';
-import { ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2, Pencil, AlertTriangle, MoreVertical, Search, Filter, FolderPlus, Play } from 'lucide-react';
-import { Dropdown } from '../../components/ui';
+import { ChevronLeft, ChevronRight, ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2, Pencil, AlertTriangle, MoreVertical, Search, Filter, FolderPlus, Play } from 'lucide-react';
+import { Dropdown, Button, Modal, Loader } from '../../components/ui';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { getFolderDetail, removeSetFromFolder, createSetInFolder, deleteFolder } from '../../api/folder';
 import './FolderDetailPage.css';
 
 const FolderDetailPage = () => {
@@ -22,7 +20,6 @@ const FolderDetailPage = () => {
     const [expandedSets, setExpandedSets] = useState({});
     const [isAddSetOpen, setIsAddSetOpen] = useState(false);
     const [isCreateSetOpen, setIsCreateSetOpen] = useState(false);
-    const [isCreateBranchOpen, setIsCreateBranchOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -118,12 +115,11 @@ const FolderDetailPage = () => {
 
     const handleCreateSet = async (title) => {
         try {
-            const branchId = activeTab !== 'all' ? activeTab : null;
             await createSetInFolder(folderId, { 
                 title, 
                 description: '', 
                 visibility: folder.visibility 
-            }, branchId);
+            });
             toast.success('Set created and added to folder');
             fetchFolder();
         } catch (error) {
@@ -132,20 +128,8 @@ const FolderDetailPage = () => {
         }
     };
 
-    const handleCreateBranch = async (name) => {
-        try {
-            const newBranch = await createBranch(folderId, { name });
-            toast.success('Branch created');
-            await fetchFolder();
-            setActiveTab(newBranch.branchId);
-        } catch (error) {
-            console.error('Failed to create branch:', error);
-            throw error;
-        }
-    };
-
     const handleStudyAll = (mode = 'study') => {
-        // Collect all cards from all sets in the current view (filtered by branch)
+        // Collect all cards from all sets in the current view (filtered by category)
         const allCards = filteredSets.reduce((acc, set) => {
             const setCards = set.flashcards || [];
             return [...acc, ...setCards];
@@ -193,8 +177,8 @@ const FolderDetailPage = () => {
     const getCurrentSets = () => {
         if (!folder) return [];
         if (activeTab === 'all') return folder.sets || [];
-        const branchToken = folder.branches?.find(b => b.branchId === activeTab);
-        return branchToken ? branchToken.sets || [] : [];
+        const categoryData = folder.categories?.find(c => c.name === activeTab);
+        return categoryData ? categoryData.sets || [] : [];
     };
 
     const filteredSets = getCurrentSets()
@@ -205,7 +189,7 @@ const FolderDetailPage = () => {
             return 0;
         });
 
-    const activeBranchName = activeTab !== 'all' ? folder?.branches?.find(b => b.branchId === activeTab)?.name : null;
+    const activeCategoryName = activeTab !== 'all' ? activeTab : null;
 
     if (isLoading) {
         return <Loader fullPage={true} />;
@@ -268,23 +252,15 @@ const FolderDetailPage = () => {
                         >
                             All
                         </button>
-                        {folder.branches?.map(branch => (
+                        {folder.categories?.map(category => (
                             <button 
-                                key={branch.branchId}
-                                className={`fd-tab-btn ${activeTab === branch.branchId ? 'active' : ''}`}
-                                onClick={() => setActiveTab(branch.branchId)}
+                                key={category.name}
+                                className={`fd-tab-btn ${activeTab === category.name ? 'active' : ''}`}
+                                onClick={() => setActiveTab(category.name)}
                             >
-                                {branch.name}
+                                {category.name}
                             </button>
                         ))}
-                        {isOwner && (
-                            <button 
-                                className="fd-tab-plus-btn"
-                                onClick={() => setIsCreateBranchOpen(true)}
-                            >
-                                <Plus size={18} />
-                            </button>
-                        )}
                     </div>
                 </div>
 
@@ -352,12 +328,12 @@ const FolderDetailPage = () => {
                         ))
                     ) : (
                         <div className="fd-empty-state">
-                            {activeBranchName ? (
+                            {activeCategoryName ? (
                                 <>
                                     <div className="fd-empty-illustrations">
                                         <img src="https://assets.quizlet.com/a/j/dist/app/i/folder/empty_state_1.06642ba5ba1860e.svg" alt="" />
                                     </div>
-                                    <p className="fd-empty-text-branch">Add study material for <strong>{activeBranchName}</strong></p>
+                                    <p className="fd-empty-text-category">Add study material for <strong>{activeCategoryName}</strong></p>
                                     {isOwner && (
                                         <Button variant="primary" onClick={() => setIsAddSetOpen(true)} className="fd-empty-cta">
                                             <Plus size={18} />
@@ -423,7 +399,6 @@ const FolderDetailPage = () => {
                 onClose={() => setIsAddSetOpen(false)}
                 folderId={folderId}
                 onSetAdded={fetchFolder}
-                branchId={activeTab !== 'all' ? activeTab : null}
             />
 
             <EditFolderModal
@@ -438,12 +413,6 @@ const FolderDetailPage = () => {
                 onClose={() => setIsCreateSetOpen(false)}
                 onCreateSuccess={handleCreateSet}
                 folderId={folderId}
-            />
-
-            <CreateBranchModal
-                isOpen={isCreateBranchOpen}
-                onClose={() => setIsCreateBranchOpen(false)}
-                onCreateSuccess={handleCreateBranch}
             />
 
             <Modal
