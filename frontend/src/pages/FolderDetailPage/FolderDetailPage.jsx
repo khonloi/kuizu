@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AddSetToFolderModal from '../../components/Folder/AddSetToFolderModal';
 import EditFolderModal from '../../components/Folder/EditFolderModal';
 import CreateSetInFolderModal from '../../components/Folder/CreateSetInFolderModal';
-import { ChevronLeft, ChevronRight, ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2, Pencil, AlertTriangle, MoreVertical, Search, Filter, FolderPlus, Play } from 'lucide-react';
+import AddCategoryModal from '../../components/Folder/AddCategoryModal';
+import { ChevronLeft, ChevronRight, ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2, Pencil, AlertTriangle, MoreVertical, Search, Filter, FolderPlus, Play, X } from 'lucide-react';
 import { Dropdown, Button, Modal, Loader } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getFolderDetail, removeSetFromFolder, createSetInFolder, deleteFolder } from '../../api/folder';
+import { getFolderDetail, removeSetFromFolder, createSetInFolder, deleteFolder, deleteFolderCategory } from '../../api/folder';
 import './FolderDetailPage.css';
 
 const FolderDetailPage = () => {
@@ -21,6 +22,7 @@ const FolderDetailPage = () => {
     const [isAddSetOpen, setIsAddSetOpen] = useState(false);
     const [isCreateSetOpen, setIsCreateSetOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [removingSetId, setRemovingSetId] = useState(null);
@@ -164,6 +166,20 @@ const FolderDetailPage = () => {
         }
     };
 
+    const handleDeleteCategory = async (e, categoryName) => {
+        e.stopPropagation();
+        if (window.confirm(`Delete category "${categoryName}"?`)) {
+            try {
+                await deleteFolderCategory(folderId, categoryName);
+                toast.success(`Category "${categoryName}" deleted`);
+                if (activeTab === categoryName) setActiveTab('all');
+                fetchFolder();
+            } catch (error) {
+                toast.error("Failed to delete category");
+            }
+        }
+    };
+
     const deleteFooter = (
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', width: '100%' }}>
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)} disabled={isDeleting}>Cancel</Button>
@@ -253,14 +269,33 @@ const FolderDetailPage = () => {
                             All
                         </button>
                         {folder.categories?.map(category => (
-                            <button 
-                                key={category.name}
-                                className={`fd-tab-btn ${activeTab === category.name ? 'active' : ''}`}
-                                onClick={() => setActiveTab(category.name)}
-                            >
-                                {category.name}
-                            </button>
+                            <div key={category.name} className={`fd-tab-wrapper ${activeTab === category.name ? 'active' : ''}`}>
+                                <button 
+                                    className={`fd-tab-btn ${activeTab === category.name ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(category.name)}
+                                >
+                                    {category.name}
+                                </button>
+                                {isOwner && (
+                                    <button 
+                                        className="fd-tab-delete-btn"
+                                        onClick={(e) => handleDeleteCategory(e, category.name)}
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
                         ))}
+                        {isOwner && (
+                            <button 
+                                className="fd-add-tab-btn"
+                                onClick={() => setIsAddCategoryOpen(true)}
+                                title="Add Tag"
+                            >
+                                <Plus size={16} />
+                                <span>Tag</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -399,6 +434,7 @@ const FolderDetailPage = () => {
                 onClose={() => setIsAddSetOpen(false)}
                 folderId={folderId}
                 onSetAdded={fetchFolder}
+                category={activeTab}
             />
 
             <EditFolderModal
@@ -413,6 +449,14 @@ const FolderDetailPage = () => {
                 onClose={() => setIsCreateSetOpen(false)}
                 onCreateSuccess={handleCreateSet}
                 folderId={folderId}
+            />
+
+            <AddCategoryModal 
+                isOpen={isAddCategoryOpen}
+                onClose={() => setIsAddCategoryOpen(false)}
+                folderId={folderId}
+                onCategoryAdded={fetchFolder}
+                currentCategories={folder.categories?.map(c => c.name) || []}
             />
 
             <Modal

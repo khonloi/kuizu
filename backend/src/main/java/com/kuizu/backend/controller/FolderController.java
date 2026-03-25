@@ -90,11 +90,12 @@ public class FolderController {
     public ResponseEntity<?> addSetToFolder(
             @PathVariable Long folderId, 
             @PathVariable Long setId, 
+            @RequestParam(required = false) String category,
             Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        folderService.addSetToFolder(folderId, setId, principal.getName());
+        folderService.addSetToFolder(folderId, setId, principal.getName(), category);
         return ResponseEntity.ok(Map.of("message", "Set added to folder successfully"));
     }
 
@@ -116,5 +117,29 @@ public class FolderController {
             return ResponseEntity.status(401).build();
         }
         return ResponseEntity.ok(folderService.createSetInFolder(folderId, request, principal.getName()));
+    }
+
+    @PostMapping("/{folderId}/categories")
+    public ResponseEntity<?> addCategory(
+            @PathVariable Long folderId, 
+            @RequestBody Map<String, String> request, 
+            Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        folderService.addCategoryToFolder(folderId, request.get("name"), principal.getName());
+        return ResponseEntity.ok(Map.of("message", "Category added successfully"));
+    }
+
+    @DeleteMapping("/{folderId}/categories/{name}")
+    public ResponseEntity<?> removeCategory(
+            @PathVariable Long folderId, 
+            @PathVariable String name, 
+            Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        folderService.removeCategoryFromFolder(folderId, name, principal.getName());
+        return ResponseEntity.ok(Map.of("message", "Category removed successfully"));
     }
 }

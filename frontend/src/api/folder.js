@@ -51,7 +51,18 @@ export const createSetInFolder = async (folderId, setData) => {
     return response.data;
 };
 
-export const addSetToFolder = async (folderId, setId) => {
-    const response = await api.post(`/folders/${folderId}/sets/${setId}`);
+export const addSetToFolder = async (folderId, setId, category) => {
+    const params = category ? { category } : {};
+    const response = await api.post(`/folders/${folderId}/sets/${setId}`, null, { params });
+    return response.data;
+};
+
+export const addFolderCategory = async (folderId, categoryName) => {
+    const response = await api.post(`/folders/${folderId}/categories`, { name: categoryName });
+    return response.data;
+};
+
+export const deleteFolderCategory = async (folderId, categoryName) => {
+    const response = await api.delete(`/folders/${folderId}/categories/${categoryName}`);
     return response.data;
 };

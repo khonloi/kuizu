@@ -84,7 +84,6 @@ const EditFolderModal = ({ isOpen, onClose, folder, onUpdateSuccess }) => {
             <div className="create-folder-content">
                 {error && (
                     <div className="modal-error-message">
-                        <span role="img" aria-label="error">⚠️</span>
                         {error}
                     </div>
                 )}

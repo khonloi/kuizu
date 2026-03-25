@@ -111,7 +111,6 @@ const CreateFolderModal = ({ isOpen, onClose, onCreateSuccess }) => {
             <div className="create-folder-content">
                 {error && (
                     <div className="modal-error-message">
-                        <span role="img" aria-label="error">⚠️</span>
                         {error}
                     </div>
                 )}

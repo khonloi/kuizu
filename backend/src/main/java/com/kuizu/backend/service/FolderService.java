@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
@@ -162,19 +164,19 @@ public class FolderService {
     }
 
     @Transactional
-    public void addSetToFolder(Long folderId, Long setId, String username) {
+    public void addSetToFolder(Long folderId, Long setId, String username, String category) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApiException("User not found"));
 
         Folder folder = folderRepository.findById(folderId)
-                .orElseThrow(() -> new RuntimeException("Folder not found"));
+                .orElseThrow(() -> new ApiException("Folder not found"));
 
         if (!folder.getOwner().getUserId().equals(user.getUserId())) {
-            throw new RuntimeException("You don't own this folder");
+            throw new ApiException("You don't own this folder");
         }
 
         FlashcardSet flashcardSet = flashcardSetRepository.findById(setId)
-                .orElseThrow(() -> new RuntimeException("Flashcard set not found"));
+                .orElseThrow(() -> new ApiException("Flashcard set not found"));
 
         FolderSet.FolderSetId id = new FolderSet.FolderSetId(folderId, setId);
         FolderSet folderSet = folderSetRepository.findById(id).orElse(null);
@@ -187,6 +189,12 @@ public class FolderService {
                     .addedBy(user.getUserId().toString())
                     .build();
             folderSetRepository.save(folderSet);
+        }
+
+        // Update category if provided and valid
+        if (category != null && !category.equalsIgnoreCase("all") && !category.equalsIgnoreCase("Uncategorized")) {
+            flashcardSet.setCategory(category);
+            flashcardSetRepository.save(flashcardSet);
         }
     }
 
@@ -286,13 +294,22 @@ public class FolderService {
                 .collect(Collectors.toList());
 
         // Group sets by category
-        Map<String, List<FolderDetailResponse.FlashcardSetSummary>> grouped = allSets.stream()
-                .collect(Collectors.groupingBy(s -> s.getCategory() != null ? s.getCategory() : "Uncategorized"));
+        Map<String, List<FolderDetailResponse.FlashcardSetSummary>> groupedBySet = allSets.stream()
+                .filter(s -> s.getCategory() != null)
+                .collect(Collectors.groupingBy(FolderDetailResponse.FlashcardSetSummary::getCategory));
 
-        List<FolderDetailResponse.CategorySummary> categorySummaries = grouped.entrySet().stream()
-                .map(entry -> FolderDetailResponse.CategorySummary.builder()
-                        .name(entry.getKey())
-                        .sets(entry.getValue())
+        List<FolderDetailResponse.FlashcardSetSummary> uncategorizedSets = allSets.stream()
+                .filter(s -> s.getCategory() == null)
+                .collect(Collectors.toList());
+
+        // Get all unique categories (defined in folder + those present in sets)
+        Set<String> allCategoryNames = new LinkedHashSet<>(folder.getCategories());
+        groupedBySet.keySet().forEach(allCategoryNames::add);
+
+        List<FolderDetailResponse.CategorySummary> categorySummaries = allCategoryNames.stream()
+                .map(name -> FolderDetailResponse.CategorySummary.builder()
+                        .name(name)
+                        .sets(groupedBySet.getOrDefault(name, Collections.emptyList()))
                         .build())
                 .collect(Collectors.toList());
 
@@ -307,6 +324,34 @@ public class FolderService {
                 .categories(categorySummaries)
                 .sets(allSets) // "All" tab uses this
                 .build();
+    }
+
+    @Transactional
+    public void addCategoryToFolder(Long folderId, String categoryName, String username) {
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new ApiException("Folder not found"));
+
+        if (!folder.getOwner().getUsername().equals(username)) {
+            throw new ApiException("You do not have permission to modify this folder");
+        }
+
+        if (!folder.getCategories().contains(categoryName)) {
+            folder.getCategories().add(categoryName);
+            folderRepository.save(folder);
+        }
+    }
+
+    @Transactional
+    public void removeCategoryFromFolder(Long folderId, String categoryName, String username) {
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new ApiException("Folder not found"));
+
+        if (!folder.getOwner().getUsername().equals(username)) {
+            throw new ApiException("You do not have permission to modify this folder");
+        }
+
+        folder.getCategories().remove(categoryName);
+        folderRepository.save(folder);
     }
 
     private FolderDetailResponse.FlashcardSetSummary mapToSummary(FolderSet fs) {
