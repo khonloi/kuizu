@@ -14,6 +14,7 @@ const FlashcardSetForm = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        category: '',
         visibility: 'PUBLIC'
     });
     const [loading, setLoading] = useState(isEdit);
@@ -32,6 +33,7 @@ const FlashcardSetForm = () => {
             setFormData({
                 title: data.title,
                 description: data.description || '',
+                category: data.category || '',
                 visibility: data.visibility || 'PUBLIC'
             });
         } catch (err) {
@@ -109,6 +111,18 @@ const FlashcardSetForm = () => {
                                         value={formData.description}
                                         onChange={handleChange}
                                     />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="category">Category (Optional)</label>
+                                    <Input
+                                        id="category"
+                                        name="category"
+                                        placeholder='e.g. "Biology", "Mathematics", "Japanese"'
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                    />
+                                    <small className="form-help">Sets with the same category will be grouped together in folders.</small>
                                 </div>
 
                                 <div className="form-group">
