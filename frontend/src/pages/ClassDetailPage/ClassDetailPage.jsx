@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClassDetails, leaveClass, getClassJoinCode, deleteClass, removeMember, processJoinRequest, removeClassMaterial, reRequestClassReview } from '@/api/class';
-import { Button, Card } from '@/components/ui';
+import { Button, Card, Badge, Loader } from '@/components/ui';
 import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2, Folder, Layers } from 'lucide-react';
 import JoinClassModal from '@/components/Class/JoinClassModal';
 import LeaveClassModal from '@/components/Class/LeaveClassModal';
@@ -233,7 +233,7 @@ const ClassDetailPage = () => {
     if (isLoading) {
         return (
             <div className="class-detail-loading">
-                <div className="spinner"></div>
+                <Loader fullPage={true} />
                 <p>Loading class details...</p>
             </div>
         );
@@ -255,13 +255,13 @@ const ClassDetailPage = () => {
                 <div className="class-header-content">
                     <div className="class-badges">
                         {classData.status === 'PENDING' && (
-                            <span className="badge" style={{ backgroundColor: '#eab308', color: 'black', marginLeft: '8px' }}>Pending Review</span>
+                            <Badge variant="warning" style={{ marginLeft: '8px' }}>Pending Review</Badge>
                         )}
                         {classData.status === 'REJECTED' && (
-                            <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white', marginLeft: '8px' }}>Rejected</span>
+                            <Badge variant="error" style={{ marginLeft: '8px' }}>Rejected</Badge>
                         )}
                         {classData.status === 'ACTIVE' && classData.isOwner && (
-                            <span className="badge" style={{ backgroundColor: '#22c55e', color: 'white', marginLeft: '8px' }}>Approved</span>
+                            <Badge variant="success" style={{ marginLeft: '8px' }}>Approved</Badge>
                         )}
                     </div>
                     <h1 className="class-title">{classData.className}</h1>
@@ -364,22 +364,25 @@ const ClassDetailPage = () => {
                 <div className="class-content-area">
                     {classData?.isOwner && (
                         <div className="class-tabs">
-                            <button
+                            <Button
+                                variant="ghost"
                                 className={`tab-btn ${activeTab === 'materials' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('materials')}
                             >
                                 <File size={18} />
                                 <span>Materials</span>
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
                                 className={`tab-btn ${activeTab === 'members' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('members')}
                             >
                                 <Users size={18} />
                                 <span>Members</span>
                                 <span className="tab-count">{classData.members?.length || 0}</span>
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
                                 className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('requests')}
                             >
@@ -388,7 +391,7 @@ const ClassDetailPage = () => {
                                 {classData.joinRequests?.length > 0 && (
                                     <span className="tab-badge">{classData.joinRequests.length}</span>
                                 )}
-                            </button>
+                            </Button>
                         </div>
                     )}
 
@@ -453,7 +456,9 @@ const ClassDetailPage = () => {
                                         </div>
                                         <div className="member-info">
                                             <h4 className="member-name">{member.displayName}</h4>
-                                            <span className={`member-role ${member.role.toLowerCase()}`}>{member.role}</span>
+                                            <Badge variant={member.role === 'OWNER' ? 'error' : member.role === 'TEACHER' ? 'success' : 'primary'} size="sm">
+                                                {member.role}
+                                            </Badge>
                                         </div>
                                         {member.userId !== classData.ownerUserId && (
                                             <Button

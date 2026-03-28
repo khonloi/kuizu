@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, User, Globe, Lock, FolderOpen } from 'lucide-react';
 import { getMyFolders, getPublicFolders } from '../../api/folder';
-import { Loader, Button, Card } from '../../components/ui';
+import { Loader, Button, Card, Badge } from '../../components/ui';
 import CreateFolderModal from '../../components/Folder/CreateFolderModal';
 import './FoldersPage.css';
 
@@ -89,18 +89,20 @@ const FoldersPage = () => {
                             />
                         </div>
                         <div className="tabs">
-                            <button
+                            <Button
+                                variant="ghost"
                                 className={`tab-item ${activeTab === 'public' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('public')}
                             >
                                 Public
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
                                 className={`tab-item ${activeTab === 'my' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('my')}
                             >
                                 My Folders
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -123,13 +125,9 @@ const FoldersPage = () => {
                                     description={folder.description}
                                     ownerName={folder.isMine ? 'You' : folder.ownerDisplayName}
                                     footerRight={
-                                        <div className={`visibility-indicator ${folder.visibility?.toLowerCase()}`}>
-                                            {folder.visibility === 'PUBLIC' ? (
-                                                <> Public</>
-                                            ) : (
-                                                <> Private</>
-                                            )}
-                                        </div>
+                                        <Badge variant={folder.visibility === 'PUBLIC' ? 'success' : 'secondary'} size="sm">
+                                            {folder.visibility === 'PUBLIC' ? 'Public' : 'Private'}
+                                        </Badge>
                                     }
                                 />
                             ))

@@ -201,15 +201,17 @@ const RegisterForm = ({ onToggle }) => {
                 leftIcon={<Lock size={18} />}
                 autoComplete="new-password"
                 rightIcon={
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         className="toggle-password-btn"
                         onClick={() => setShowPassword(!showPassword)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
                         aria-label={showPassword ? "Hide password" : "Show password"}
+                        style={{ width: 'auto', height: 'auto', padding: '4px' }}
                     >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                    </Button>
                 }
             />
 
@@ -223,15 +225,17 @@ const RegisterForm = ({ onToggle }) => {
                 leftIcon={<Lock size={18} />}
                 autoComplete="new-password"
                 rightIcon={
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         className="toggle-password-btn"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
                         aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                        style={{ width: 'auto', height: 'auto', padding: '4px' }}
                     >
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                    </Button>
                 }
             />
 

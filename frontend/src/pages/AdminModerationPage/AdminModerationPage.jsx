@@ -15,7 +15,7 @@ import {
     getPendingClasses,
     getAllUsers
 } from '@/api/moderation';
-import { Button, Card, Loader, Modal } from '@/components/ui';
+import { Button, Card, Loader, Modal, Textarea, Badge } from '@/components/ui';
 import MainLayout from '@/components/layout';
 import './AdminModerationPage.css';
 import { useToast } from '@/context/ToastContext';
@@ -162,7 +162,7 @@ const AdminModerationPage = () => {
                             <td>{user.displayName}</td>
                             <td>{user.email}</td>
                             <td>{user.role}</td>
-                            <td><span className={`status-badge ${user.status.toLowerCase()}`}>{user.status}</span></td>
+                            <td><Badge variant={user.status === 'ACTIVE' ? 'success' : user.status === 'SUSPENDED' ? 'error' : 'warning'}>{user.status}</Badge></td>
                             <td>
                                 {user.status !== 'SUSPENDED' ? (
                                     <Button variant="ghost" size="sm" className="suspend-btn" onClick={() => handleOpenModModal('USER', user.userId, 'SUSPEND')}>
@@ -198,7 +198,11 @@ const AdminModerationPage = () => {
                         <tr key={item.modId}>
                             <td>{item.moderatorDisplayName}</td>
                             <td>{item.entityType} ({item.entityId})</td>
-                            <td><span className={`action-badge ${item.action.toLowerCase()}`}>{item.action}</span></td>
+                            <td>
+                                <Badge variant={item.action === 'APPROVE' ? 'success' : item.action === 'REJECT' || item.action === 'SUSPEND' ? 'error' : 'primary'}>
+                                    {item.action}
+                                </Badge>
+                            </td>
                             <td className="notes-cell">{item.notes}</td>
                             <td>{new Date(item.createdAt).toLocaleString()}</td>
                         </tr>
@@ -222,18 +226,34 @@ const AdminModerationPage = () => {
                 </header>
 
                 <div className="mod-tabs">
-                    <button className={activeTab === 'sets' ? 'active' : ''} onClick={() => setActiveTab('sets')}>
+                    <Button 
+                        variant="ghost" 
+                        className={activeTab === 'sets' ? 'active' : ''} 
+                        onClick={() => setActiveTab('sets')}
+                    >
                         <Clock size={18} /> Flashcard Sets
-                    </button>
-                    <button className={activeTab === 'classes' ? 'active' : ''} onClick={() => setActiveTab('classes')}>
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        className={activeTab === 'classes' ? 'active' : ''} 
+                        onClick={() => setActiveTab('classes')}
+                    >
                         <Clock size={18} /> Classes
-                    </button>
-                    <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        className={activeTab === 'users' ? 'active' : ''} 
+                        onClick={() => setActiveTab('users')}
+                    >
                         <UserCog size={18} /> Users
-                    </button>
-                    <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        className={activeTab === 'history' ? 'active' : ''} 
+                        onClick={() => setActiveTab('history')}
+                    >
                         <History size={18} /> History
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="mod-content">
@@ -256,12 +276,12 @@ const AdminModerationPage = () => {
                         <p>Are you sure you want to <strong>{modData.action}</strong> this {modData.entityType.toLowerCase()}?</p>
                         <div className="form-group">
                             <label>Moderation Notes</label>
-                            <textarea
-                                value={modData.notes}
-                                onChange={(e) => setModData({ ...modData, notes: e.target.value })}
-                                placeholder="Provide a reason for this action..."
-                                rows={4}
-                            />
+                        <Textarea
+                            value={modData.notes}
+                            onChange={(e) => setModData({ ...modData, notes: e.target.value })}
+                            placeholder="Provide a reason for this action..."
+                            rows={4}
+                        />
                         </div>
                         <div className="modal-actions">
                             <Button variant="ghost" onClick={() => setIsModModalOpen(false)}>Cancel</Button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button, Card, Badge, Table, Pagination, EmptyState, Loader } from '@/components/ui';
+import { Button, Card, Badge, Table, Pagination, EmptyState, Loader, Select } from '@/components/ui';
 import { getUserStatistics, getFlashcardSetStatistics, getClassStatistics, getDashboardSummary, getFlashcardSummary, getClassSummary } from '@/api/statistics';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Brush } from 'recharts';
 import { useToast } from '@/context/ToastContext';
@@ -261,27 +261,33 @@ const StatisticsPage = () => {
                 
                 {/* Top Navigation Cards moved to header */}
                 <div style={{ display: 'flex', gap: '4px', backgroundColor: '#f1f5f9', padding: '6px', borderRadius: '10px' }}>
-                    <button 
+                    <Button 
+                        variant="ghost"
                         onClick={() => navigate('/admin/stats/users')}
-                        style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none', transition: 'all 0.2s', backgroundColor: activeView === 'users' ? '#ffffff' : 'transparent', color: activeView === 'users' ? '#2563eb' : '#64748b', boxShadow: activeView === 'users' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
+                        className={activeView === 'users' ? 'active-stat-tab' : ''}
+                        style={{ backgroundColor: activeView === 'users' ? '#ffffff' : 'transparent', color: activeView === 'users' ? '#2563eb' : '#64748b', boxShadow: activeView === 'users' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
                     >
                         <TrendingUp size={16} />
                         <span>User Statistics</span>
-                    </button>
-                    <button 
+                    </Button>
+                    <Button 
+                        variant="ghost"
                         onClick={() => navigate('/admin/stats/flashcards')}
-                        style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none', transition: 'all 0.2s', backgroundColor: activeView === 'flashcards' ? '#ffffff' : 'transparent', color: activeView === 'flashcards' ? '#2563eb' : '#64748b', boxShadow: activeView === 'flashcards' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
+                        className={activeView === 'flashcards' ? 'active-stat-tab' : ''}
+                        style={{ backgroundColor: activeView === 'flashcards' ? '#ffffff' : 'transparent', color: activeView === 'flashcards' ? '#2563eb' : '#64748b', boxShadow: activeView === 'flashcards' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
                     >
                         <BookOpen size={16} />
                         <span>Flashcard Statistics</span>
-                    </button>
-                    <button 
+                    </Button>
+                    <Button 
+                        variant="ghost"
                         onClick={() => navigate('/admin/stats/classes')}
-                        style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none', transition: 'all 0.2s', backgroundColor: activeView === 'classes' ? '#ffffff' : 'transparent', color: activeView === 'classes' ? '#2563eb' : '#64748b', boxShadow: activeView === 'classes' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
+                        className={activeView === 'classes' ? 'active-stat-tab' : ''}
+                        style={{ backgroundColor: activeView === 'classes' ? '#ffffff' : 'transparent', color: activeView === 'classes' ? '#2563eb' : '#64748b', boxShadow: activeView === 'classes' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none' }}
                     >
                         <GraduationCap size={16} />
                         <span>Class Statistics</span>
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -388,15 +394,16 @@ const StatisticsPage = () => {
                             <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b', margin: 0 }}>
                                 {activeView === 'users' ? 'Registration Trend' : activeView === 'flashcards' ? 'Flashcard Creation Trend' : 'Class Creation Trend'}
                             </h3>
-                            <select 
+                            <Select 
                                 value={chartDays} 
-                                onChange={handleDaysChange}
-                                style={{ padding: '8px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#ffffff', fontSize: '14px', color: '#334155', cursor: 'pointer', outline: 'none' }}
-                            >
-                                <option value={7}>Last 7 Days</option>
-                                <option value={14}>Last 14 Days</option>
-                                <option value={30}>Last 30 Days</option>
-                            </select>
+                                onChange={(e) => setChartDays(Number(e.target.value))}
+                                options={[
+                                    { value: 7, label: 'Last 7 Days' },
+                                    { value: 14, label: 'Last 14 Days' },
+                                    { value: 30, label: 'Last 30 Days' }
+                                ]}
+                                style={{ width: 'auto' }}
+                            />
                         </div>
                         <div style={{ width: '100%', height: '350px' }}>
                             <ResponsiveContainer>

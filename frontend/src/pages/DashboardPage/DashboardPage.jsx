@@ -106,8 +106,6 @@ const DashboardPage = () => {
 
     return (
         <div className="dashboard-container">
-            <h1 className="dashboard-title">Welcome back to Kuizu!</h1>
-
             {/* Flashcard Sets Section */}
             <section className="dashboard-section">
                 <div className="dashboard-section-header">

@@ -6,7 +6,7 @@ import { useToast } from '@/context/ToastContext';
 
 import LoginForm from '@/components/Auth/LoginForm';
 import RegisterForm from '@/components/Auth/RegisterForm';
-import { Tabs } from '@/components/ui';
+import { Button, Tabs } from '@/components/ui';
 import { GoogleLogin } from '@react-oauth/google';
 import { googleLogin } from '@/api/auth';
 import './AuthPage.css';
@@ -103,9 +103,9 @@ const AuthPage = () => {
             </div>
             <div className="auth-right">
                 <div className="auth-close">
-                    <button className="close-btn" onClick={() => window.history.back()}>
+                    <Button variant="ghost" className="close-btn" onClick={() => window.history.back()}>
                         <X size={24} />
-                    </button>
+                    </Button>
                 </div>
                 <div className="auth-card">
                     <Tabs

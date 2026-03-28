@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navbar, Footer } from '@/components/layout';
-import { Button } from '@/components/ui';
+import { Button, Badge } from '@/components/ui';
 import { BookOpen, Brain, Users, Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
 import './HomePage.css';
 
@@ -13,10 +13,10 @@ const HomePage = () => {
                 {/* Hero Section */}
                 <section className="hero-section">
                     <div className="hero-container">
-                        <div className="hero-badge">
-                            <Sparkles size={14} className="sparkle-icon" />
+                        <Badge variant="primary" className="hero-badge" style={{ marginBottom: '24px' }}>
+                            <Sparkles size={14} className="sparkle-icon" style={{ marginRight: '8px' }} />
                             <span>Revolutionize Your Study Habits</span>
-                        </div>
+                        </Badge>
                         <h1 className="hero-title">
                             Master any subject with <span className="gradient-text">Kuizu</span>
                         </h1>

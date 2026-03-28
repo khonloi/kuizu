@@ -211,14 +211,16 @@ const ForgotPasswordPage = () => {
                                         leftIcon={<Lock size={18} />}
                                         required
                                         rightIcon={
-                                            <button
+                                            <Button
                                                 type="button"
+                                                variant="ghost"
+                                                size="icon"
                                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
                                                 aria-label={showNewPassword ? "Hide password" : "Show password"}
+                                                style={{ width: 'auto', height: 'auto', padding: '4px' }}
                                             >
                                                 {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
+                                            </Button>
                                         }
                                     />
 
@@ -231,14 +233,16 @@ const ForgotPasswordPage = () => {
                                         leftIcon={<Lock size={18} />}
                                         required
                                         rightIcon={
-                                            <button
+                                            <Button
                                                 type="button"
+                                                variant="ghost"
+                                                size="icon"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
                                                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                                                style={{ width: 'auto', height: 'auto', padding: '4px' }}
                                             >
                                                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
+                                            </Button>
                                         }
                                     />
                                 </>

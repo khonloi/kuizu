@@ -35,10 +35,10 @@ const QuizResultPage = () => {
         <MainLayout>
             <div className="result-page-container">
                 <div className="result-header">
-                    <button className="back-link" onClick={() => navigate(returnPath)}>
+                    <Button variant="ghost" className="back-link" onClick={() => navigate(returnPath)}>
                         <ChevronLeft size={20} />
                         {backLabel}
-                    </button>
+                    </Button>
                     <h1>Quiz Results</h1>
                 </div>
 

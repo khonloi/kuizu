@@ -252,9 +252,9 @@ const FolderDetailPage = () => {
                                 variant="ghost"
                                 showChevron={false}
                             >
-                                <button className="fd-more-btn">
+                                <Button variant="ghost" className="fd-more-btn" size="icon">
                                     <MoreVertical size={24} />
-                                </button>
+                                </Button>
                             </Dropdown>
                         )}
                     </div>
@@ -262,39 +262,44 @@ const FolderDetailPage = () => {
 
                 <div className="fd-tabs-container">
                     <div className="fd-tabs">
-                        <button 
+                        <Button 
+                            variant="ghost"
                             className={`fd-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
                             onClick={() => setActiveTab('all')}
                         >
                             All
-                        </button>
+                        </Button>
                         {folder.categories?.map(category => (
                             <div key={category.name} className={`fd-tab-wrapper ${activeTab === category.name ? 'active' : ''}`}>
-                                <button 
+                                <Button 
+                                    variant="ghost"
                                     className={`fd-tab-btn ${activeTab === category.name ? 'active' : ''}`}
                                     onClick={() => setActiveTab(category.name)}
                                 >
                                     {category.name}
-                                </button>
+                                </Button>
                                 {isOwner && (
-                                    <button 
+                                    <Button 
+                                        variant="ghost"
+                                        size="icon"
                                         className="fd-tab-delete-btn"
                                         onClick={(e) => handleDeleteCategory(e, category.name)}
                                     >
                                         <X size={12} />
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         ))}
                         {isOwner && (
-                            <button 
+                            <Button 
+                                variant="ghost"
                                 className="fd-add-tab-btn"
                                 onClick={() => setIsAddCategoryOpen(true)}
                                 title="Add Tag"
                             >
                                 <Plus size={16} />
                                 <span>Tag</span>
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -403,7 +408,8 @@ const FolderDetailPage = () => {
                             triggerClassName="fd-study-dropdown-trigger"
                             className="fd-study-dropdown-field"
                         >
-                            <button 
+                            <Button 
+                                variant="ghost"
                                 className="fd-study-btn" 
                                 onClick={(e) => {
                                     // Let dropdown toggle handle it unless it's a direct click on something else
@@ -411,13 +417,13 @@ const FolderDetailPage = () => {
                             >
                                 <BookOpen size={22} />
                                 Study
-                            </button>
+                            </Button>
                         </Dropdown>
                         {isOwner && (
-                            <button className="fd-add-set-toolbar-btn" onClick={() => setIsAddSetOpen(true)}>
+                            <Button variant="primary" className="fd-add-set-toolbar-btn" onClick={() => setIsAddSetOpen(true)}>
                                 <Plus size={20} />
                                 Add study set
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>

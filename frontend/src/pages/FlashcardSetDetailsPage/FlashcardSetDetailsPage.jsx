@@ -4,7 +4,7 @@ import { ChevronLeft, Play, Plus, Pencil, Trash2, User, Layers, BookOpen } from 
 import './FlashcardSetDetailsPage.css';
 import { getFlashcardSetById, getFlashcardsBySetId, deleteFlashcard, reRequestFlashcardSetReview } from '@/api/flashcards';
 import { getStudyProgress, resetStudyProgress } from '@/api/study';
-import { Button, Card, Loader, ConfirmationModal, CelebrationModal } from '@/components/ui';
+import { Button, Card, Loader, ConfirmationModal, CelebrationModal, Badge } from '@/components/ui';
 import { useModal } from '@/context/ModalContext';
 import MainLayout from '@/components/layout';
 import { useAuth } from '@/context/AuthContext';
@@ -161,23 +161,23 @@ const FlashcardSetDetailsPage = () => {
     return (
         <MainLayout>
             <div className="set-details-container">
-                <button className="back-link" onClick={() => navigate('/flashcard-sets')}>
+                <Button variant="ghost" className="back-link" onClick={() => navigate('/flashcard-sets')}>
                     <ChevronLeft size={20} />
                     Back to sets
-                </button>
+                </Button>
 
                 <div className="set-hero">
                     <div className="set-info-main">
                         <h1 className="set-title">
                             {set.title}
                             {set.status === 'PENDING' && (
-                                <span style={{ fontSize: '1rem', backgroundColor: '#eab308', color: 'black', padding: '4px 8px', borderRadius: '4px', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 600 }}>Pending Review</span>
+                                <Badge variant="warning" style={{ marginLeft: '12px', verticalAlign: 'middle' }}>Pending Review</Badge>
                             )}
                             {set.status === 'REJECTED' && (
-                                <span style={{ fontSize: '1rem', backgroundColor: '#ef4444', color: 'white', padding: '4px 8px', borderRadius: '4px', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 600 }}>Rejected</span>
+                                <Badge variant="error" style={{ marginLeft: '12px', verticalAlign: 'middle' }}>Rejected</Badge>
                             )}
                             {set.status === 'APPROVED' && (
-                                <span style={{ fontSize: '1rem', backgroundColor: '#22c55e', color: 'white', padding: '4px 8px', borderRadius: '4px', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 600 }}>Approved</span>
+                                <Badge variant="success" style={{ marginLeft: '12px', verticalAlign: 'middle' }}>Approved</Badge>
                             )}
                         </h1>
                         {set.status === 'REJECTED' && set.moderationNotes && (

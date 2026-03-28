@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, Save, Loader } from 'lucide-react';
 import './FlashcardForm.css';
 import { getFlashcardById, createFlashcard, updateFlashcard } from '@/api/flashcards';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, Textarea } from '@/components/ui';
 import MainLayout from '@/components/layout';
 
 const FlashcardForm = () => {
@@ -78,10 +78,10 @@ const FlashcardForm = () => {
     return (
         <MainLayout>
             <div className="form-container">
-                <button className="back-link" onClick={() => navigate(-1)}>
+                <Button variant="ghost" className="back-link" onClick={() => navigate(-1)}>
                     <ChevronLeft size={20} />
                     Cancel
-                </button>
+                </Button>
 
                 <div className="form-header">
                     <h1>{isEdit ? 'Edit Flashcard' : 'Add New Flashcard'}</h1>
@@ -108,13 +108,12 @@ const FlashcardForm = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="definition">Definition</label>
-                                    <textarea
+                                    <Textarea
                                         id="definition"
                                         name="definition"
+                                        label="Definition"
                                         rows="4"
                                         placeholder="Enter the explanation..."
-                                        className="custom-textarea"
                                         value={formData.definition}
                                         onChange={handleChange}
                                         required
@@ -143,10 +142,11 @@ const FlashcardForm = () => {
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={submitting}
+                                        isLoading={submitting}
                                         className="submit-btn"
+                                        leftIcon={<Save size={18} />}
                                     >
-                                        {submitting ? <Loader size="sm" /> : <><Save size={18} /> {isEdit ? 'Save Card' : 'Add Card'}</>}
+                                        {isEdit ? 'Save Card' : 'Add Card'}
                                     </Button>
                                 </div>
                             </form>

@@ -1,5 +1,6 @@
 .dashboard-container {
     padding: 40px;
+    padding-bottom: 0;
     max-width: 1440px;
     margin: 0 auto;
 }
@@ -9,7 +10,7 @@
 }
 
 .dashboard-section {
-    margin-bottom: 56px;
+    margin-bottom: 48px;
 }
 
 .dashboard-section-header {

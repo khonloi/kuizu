@@ -109,18 +109,20 @@ const FlashcardSetsPage = () => {
                             />
                         </div>
                         <div className="tabs">
-                            <button
+                            <Button
+                                variant="ghost"
                                 className={`tab-item ${activeTab === 'public' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('public')}
                             >
                                 Public
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant="ghost"
                                 className={`tab-item ${activeTab === 'my' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('my')}
                             >
                                 My Sets
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

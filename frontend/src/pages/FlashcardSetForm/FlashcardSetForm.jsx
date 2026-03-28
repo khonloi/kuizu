@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Save, Loader } from 'lucide-react';
 import './FlashcardSetForm.css';
 import { getFlashcardSetById, createFlashcardSet, updateFlashcardSet } from '@/api/flashcards';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card, Input, Textarea, Select } from '@/components/ui';
 import MainLayout from '@/components/layout';
 
 const FlashcardSetForm = () => {
@@ -71,10 +71,10 @@ const FlashcardSetForm = () => {
     return (
         <MainLayout>
             <div className="form-container">
-                <button className="back-link" onClick={() => navigate(-1)}>
+                <Button variant="ghost" className="back-link" onClick={() => navigate(-1)}>
                     <ChevronLeft size={20} />
                     Cancel
-                </button>
+                </Button>
 
                 <div className="form-header">
                     <h1>{isEdit ? 'Edit Flashcard Set' : 'Create New Set'}</h1>
@@ -101,13 +101,12 @@ const FlashcardSetForm = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="description">Description (Optional)</label>
-                                    <textarea
+                                    <Textarea
                                         id="description"
                                         name="description"
+                                        label="Description (Optional)"
                                         rows="4"
                                         placeholder="Add a bio to your profile..."
-                                        className="custom-textarea"
                                         value={formData.description}
                                         onChange={handleChange}
                                     />
@@ -126,18 +125,17 @@ const FlashcardSetForm = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="visibility">Visibility</label>
-                                    <select
+                                    <Select
                                         id="visibility"
                                         name="visibility"
-                                        className="custom-select"
+                                        label="Visibility"
                                         value={formData.visibility}
                                         onChange={handleChange}
                                     >
                                         <option value="PUBLIC">Public (Everyone can see)</option>
                                         <option value="PRIVATE">Private (Only you can see)</option>
                                         <option value="UNLISTED">Unlisted (Anyone with the link can see)</option>
-                                    </select>
+                                    </Select>
                                 </div>
 
                                 <div className="form-actions">
@@ -151,10 +149,11 @@ const FlashcardSetForm = () => {
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={submitting}
+                                        isLoading={submitting}
                                         className="submit-btn"
+                                        leftIcon={<Save size={18} />}
                                     >
-                                        {submitting ? <Loader size="sm" /> : <><Save size={18} /> {isEdit ? 'Save Changes' : 'Create Set'}</>}
+                                        {isEdit ? 'Save Changes' : 'Create Set'}
                                     </Button>
                                 </div>
                             </form>

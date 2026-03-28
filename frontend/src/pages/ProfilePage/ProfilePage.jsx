@@ -3,7 +3,7 @@ import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck,
 import { Link } from 'react-router-dom';
 import './ProfilePage.css';
 import { updateProfile, changePassword, setPassword } from '@/api/user';
-import { Button, Card, Input, Modal, Dropdown, Textarea } from '@/components/ui';
+import { Button, Card, Input, Modal, Dropdown, Textarea, Badge } from '@/components/ui';
 import MainLayout from '@/components/layout';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -317,9 +317,9 @@ const ProfilePage = () => {
                                     <div className="field-info">
                                         <h4>Account Type</h4>
                                     </div>
-                                    <div className="account-type-badge">
+                                    <Badge variant={user?.role === 'ROLE_ADMIN' ? 'error' : user?.role === 'ROLE_TEACHER' ? 'success' : 'primary'}>
                                         {user?.role === 'ROLE_ADMIN' ? 'Admin' : user?.role === 'ROLE_TEACHER' ? 'Teacher' : 'Student'}
-                                    </div>
+                                    </Badge>
                                 </div>
                             </div>
 
@@ -329,9 +329,9 @@ const ProfilePage = () => {
                                     <div className="field-info">
                                         <h4>Account Status</h4>
                                     </div>
-                                    <div className={`account-status-badge ${user?.status?.toLowerCase() || 'unknown'}`}>
+                                    <Badge variant={user?.status === 'ACTIVE' ? 'success' : user?.status === 'SUSPENDED' ? 'error' : 'warning'}>
                                         {user?.status || 'Unknown'}
-                                    </div>
+                                    </Badge>
                                 </div>
                             </div>
 

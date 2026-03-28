@@ -210,13 +210,15 @@ const StudyPage = () => {
                             Card <span className="current">{currentIndex + 1}</span> of <span className="total">{cards.length}</span>
                         </div>
                         <div className="header-actions">
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 className="shuffle-btn"
                                 onClick={handleShuffle}
                                 title="Shuffle cards"
                             >
                                 <Shuffle size={18} />
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -234,13 +236,16 @@ const StudyPage = () => {
                     >
                         {/* Front Face */}
                         <div className="flashcard-face flashcard-front">
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 className={`star-btn ${starredCardIds.has(currentCard.cardId) ? 'starred' : ''}`}
                                 onClick={toggleStar}
                                 title={starredCardIds.has(currentCard.cardId) ? "Unstar" : "Star"}
+                                style={{ color: starredCardIds.has(currentCard.cardId) ? '#f59e0b' : 'inherit' }}
                             >
                                 <Star size={24} fill={starredCardIds.has(currentCard.cardId) ? "currentColor" : "none"} />
-                            </button>
+                            </Button>
                             <span className="face-label">Term</span>
                             <div className="card-text">{currentCard.term}</div>
                             <span className="card-hint">Click or press Space to flip</span>
@@ -248,13 +253,16 @@ const StudyPage = () => {
 
                         {/* Back Face */}
                         <div className="flashcard-face flashcard-back">
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 className={`star-btn ${starredCardIds.has(currentCard.cardId) ? 'starred' : ''}`}
                                 onClick={toggleStar}
                                 title={starredCardIds.has(currentCard.cardId) ? "Unstar" : "Star"}
+                                style={{ color: starredCardIds.has(currentCard.cardId) ? '#f59e0b' : 'inherit' }}
                             >
                                 <Star size={24} fill={starredCardIds.has(currentCard.cardId) ? "currentColor" : "none"} />
-                            </button>
+                            </Button>
                             <span className="face-label">Definition</span>
                             <div className="card-text">{currentCard.definition}</div>
                             <span className="card-hint">Click or press Space to flip back</span>
