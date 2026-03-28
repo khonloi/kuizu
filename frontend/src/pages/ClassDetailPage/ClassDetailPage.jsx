@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClassDetails, leaveClass, getClassJoinCode, deleteClass, removeMember, processJoinRequest, removeClassMaterial, reRequestClassReview } from '@/api/class';
-import { Button } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2, Folder, Layers } from 'lucide-react';
 import JoinClassModal from '@/components/Class/JoinClassModal';
 import LeaveClassModal from '@/components/Class/LeaveClassModal';
@@ -406,21 +406,27 @@ const ClassDetailPage = () => {
                                     {classData.classMaterials.map(material => {
                                         const isFolder = material.materialType === 'FOLDER';
                                         return (
-                                            <div key={material.materialId} className="material-card">
-                                                <div className="material-icon">
-                                                    {isFolder ? <Folder size={32} /> : <Layers size={32} />}
-                                                </div>
-                                                <div className="material-info">
-                                                    <h4 className="material-title">{material.materialName || material.materialType}</h4>
-                                                    <p className="material-ref">{isFolder ? 'Folder' : 'Flashcard Set'}</p>
-                                                </div>
-                                                <div className="material-actions" style={{ display: 'flex', gap: '8px' }}>
-                                                    <Button variant="outline" size="sm" onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/flashcard-sets/${material.materialRefId}`)}>View</Button>
-                                                    {classData?.isOwner && (
-                                                        <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleRemoveMaterialClick(material)}>Remove</Button>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            <Card
+                                                key={material.materialId}
+                                                onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/flashcard-sets/${material.materialRefId}`)}
+                                                title={material.materialName || material.materialType}
+                                                badge={isFolder ? 'Folder' : 'Flashcard Set'}
+                                                badgeVariant="outline"
+                                                description={null}
+                                                ownerName={null}
+                                                actions={
+                                                    classData?.isOwner && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-red-500 delete-btn"
+                                                            onClick={() => handleRemoveMaterialClick(material)}
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </Button>
+                                                    )
+                                                }
+                                            />
                                         );
                                     })}
                                 </div>

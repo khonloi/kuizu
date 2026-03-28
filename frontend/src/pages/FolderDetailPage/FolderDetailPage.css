@@ -296,88 +296,13 @@
 
 /* --- Sets List --- */
 .fd-sets-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.fd-set-card-modern {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    background-color: var(--fd-white);
-    border-radius: 8px;
-    transition: background-color 0.2s;
-    cursor: pointer;
-}
-
-.fd-set-card-modern:hover {
-    background-color: var(--fd-bg);
-}
-
-.fd-set-card-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.fd-set-icon-modern {
-    color: var(--fd-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #eef1ff;
-    padding: 8px;
-    border-radius: 8px;
-}
-
-.fd-set-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.fd-set-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--fd-text-main);
-    margin: 0;
-}
-
-.fd-set-subtitle {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--fd-text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.fd-dot {
-    width: 3px;
-    height: 3px;
-    background-color: var(--fd-text-secondary);
-    border-radius: 50%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
 }
 
 .fd-set-more-btn {
-    background: none;
-    border: none;
-    color: var(--fd-text-secondary);
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 4px;
-    opacity: 0;
-    transition: opacity 0.2s, background-color 0.2s;
-}
-
-.fd-set-card-modern:hover .fd-set-more-btn {
-    opacity: 1;
-}
-
-.fd-set-more-btn:hover {
-    background-color: rgba(0,0,0,0.05);
+    opacity: 1 !important;
 }
 
 /* --- Empty State --- */

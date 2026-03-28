@@ -76,22 +76,34 @@ const AdminModerationPage = () => {
         <div className="mod-grid">
             {pendingSets.length === 0 ? <p className="empty-msg">No pending flashcard sets.</p> :
                 pendingSets.map(set => (
-                    <Card key={set.setId} className="mod-item-card">
-                        <div className="card-header">
-                            <h3>{set.title}</h3>
-                            <span className="badge pending">Pending Set</span>
-                        </div>
-                        <p className="description">{set.description || 'No description'}</p>
-                        <div className="meta">By: {set.ownerDisplayName}</div>
-                        <div className="actions">
-                            <Button variant="outline" size="sm" onClick={() => handleOpenModModal('SET', set.setId, 'APPROVE')} className="approve-btn">
-                                <CheckCircle size={16} /> Approve
-                            </Button>
-                            <Button variant="outline" className="reject-btn" size="sm" onClick={() => handleOpenModModal('SET', set.setId, 'REJECT')}>
-                                <XCircle size={16} /> Reject
-                            </Button>
-                        </div>
-                    </Card>
+                    <Card
+                        key={set.setId}
+                        title={set.title}
+                        badge="Pending Set"
+                        badgeVariant="warning"
+                        description={set.description}
+                        ownerName={set.ownerDisplayName}
+                        actions={
+                            <div className="actions">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenModModal('SET', set.setId, 'APPROVE')}
+                                    className="approve-btn"
+                                >
+                                    <CheckCircle size={16} /> Approve
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="reject-btn"
+                                    size="sm"
+                                    onClick={() => handleOpenModModal('SET', set.setId, 'REJECT')}
+                                >
+                                    <XCircle size={16} /> Reject
+                                </Button>
+                            </div>
+                        }
+                    />
                 ))}
         </div>
     );
@@ -100,22 +112,34 @@ const AdminModerationPage = () => {
         <div className="mod-grid">
             {pendingClasses.length === 0 ? <p className="empty-msg">No pending classes.</p> :
                 pendingClasses.map(cls => (
-                    <Card key={cls.classId} className="mod-item-card">
-                        <div className="card-header">
-                            <h3>{cls.className}</h3>
-                            <span className="badge pending">Pending Class</span>
-                        </div>
-                        <p className="description">{cls.description || 'No description'}</p>
-                        <div className="meta">By: {cls.ownerDisplayName}</div>
-                        <div className="actions">
-                            <Button variant="outline" size="sm" onClick={() => handleOpenModModal('CLASS', cls.classId, 'APPROVE')} className="approve-btn">
-                                <CheckCircle size={16} /> Approve
-                            </Button>
-                            <Button variant="outline" className="reject-btn" size="sm" onClick={() => handleOpenModModal('CLASS', cls.classId, 'REJECT')}>
-                                <XCircle size={16} /> Reject
-                            </Button>
-                        </div>
-                    </Card>
+                    <Card
+                        key={cls.classId}
+                        title={cls.className}
+                        badge="Pending Class"
+                        badgeVariant="warning"
+                        description={cls.description}
+                        ownerName={cls.ownerDisplayName}
+                        actions={
+                            <div className="actions">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenModModal('CLASS', cls.classId, 'APPROVE')}
+                                    className="approve-btn"
+                                >
+                                    <CheckCircle size={16} /> Approve
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="reject-btn"
+                                    size="sm"
+                                    onClick={() => handleOpenModModal('CLASS', cls.classId, 'REJECT')}
+                                >
+                                    <XCircle size={16} /> Reject
+                                </Button>
+                            </div>
+                        }
+                    />
                 ))}
         </div>
     );

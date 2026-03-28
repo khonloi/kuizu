@@ -8,7 +8,7 @@ import CreateFolderModal from '@/components/Folder/CreateFolderModal';
 import { useAuth } from '@/context/AuthContext';
 import { useModal } from '@/context/ModalContext';
 import { FolderOpen, Globe, BookOpen } from 'lucide-react';
-import { Button, Card, Loader, EmptyState, ItemCard } from '@/components/ui';
+import { Button, Card, Loader, EmptyState } from '@/components/ui';
 import './DashboardPage.css';
 
 const DashboardPage = () => {
@@ -36,11 +36,11 @@ const DashboardPage = () => {
                 getMyFlashcardSets(),
                 getPublicFlashcardSets()
             ]);
-            
+
             // Get recent sets from localStorage
             const recentIds = JSON.parse(localStorage.getItem('recent_sets') || '[]');
             let recentSets = [];
-            
+
             if (recentIds.length > 0) {
                 // Fetch the content of these sets
                 // To avoid too many calls, we check if they are already in mySetsData
@@ -55,7 +55,7 @@ const DashboardPage = () => {
                     .filter(r => r.status === 'fulfilled')
                     .map(r => r.value);
             }
-            
+
             // Use history if available, otherwise fallback to my sets
             const displaySets = recentSets.length > 0 ? recentSets : mySetsData;
 
@@ -123,26 +123,12 @@ const DashboardPage = () => {
                         {flashcardSets.slice(0, 4).map(set => (
                             <Card
                                 key={set.setId}
-                                className="dashboard-item-card"
                                 onClick={() => navigate(`/flashcard-sets/${set.setId}`)}
-                            >
-                                <div className="card-header-custom">
-                                    <h3 className="card-title-custom">{set.title}</h3>
-                                    <span className="badge-custom">
-                                        <BookOpen size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                        {set.cardCount || 0} terms
-                                    </span>
-                                </div>
-                                <div className="card-body-custom">
-                                    <p className="card-description-custom">{set.description || 'No description provided.'}</p>
-                                </div>
-                                <div className="card-footer-custom">
-                                    <span className="owner-text">by {set.ownerDisplayName}</span>
-                                    <span className={`visibility-tag ${set.visibility?.toLowerCase()}`}>
-                                        {set.visibility === 'PUBLIC' ? '🌐 Public' : '🔒 Private'}
-                                    </span>
-                                </div>
-                            </Card>
+                                title={set.title}
+                                badge={`${set.cardCount || 0} terms`}
+                                description={set.description}
+                                ownerName={set.ownerDisplayName}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -158,7 +144,6 @@ const DashboardPage = () => {
                 <section className="dashboard-section">
                     <div className="dashboard-section-header">
                         <h2>
-                            <Globe size={20} style={{ marginRight: 8, verticalAlign: 'middle', color: '#10b981' }} />
                             Suggested Flashcard Sets
                         </h2>
                         <div className="section-actions">
@@ -170,30 +155,18 @@ const DashboardPage = () => {
                         {publicFlashcardSets.slice(0, 4).map(set => (
                             <Card
                                 key={set.setId}
-                                className="dashboard-item-card"
                                 onClick={() => navigate(`/flashcard-sets/${set.setId}`)}
-                            >
-                                <div className="card-header-custom">
-                                    <h3 className="card-title-custom">{set.title}</h3>
-                                    <span className="badge-custom badge-green">
-                                        <BookOpen size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                        {set.cardCount || 0} terms
-                                    </span>
-                                </div>
-                                <div className="card-body-custom">
-                                    <p className="card-description-custom">{set.description || 'No description provided.'}</p>
-                                </div>
-                                <div className="card-footer-custom">
-                                    <span className="owner-text">by {set.ownerDisplayName}</span>
-                                    <span className="visibility-tag public">🌐 Public</span>
-                                </div>
-                            </Card>
+                                title={set.title}
+                                badge={`${set.cardCount || 0} terms`}
+                                description={set.description}
+                                ownerName={set.ownerDisplayName}
+                            />
                         ))}
                     </div>
                 </section>
             )}
 
-            {/* Folders Section and other sections... */}
+            {/* Folders Section */}
             <section className="dashboard-section">
                 <div className="dashboard-section-header">
                     <h2>My Folders</h2>
@@ -208,26 +181,12 @@ const DashboardPage = () => {
                         {folders.map(folder => (
                             <Card
                                 key={folder.folderId}
-                                className="dashboard-item-card"
                                 onClick={() => navigate(`/folders/${folder.folderId}`)}
-                            >
-                                <div className="card-header-custom">
-                                    <h3 className="card-title-custom">{folder.name}</h3>
-                                    <span className="badge-custom">
-                                        <FolderOpen size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                        {folder.setCount} sets
-                                    </span>
-                                </div>
-                                <div className="card-body-custom">
-                                    <p className="card-description-custom">{folder.description || 'No description provided.'}</p>
-                                </div>
-                                <div className="card-footer-custom">
-                                    <span className="owner-text">by {folder.ownerDisplayName}</span>
-                                    <span className={`visibility-tag ${folder.visibility?.toLowerCase()}`}>
-                                        {folder.visibility === 'PUBLIC' ? '🌐 Public' : '🔒 Private'}
-                                    </span>
-                                </div>
-                            </Card>
+                                title={folder.name}
+                                badge={`${folder.setCount} sets`}
+                                description={folder.description}
+                                ownerName={folder.ownerDisplayName}
+                            />
                         ))}
                     </div>
                 ) : (
@@ -243,7 +202,6 @@ const DashboardPage = () => {
                 <section className="dashboard-section">
                     <div className="dashboard-section-header">
                         <h2>
-                            <Globe size={20} style={{ marginRight: 8, verticalAlign: 'middle', color: '#10b981' }} />
                             Suggested Folders
                         </h2>
                         <div className="section-actions">
@@ -255,24 +213,12 @@ const DashboardPage = () => {
                         {publicFolders.slice(0, 4).map(folder => (
                             <Card
                                 key={folder.folderId}
-                                className="dashboard-item-card"
                                 onClick={() => navigate(`/folders/${folder.folderId}`)}
-                            >
-                                <div className="card-header-custom">
-                                    <h3 className="card-title-custom">{folder.name}</h3>
-                                    <span className="badge-custom badge-green">
-                                        <Globe size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                                        {folder.setCount} sets
-                                    </span>
-                                </div>
-                                <div className="card-body-custom">
-                                    <p className="card-description-custom">{folder.description || 'No description provided.'}</p>
-                                </div>
-                                <div className="card-footer-custom">
-                                    <span className="owner-text">by {folder.ownerDisplayName}</span>
-                                    <span className="visibility-tag public">🌐 Public</span>
-                                </div>
-                            </Card>
+                                title={folder.name}
+                                badge={`${folder.setCount} sets`}
+                                description={folder.description}
+                                ownerName={folder.ownerDisplayName}
+                            />
                         ))}
                     </div>
                 </section>
@@ -293,13 +239,14 @@ const DashboardPage = () => {
                 {classes.length > 0 ? (
                     <div className="dashboard-grid">
                         {classes.map(cls => (
-                            <ItemCard
+                            <Card
                                 key={cls.classId}
                                 onClick={() => handleClassClick(cls.classId)}
                                 title={cls.className}
                                 badge={cls.status === 'PENDING' ? 'Pending Review' : (cls.status === 'REJECTED' ? 'Rejected' : 'Class')}
-                                description={cls.description || 'No description provided.'}
-                                footerText={`by ${cls.ownerDisplayName}`}
+                                badgeVariant={cls.status === 'PENDING' ? 'warning' : (cls.status === 'REJECTED' ? 'error' : 'primary')}
+                                description={cls.description}
+                                ownerName={cls.ownerDisplayName}
                             />
                         ))}
                     </div>

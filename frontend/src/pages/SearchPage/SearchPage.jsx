@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { searchClasses } from '@/api/class';
 import { Search, BookOpen, Users } from 'lucide-react';
-import { Loader, EmptyState, ItemCard } from '@/components/ui';
+import { Loader, EmptyState, Card } from '@/components/ui';
 import './SearchPage.css';
 
 const SearchPage = () => {
@@ -54,18 +54,13 @@ const SearchPage = () => {
                 ) : results.length > 0 ? (
                     <div className="search-results-grid">
                         {results.map(cls => (
-                            <ItemCard
+                            <Card
                                 key={cls.classId}
                                 onClick={() => navigate(`/classes/${cls.classId}`)}
                                 title={cls.className}
                                 badge="Class"
-                                description={cls.description || 'No description provided.'}
-                                footerText={
-                                    <div className="result-meta">
-                                        <Users size={14} />
-                                        <span>Owner: {cls.ownerDisplayName}</span>
-                                    </div>
-                                }
+                                description={cls.description}
+                                ownerName={cls.ownerDisplayName}
                             />
                         ))}
                     </div>

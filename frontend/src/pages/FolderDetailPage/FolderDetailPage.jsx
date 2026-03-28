@@ -5,7 +5,7 @@ import EditFolderModal from '../../components/Folder/EditFolderModal';
 import CreateSetInFolderModal from '../../components/Folder/CreateSetInFolderModal';
 import AddCategoryModal from '../../components/Folder/AddCategoryModal';
 import { ChevronLeft, ChevronRight, ArrowLeft, BookOpen, FolderOpen, User, Eye, Calendar, Layers, Hash, ChevronDown, ChevronUp, Plus, Trash2, Pencil, AlertTriangle, MoreVertical, Search, Filter, FolderPlus, Play, X } from 'lucide-react';
-import { Dropdown, Button, Modal, Loader } from '../../components/ui';
+import { Dropdown, Button, Modal, Loader, Card } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { getFolderDetail, removeSetFromFolder, createSetInFolder, deleteFolder, deleteFolderCategory } from '../../api/folder';
@@ -332,34 +332,29 @@ const FolderDetailPage = () => {
                 <div className="fd-sets-list">
                     {filteredSets.length > 0 ? (
                         filteredSets.map(set => (
-                            <div key={set.setId} className="fd-set-card-modern" onClick={() => navigate(`/flashcard-sets/${set.setId}`)}>
-                                <div className="fd-set-card-left">
-                                    <div className="fd-set-icon-modern">
-                                        <BookOpen size={20} />
-                                    </div>
-                                    <div className="fd-set-text">
-                                        <h3 className="fd-set-title">{set.title}</h3>
-                                        <div className="fd-set-subtitle">
-                                            <span>Study set</span>
-                                            <span className="fd-dot"></span>
-                                            <span>{set.termCount} terms</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="fd-set-card-right">
-                                    {isOwner && (
-                                        <button 
-                                            className="fd-set-more-btn"
+                            <Card
+                                key={set.setId}
+                                onClick={() => navigate(`/flashcard-sets/${set.setId}`)}
+                                title={set.title}
+                                badge={`${set.termCount} terms`}
+                                description={null}
+                                ownerName={null}
+                                actions={
+                                    isOwner && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="fd-set-more-btn delete-btn"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleRemoveSet(e, set.setId);
                                             }}
                                         >
-                                            <MoreVertical size={20} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+                                            <Trash2 size={16} />
+                                        </Button>
+                                    )
+                                }
+                            />
                         ))
                     ) : (
                         <div className="fd-empty-state">

@@ -425,8 +425,8 @@
 }
 
 .user-avatar {
-    width: 48px;
-    height: 48px;
+    /* width: 48px;
+    height: 48px; */
     background: #e5e7eb;
     color: #4b5563;
     border-radius: 50%;

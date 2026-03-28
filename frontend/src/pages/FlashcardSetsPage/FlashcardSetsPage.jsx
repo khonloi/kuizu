@@ -141,44 +141,31 @@ const FlashcardSetsPage = () => {
                             filteredSets.map(set => (
                                 <Card
                                     key={set.setId}
-                                    className="set-card"
                                     onClick={() => navigate(`/flashcard-sets/${set.setId}`)}
-                                >
-                                    <Card.Header className="set-card-header">
-                                        <Card.Title className="set-title">{set.title}</Card.Title>
-                                        <span className="card-count">{set.cardCount || 0} terms</span>
-                                    </Card.Header>
-                                    <Card.Body>
-                                        <p className="set-description">{set.description || 'No description provided.'}</p>
-                                    </Card.Body>
-                                    <Card.Footer className="set-card-footer">
-                                        <div className="user-info">
-                                            <div className="user-avatar">
-                                                <User size={14} />
-                                            </div>
-                                            <span className="username">{activeTab === 'my' ? 'You' : set.ownerDisplayName}</span>
-                                        </div>
-                                        {activeTab === 'my' && (
-                                            <div className="set-actions">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={(e) => handleEditClick(e, set.setId)}
-                                                >
-                                                    <Pencil size={16} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="delete-btn"
-                                                    onClick={(e) => handleDelete(e, set.setId)}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </Card.Footer>
-                                </Card>
+                                    title={set.title}
+                                    badge={`${set.cardCount || 0} terms`}
+                                    description={set.description}
+                                    ownerName={activeTab === 'my' ? 'You' : set.ownerDisplayName}
+                                    actions={activeTab === 'my' && (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => handleEditClick(e, set.setId)}
+                                            >
+                                                <Pencil size={16} />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="delete-btn"
+                                                onClick={(e) => handleDelete(e, set.setId)}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </>
+                                    )}
+                                />
                             ))
                         ) : (
                             <div className="empty-state">

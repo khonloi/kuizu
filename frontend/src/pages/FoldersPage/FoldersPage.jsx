@@ -116,39 +116,22 @@ const FoldersPage = () => {
                             filteredFolders.map(folder => (
                                 <Card
                                     key={folder.folderId}
-                                    className="folder-card"
                                     onClick={() => handleFolderClick(folder.folderId)}
-                                >
-                                    <div className="folder-card-header">
-                                        <h3 className="folder-title">{folder.name}</h3>
-                                        <span className="card-count">
-                                            <FolderOpen size={14} />
-                                            {folder.setCount || 0} Sets
-                                        </span>
-                                    </div>
-                                    <div className="folder-card-body">
-                                        <p className="folder-description">
-                                            {folder.description || 'No description provided.'}
-                                        </p>
-                                    </div>
-                                    <div className="folder-card-footer">
-                                        <div className="user-info">
-                                            <div className="user-avatar">
-                                                <User size={14} />
-                                            </div>
-                                            <span className="username">
-                                                {folder.isMine ? 'You' : folder.ownerDisplayName}
-                                            </span>
-                                        </div>
+                                    title={folder.name}
+                                    badge={`${folder.setCount || 0} Sets`}
+                                    badgeIcon={FolderOpen}
+                                    description={folder.description}
+                                    ownerName={folder.isMine ? 'You' : folder.ownerDisplayName}
+                                    footerRight={
                                         <div className={`visibility-indicator ${folder.visibility?.toLowerCase()}`}>
                                             {folder.visibility === 'PUBLIC' ? (
-                                                <><Globe size={14} /> Public</>
+                                                <> Public</>
                                             ) : (
-                                                <><Lock size={14} /> Private</>
+                                                <> Private</>
                                             )}
                                         </div>
-                                    </div>
-                                </Card>
+                                    }
+                                />
                             ))
                         ) : (
                             <div className="empty-state">
