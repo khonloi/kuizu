@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClassDetails, leaveClass, getClassJoinCode, deleteClass, removeMember, processJoinRequest, removeClassMaterial, reRequestClassReview } from '@/api/class';
-import { Button, Card, Badge, Loader } from '@/components/ui';
-import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2, Folder, Layers } from 'lucide-react';
+import { Button, Card, Badge, Loader, EmptyState, Tabs } from '@/components/ui';
+import { Users, File, Calendar, Share2, MoreVertical, Copy, Check, Trash2, Folder, Layers, BookOpen } from 'lucide-react';
 import JoinClassModal from '@/components/Class/JoinClassModal';
 import LeaveClassModal from '@/components/Class/LeaveClassModal';
 import EditClassModal from '@/components/Class/EditClassModal';
@@ -231,21 +231,21 @@ const ClassDetailPage = () => {
     }, [classId]);
 
     if (isLoading) {
-        return (
-            <div className="class-detail-loading">
-                <Loader fullPage={true} />
-                <p>Loading class details...</p>
-            </div>
-        );
+        return <Loader fullPage={true} text="Loading class details..." />;
     }
 
     if (error || !classData) {
         return (
-            <div className="class-detail-error">
-                <h2>Oops! Something went wrong.</h2>
-                <p>{error || "Class not found."}</p>
-                <Button variant="primary" onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
-            </div>
+            <MainLayout>
+                <div style={{ padding: '80px 40px' }}>
+                    <EmptyState
+                        icon={BookOpen}
+                        title="Oops! Something went wrong"
+                        description={error || "Class not found."}
+                        action={<Button variant="primary" onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>}
+                    />
+                </div>
+            </MainLayout>
         );
     }
 
@@ -362,159 +362,149 @@ const ClassDetailPage = () => {
                 </div>
 
                 <div className="class-content-area">
-                    {classData?.isOwner && (
-                        <div className="class-tabs">
-                            <Button
-                                variant="ghost"
-                                className={`tab-btn ${activeTab === 'materials' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('materials')}
-                            >
-                                <File size={18} />
-                                <span>Materials</span>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className={`tab-btn ${activeTab === 'members' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('members')}
-                            >
-                                <Users size={18} />
-                                <span>Members</span>
-                                <span className="tab-count">{classData.members?.length || 0}</span>
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('requests')}
-                            >
-                                <Calendar size={18} />
-                                <span>Join Requests</span>
-                                {classData.joinRequests?.length > 0 && (
-                                    <span className="tab-badge">{classData.joinRequests.length}</span>
-                                )}
-                            </Button>
-                        </div>
-                    )}
-
-                    {activeTab === 'materials' && (
-                        <div className="class-materials-list">
-                            <div className="materials-header">
-                                <h2>Class Materials</h2>
-                                {classData?.isOwner && (
-                                    <Button variant="outline" size="sm" onClick={() => setIsAddMaterialModalOpen(true)}>Add Material</Button>
-                                )}
-                            </div>
-
-                            {classData.classMaterials && classData.classMaterials.length > 0 ? (
-                                <div className="materials-grid">
-                                    {classData.classMaterials.map(material => {
-                                        const isFolder = material.materialType === 'FOLDER';
-                                        return (
-                                            <Card
-                                                key={material.materialId}
-                                                onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/flashcard-sets/${material.materialRefId}`)}
-                                                title={material.materialName || material.materialType}
-                                                badge={isFolder ? 'Folder' : 'Flashcard Set'}
-                                                badgeVariant="outline"
-                                                description={null}
-                                                ownerName={null}
-                                                actions={
-                                                    classData?.isOwner && (
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-500 delete-btn"
-                                                            onClick={() => handleRemoveMaterialClick(material)}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </Button>
-                                                    )
-                                                }
-                                            />
-                                        );
-                                    })}
+                    {(() => {
+                        const materialsContent = (
+                            <div className="class-materials-list">
+                                <div className="materials-header">
+                                    <h2>Class Materials</h2>
+                                    {classData?.isOwner && (
+                                        <Button variant="outline" size="sm" onClick={() => setIsAddMaterialModalOpen(true)}>Add Material</Button>
+                                    )}
                                 </div>
-                            ) : (
-                                <div className="empty-materials">
-                                    <File size={48} className="empty-icon" />
-                                    <h3>No materials yet</h3>
-                                    <p>This class doesn't have any study materials assigned to it.</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {activeTab === 'members' && (
-                        <div className="class-members-list">
-                            <div className="members-header">
-                                <h2>Class Members</h2>
-                            </div>
-                            <div className="members-grid">
-                                {classData.members?.map(member => (
-                                    <div key={member.userId} className="member-card">
-                                        <div className="member-avatar">
-                                            {member.displayName.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="member-info">
-                                            <h4 className="member-name">{member.displayName}</h4>
-                                            <Badge variant={member.role === 'OWNER' ? 'error' : member.role === 'TEACHER' ? 'success' : 'primary'} size="sm">
-                                                {member.role}
-                                            </Badge>
-                                        </div>
-                                        {member.userId !== classData.ownerUserId && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-red-500"
-                                                onClick={() => handleRemoveMemberClick(member)}
-                                            >
-                                                Remove
-                                            </Button>
-                                        )}
+                                {classData.classMaterials && classData.classMaterials.length > 0 ? (
+                                    <div className="materials-grid">
+                                        {classData.classMaterials.map(material => {
+                                            const isFolder = material.materialType === 'FOLDER';
+                                            return (
+                                                <Card
+                                                    key={material.materialId}
+                                                    onClick={() => navigate(isFolder ? `/folders/${material.materialRefId}` : `/flashcard-sets/${material.materialRefId}`)}
+                                                    title={material.materialName || material.materialType}
+                                                    badge={isFolder ? 'Folder' : 'Flashcard Set'}
+                                                    badgeVariant="outline"
+                                                    actions={
+                                                        classData?.isOwner && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-red-500 delete-btn"
+                                                                onClick={() => handleRemoveMaterialClick(material)}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </Button>
+                                                        )
+                                                    }
+                                                />
+                                            );
+                                        })}
                                     </div>
-                                ))}
+                                ) : (
+                                    <EmptyState
+                                        icon={File}
+                                        title="No materials yet"
+                                        description="This class doesn't have any study materials assigned to it."
+                                    />
+                                )}
                             </div>
-                        </div>
-                    )}
+                        );
 
-                    {activeTab === 'requests' && (
-                        <div className="class-requests-list">
-                            <div className="requests-header">
-                                <h2>Join Requests</h2>
-                            </div>
-                            {classData.joinRequests?.length > 0 ? (
-                                <div className="requests-container">
-                                    {classData.joinRequests.map(request => (
-                                        <div key={request.requestId} className="request-card">
-                                            <div className="request-user">
-                                                <div className="user-avatar">
-                                                    {request.displayName.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div className="user-info">
-                                                    <h4 className="user-name">{request.displayName}</h4>
-                                                    <p className="request-time">Requested {new Date(request.requestedAt).toLocaleDateString()}</p>
-                                                </div>
+                        const membersContent = (
+                            <div className="class-members-list">
+                                <div className="members-header">
+                                    <h2>Class Members</h2>
+                                </div>
+                                <div className="members-grid">
+                                    {classData.members?.map(member => (
+                                        <div key={member.userId} className="member-card">
+                                            <div className="member-avatar">
+                                                {member.displayName.charAt(0).toUpperCase()}
                                             </div>
-                                            {request.message && (
-                                                <div className="request-message">
-                                                    <p>"{request.message}"</p>
-                                                </div>
+                                            <div className="member-info">
+                                                <h4 className="member-name">{member.displayName}</h4>
+                                                <Badge variant={member.role === 'OWNER' ? 'error' : member.role === 'TEACHER' ? 'success' : 'primary'} size="sm">
+                                                    {member.role}
+                                                </Badge>
+                                            </div>
+                                            {member.userId !== classData.ownerUserId && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-red-500"
+                                                    onClick={() => handleRemoveMemberClick(member)}
+                                                >
+                                                    Remove
+                                                </Button>
                                             )}
-                                            <div className="request-actions">
-                                                <Button variant="primary" size="sm" onClick={() => handleProcessJoinRequest(request.requestId, 'ACCEPTED')}>Accept</Button>
-                                                <Button variant="outline" size="sm" onClick={() => handleProcessJoinRequest(request.requestId, 'REJECTED')}>Decline</Button>
-                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                            ) : (
-                                <div className="empty-requests">
-                                    <Calendar size={48} className="empty-icon" />
-                                    <h3>No pending requests</h3>
-                                    <p>When students ask to join your class, they will appear here.</p>
+                            </div>
+                        );
+
+                        const requestsContent = (
+                            <div className="class-requests-list">
+                                <div className="requests-header">
+                                    <h2>Join Requests</h2>
                                 </div>
-                            )}
-                        </div>
-                    )}
+                                {classData.joinRequests?.length > 0 ? (
+                                    <div className="requests-container">
+                                        {classData.joinRequests.map(request => (
+                                            <div key={request.requestId} className="request-card">
+                                                <div className="request-user">
+                                                    <div className="user-avatar">
+                                                        {request.displayName.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div className="user-info">
+                                                        <h4 className="user-name">{request.displayName}</h4>
+                                                        <p className="request-time">Requested {new Date(request.requestedAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+                                                {request.message && (
+                                                    <div className="request-message">
+                                                        <p>"{request.message}"</p>
+                                                    </div>
+                                                )}
+                                                <div className="request-actions">
+                                                    <Button variant="primary" size="sm" onClick={() => handleProcessJoinRequest(request.requestId, 'ACCEPTED')}>Accept</Button>
+                                                    <Button variant="outline" size="sm" onClick={() => handleProcessJoinRequest(request.requestId, 'REJECTED')}>Decline</Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <EmptyState
+                                        icon={Calendar}
+                                        title="No pending requests"
+                                        description="When students ask to join your class, they will appear here."
+                                    />
+                                )}
+                            </div>
+                        );
+
+                        const tabs = [
+                            { label: <div className="flex items-center gap-2"><File size={18} /> Materials</div>, content: materialsContent, key: 'materials' },
+                            { label: <div className="flex items-center gap-2"><Users size={18} /> Members <span className="tab-count-badge">{classData.members?.length || 0}</span></div>, content: membersContent, key: 'members' },
+                        ];
+
+                        if (classData?.isOwner) {
+                            tabs.push({ 
+                                label: <div className="flex items-center gap-2"><Calendar size={18} /> Requests {classData.joinRequests?.length > 0 && <span className="tab-badge">{classData.joinRequests.length}</span>}</div>, 
+                                content: requestsContent, 
+                                key: 'requests' 
+                            });
+                        }
+
+                        // Map activeTab to index for controlled Tabs
+                        const activeIndex = tabs.findIndex(t => t.key === activeTab);
+                        
+                        return (
+                            <Tabs 
+                                tabs={tabs} 
+                                activeIndex={activeIndex !== -1 ? activeIndex : 0} 
+                                onTabChange={(idx) => setActiveTab(tabs[idx].key)}
+                            />
+                        );
+                    })()}
                 </div>
             </main>
 

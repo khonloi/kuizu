@@ -15,7 +15,7 @@ import {
     getPendingClasses,
     getAllUsers
 } from '@/api/moderation';
-import { Button, Card, Loader, Modal, Textarea, Badge } from '@/components/ui';
+import { Button, Card, Loader, Modal, Textarea, Badge, EmptyState, Tabs } from '@/components/ui';
 import MainLayout from '@/components/layout';
 import './AdminModerationPage.css';
 import { useToast } from '@/context/ToastContext';
@@ -74,7 +74,13 @@ const AdminModerationPage = () => {
 
     const renderSets = () => (
         <div className="mod-grid">
-            {pendingSets.length === 0 ? <p className="empty-msg">No pending flashcard sets.</p> :
+            {pendingSets.length === 0 ? (
+                <EmptyState
+                    icon={Clock}
+                    title="No pending sets"
+                    description="All flashcard sets have been reviewed."
+                />
+            ) :
                 pendingSets.map(set => (
                     <Card
                         key={set.setId}
@@ -110,7 +116,13 @@ const AdminModerationPage = () => {
 
     const renderClasses = () => (
         <div className="mod-grid">
-            {pendingClasses.length === 0 ? <p className="empty-msg">No pending classes.</p> :
+            {pendingClasses.length === 0 ? (
+                <EmptyState
+                    icon={Clock}
+                    title="No pending classes"
+                    description="All classes have been reviewed."
+                />
+            ) :
                 pendingClasses.map(cls => (
                     <Card
                         key={cls.classId}
@@ -146,69 +158,85 @@ const AdminModerationPage = () => {
 
     const renderUsers = () => (
         <div className="mod-table-container">
-            <table className="mod-table">
-                <thead>
-                    <tr>
-                        <th>Display Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {users.map(user => (
-                        <tr key={user.userId}>
-                            <td>{user.displayName}</td>
-                            <td>{user.email}</td>
-                            <td>{user.role}</td>
-                            <td><Badge variant={user.status === 'ACTIVE' ? 'success' : user.status === 'SUSPENDED' ? 'error' : 'warning'}>{user.status}</Badge></td>
-                            <td>
-                                {user.status !== 'SUSPENDED' ? (
-                                    <Button variant="ghost" size="sm" className="suspend-btn" onClick={() => handleOpenModModal('USER', user.userId, 'SUSPEND')}>
-                                        <AlertTriangle size={16} /> Suspend
-                                    </Button>
-                                ) : (
-                                    <Button variant="ghost" size="sm" className="activate-btn" onClick={() => handleOpenModModal('USER', user.userId, 'ACTIVATE')}>
-                                        <CheckCircle size={16} /> Reactivate
-                                    </Button>
-                                )}
-                            </td>
+            {users.length === 0 ? (
+                <EmptyState
+                    icon={Users}
+                    title="No users found"
+                    description="There are no users to display."
+                />
+            ) : (
+                <table className="mod-table">
+                    <thead>
+                        <tr>
+                            <th>Display Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {users.map(user => (
+                            <tr key={user.userId}>
+                                <td>{user.displayName}</td>
+                                <td>{user.email}</td>
+                                <td>{user.role}</td>
+                                <td><Badge variant={user.status === 'ACTIVE' ? 'success' : user.status === 'SUSPENDED' ? 'error' : 'warning'}>{user.status}</Badge></td>
+                                <td>
+                                    {user.status !== 'SUSPENDED' ? (
+                                        <Button variant="ghost" size="sm" className="suspend-btn" onClick={() => handleOpenModModal('USER', user.userId, 'SUSPEND')}>
+                                            <AlertTriangle size={16} /> Suspend
+                                        </Button>
+                                    ) : (
+                                        <Button variant="ghost" size="sm" className="activate-btn" onClick={() => handleOpenModModal('USER', user.userId, 'ACTIVATE')}>
+                                            <CheckCircle size={16} /> Reactivate
+                                        </Button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 
     const renderHistory = () => (
         <div className="mod-table-container">
-            <table className="mod-table">
-                <thead>
-                    <tr>
-                        <th>Moderator</th>
-                        <th>Entity</th>
-                        <th>Action</th>
-                        <th>Notes</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {history.map(item => (
-                        <tr key={item.modId}>
-                            <td>{item.moderatorDisplayName}</td>
-                            <td>{item.entityType} ({item.entityId})</td>
-                            <td>
-                                <Badge variant={item.action === 'APPROVE' ? 'success' : item.action === 'REJECT' || item.action === 'SUSPEND' ? 'error' : 'primary'}>
-                                    {item.action}
-                                </Badge>
-                            </td>
-                            <td className="notes-cell">{item.notes}</td>
-                            <td>{new Date(item.createdAt).toLocaleString()}</td>
+            {history.length === 0 ? (
+                <EmptyState
+                    icon={History}
+                    title="No moderation history"
+                    description="All actions will be recorded here for review."
+                />
+            ) : (
+                <table className="mod-table">
+                    <thead>
+                        <tr>
+                            <th>Moderator</th>
+                            <th>Entity</th>
+                            <th>Action</th>
+                            <th>Notes</th>
+                            <th>Date</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {history.map(item => (
+                            <tr key={item.modId}>
+                                <td>{item.moderatorDisplayName}</td>
+                                <td>{item.entityType} ({item.entityId})</td>
+                                <td>
+                                    <Badge variant={item.action === 'APPROVE' ? 'success' : item.action === 'REJECT' || item.action === 'SUSPEND' ? 'error' : 'primary'}>
+                                        {item.action}
+                                    </Badge>
+                                </td>
+                                <td className="notes-cell">{item.notes}</td>
+                                <td>{new Date(item.createdAt).toLocaleString()}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 
@@ -225,45 +253,22 @@ const AdminModerationPage = () => {
                     </div>
                 </header>
 
-                <div className="mod-tabs">
-                    <Button 
-                        variant="ghost" 
-                        className={activeTab === 'sets' ? 'active' : ''} 
-                        onClick={() => setActiveTab('sets')}
-                    >
-                        <Clock size={18} /> Flashcard Sets
-                    </Button>
-                    <Button 
-                        variant="ghost" 
-                        className={activeTab === 'classes' ? 'active' : ''} 
-                        onClick={() => setActiveTab('classes')}
-                    >
-                        <Clock size={18} /> Classes
-                    </Button>
-                    <Button 
-                        variant="ghost" 
-                        className={activeTab === 'users' ? 'active' : ''} 
-                        onClick={() => setActiveTab('users')}
-                    >
-                        <UserCog size={18} /> Users
-                    </Button>
-                    <Button 
-                        variant="ghost" 
-                        className={activeTab === 'history' ? 'active' : ''} 
-                        onClick={() => setActiveTab('history')}
-                    >
-                        <History size={18} /> History
-                    </Button>
-                </div>
-
                 <div className="mod-content">
-                    {loading ? <Loader fullPage={false} /> : (
-                        <>
-                            {activeTab === 'sets' && renderSets()}
-                            {activeTab === 'classes' && renderClasses()}
-                            {activeTab === 'users' && renderUsers()}
-                            {activeTab === 'history' && renderHistory()}
-                        </>
+                    {loading ? (
+                        <div style={{ padding: '80px 0' }}>
+                            <Loader text="Loading data..." />
+                        </div>
+                    ) : (
+                        <Tabs 
+                            tabs={[
+                                { label: <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={16} /> Flashcard Sets</div>, content: renderSets(), key: 'sets' },
+                                { label: <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Clock size={16} /> Classes</div>, content: renderClasses(), key: 'classes' },
+                                { label: <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><History size={16} /> User Management</div>, content: renderUsers(), key: 'users' },
+                                { label: <div className="flex items-center gap-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><History size={16} /> Mod History</div>, content: renderHistory(), key: 'history' }
+                            ]}
+                            activeIndex={['sets', 'classes', 'users', 'history'].indexOf(activeTab)}
+                            onTabChange={(idx) => setActiveTab(['sets', 'classes', 'users', 'history'][idx])}
+                        />
                     )}
                 </div>
 

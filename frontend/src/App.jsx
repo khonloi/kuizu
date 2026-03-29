@@ -151,19 +151,15 @@ function App() {
         } />
 
         <Route path="/folders" element={
-          <MainLayout>
-            <ProtectedRoute>
-              <FoldersPage />
-            </ProtectedRoute>
-          </MainLayout>
+          <ProtectedRoute>
+            <FoldersPage />
+          </ProtectedRoute>
         } />
 
         <Route path="/folders/:folderId" element={
-          <MainLayout>
-            <ProtectedRoute>
-              <FolderDetailPage />
-            </ProtectedRoute>
-          </MainLayout>
+          <ProtectedRoute>
+            <FolderDetailPage />
+          </ProtectedRoute>
         } />
         {/* Catch-all route for missing pages */}
         <Route path="*" element={<ComingSoonPage />} />

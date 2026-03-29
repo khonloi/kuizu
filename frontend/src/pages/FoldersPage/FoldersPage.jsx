@@ -1,156 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Plus, User, Globe, Lock, FolderOpen } from 'lucide-react';
-import { getMyFolders, getPublicFolders } from '../../api/folder';
-import { Loader, Button, Card, Badge } from '../../components/ui';
-import CreateFolderModal from '../../components/Folder/CreateFolderModal';
-import './FoldersPage.css';
+import React from 'react';
+import ContentListPage from '../shared/ContentListPage';
+import { getPublicFolders, getMyFolders, deleteFolder } from '@/api/folder';
+import { useModal } from '@/context/ModalContext';
 
 const FoldersPage = () => {
-    const [myFolders, setMyFolders] = useState([]);
-    const [publicFolders, setPublicFolders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('my'); // 'my' or 'public'
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const navigate = useNavigate();
-
-    const fetchFolders = async () => {
-        try {
-            setLoading(true);
-            const [my, pub] = await Promise.all([
-                getMyFolders(),
-                getPublicFolders()
-            ]);
-            
-            const myWithFlag = (Array.isArray(my) ? my : []).map(f => ({ ...f, isMine: true }));
-            const pubWithFlag = (Array.isArray(pub) ? pub : []).map(f => ({ 
-                ...f, 
-                isMine: myWithFlag.some(mf => mf.folderId === f.folderId) 
-            }));
-            
-            setMyFolders(myWithFlag);
-            setPublicFolders(pubWithFlag);
-        } catch (error) {
-            console.error("Failed to fetch folders:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchFolders();
-    }, []);
-
-    const handleFolderClick = (folderId) => {
-        navigate(`/folders/${folderId}`);
-    };
-
-    const handleFolderCreated = (newFolder) => {
-        const folderWithFlag = { ...newFolder, isMine: true };
-        setMyFolders(prev => [folderWithFlag, ...prev]);
-        if (newFolder.visibility === 'PUBLIC') {
-            setPublicFolders(prev => [folderWithFlag, ...prev]);
-        }
-        setIsCreateOpen(false);
-    };
-
-    const activeFolders = searchQuery 
-        ? [...myFolders, ...publicFolders.filter(pf => !myFolders.some(mf => mf.folderId === pf.folderId))]
-        : (activeTab === 'my' ? myFolders : publicFolders);
-
-    const filteredFolders = activeFolders.filter(folder =>
-        folder.name && folder.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (folder.description && folder.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const { openFolderModal } = useModal();
 
     return (
-        <div className="folders-container">
-                <div className="folders-header">
-                    <div className="header-top">
-                        <h1 className="folders-title">My Folders</h1>
-                        <Button
-                            className="create-btn"
-                            onClick={() => setIsCreateOpen(true)}
-                        >
-                            <Plus size={20} />
-                            Create Folder
-                        </Button>
-                    </div>
-
-                    <div className="header-filters">
-                        <div className="search-bar">
-                            <Search size={20} className="search-icon" />
-                            <input
-                                type="text"
-                                placeholder="Search folders..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        <div className="tabs">
-                            <Button
-                                variant="ghost"
-                                className={`tab-item ${activeTab === 'public' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('public')}
-                            >
-                                Public
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className={`tab-item ${activeTab === 'my' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('my')}
-                            >
-                                My Folders
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-                {loading ? (
-                    <div className="loading-state">
-                        <Loader />
-                        <p>Loading folders...</p>
-                    </div>
-                ) : (
-                    <div className="folders-grid">
-                        {filteredFolders.length > 0 ? (
-                            filteredFolders.map(folder => (
-                                <Card
-                                    key={folder.folderId}
-                                    onClick={() => handleFolderClick(folder.folderId)}
-                                    title={folder.name}
-                                    badge={`${folder.setCount || 0} Sets`}
-                                    badgeIcon={FolderOpen}
-                                    description={folder.description}
-                                    ownerName={folder.isMine ? 'You' : folder.ownerDisplayName}
-                                    footerRight={
-                                        <Badge variant={folder.visibility === 'PUBLIC' ? 'success' : 'secondary'} size="sm">
-                                            {folder.visibility === 'PUBLIC' ? 'Public' : 'Private'}
-                                        </Badge>
-                                    }
-                                />
-                            ))
-                        ) : (
-                            <div className="empty-state">
-                                <p>No folders found.</p>
-                                {searchQuery && <p>Try a different search term.</p>}
-                                {!searchQuery && activeTab === 'my' && (
-                                    <Button variant="outline" onClick={() => setIsCreateOpen(true)} style={{ marginTop: '1rem' }}>
-                                        Create your first folder
-                                    </Button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-            <CreateFolderModal
-                isOpen={isCreateOpen}
-                onClose={() => setIsCreateOpen(false)}
-                onCreateSuccess={handleFolderCreated}
-            />
-        </div>
+        <ContentListPage
+            type="folders"
+            fetchPublic={getPublicFolders}
+            fetchMy={getMyFolders}
+            deleteItem={deleteFolder}
+            openModal={openFolderModal}
+            title="Folders"
+            createLabel="Create Folder"
+            searchPlaceholder="Search folders..."
+            emptyMsg="No folders found."
+            itemLabel="Sets"
+            navigatePath="/folders"
+        />
     );
 };
 

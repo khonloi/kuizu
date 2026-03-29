@@ -3,7 +3,7 @@ import { Camera, ChevronDown, Plus, Pencil, User as UserIcon, Mail, ShieldCheck,
 import { Link } from 'react-router-dom';
 import './ProfilePage.css';
 import { updateProfile, changePassword, setPassword } from '@/api/user';
-import { Button, Card, Input, Modal, Dropdown, Textarea, Badge } from '@/components/ui';
+import { Button, Card, Input, Modal, Dropdown, Textarea, Badge, EmptyState } from '@/components/ui';
 import MainLayout from '@/components/layout';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -191,12 +191,17 @@ const ProfilePage = () => {
     return (
         <MainLayout isLoading={authLoading}>
             {error ? (
-                <div className="profile-container" style={{ textAlign: 'center', padding: '100px 0' }}>
-                    <p style={{ color: 'var(--error)', fontSize: '1.2rem', fontWeight: '600' }}>{error}</p>
-                    <Button variant="outline" onClick={checkAuth} style={{ marginTop: '20px' }}>Try Again</Button>
+                <div className="profile-container" style={{ padding: '60px 0' }}>
+                    <EmptyState
+                        icon={ShieldCheck}
+                        title="Something went wrong"
+                        description={error}
+                        action={<Button variant="outline" onClick={checkAuth}>Try Again</Button>}
+                    />
                 </div>
             ) : (
-                <div className="profile-container">
+                <React.Fragment>
+                    <div className="profile-container">
                     <h1 className="profile-title">Settings</h1>
 
                     <div className="profile-section">
@@ -479,6 +484,7 @@ const ProfilePage = () => {
                         </div>
                     </Modal>
                 </div>
+            </React.Fragment>
             )}
         </MainLayout>
     );

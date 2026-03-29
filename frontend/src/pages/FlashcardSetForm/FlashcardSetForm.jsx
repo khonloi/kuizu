@@ -81,7 +81,9 @@ const FlashcardSetForm = () => {
                 </div>
 
                 {loading ? (
-                    <div className="center"><Loader /></div>
+                    <div style={{ padding: '100px 0' }}>
+                        <Loader fullPage={false} text="Loading set details..." />
+                    </div>
                 ) : (
                     <Card className="form-card">
                         <Card.Body>

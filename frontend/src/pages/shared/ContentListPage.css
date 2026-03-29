@@ -1,10 +1,10 @@
-.folders-container {
+.content-list-container {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.folders-header {
+.content-list-header {
     margin-bottom: 2rem;
 }
 
@@ -15,11 +15,10 @@
     margin-bottom: 2rem;
 }
 
-.folders-title {
+.content-list-title {
     font-size: 2.5rem;
     font-weight: 700;
     color: var(--text-dark);
-    margin: 0;
 }
 
 .create-btn {
@@ -79,23 +78,22 @@
 }
 
 .tab-item {
-    padding: 0.5rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    color: var(--text-light);
-    transition: all 0.2s;
-    background: none;
-    border: none;
-    cursor: pointer;
+    padding: 0.5rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    color: var(--text-light) !important;
+    transition: all 0.2s !important;
+    background: none !important;
+    border: none !important;
 }
 
 .tab-item.active {
-    background-color: white;
-    color: var(--primary);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: white !important;
+    color: var(--primary) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
-.folders-grid {
+.content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
@@ -112,30 +110,28 @@
     text-align: center;
 }
 
-.loading-state,
-.error-state,
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5rem 0;
-    text-align: center;
-}
-
-.visibility-indicator {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-light);
-}
-
-.visibility-indicator.public {
-    color: #10b981;
-}
-
-.visibility-indicator.private {
-    color: #ff725e;
+@media (max-width: 768px) {
+    .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .header-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-bar {
+        max-width: 100%;
+    }
+    
+    .tabs {
+        width: 100%;
+    }
+    
+    .tab-item {
+        flex: 1;
+        text-align: center;
+    }
 }
